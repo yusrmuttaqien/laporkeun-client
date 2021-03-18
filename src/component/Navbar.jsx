@@ -2,7 +2,7 @@ import React from "react";
 import styled from "styled-components";
 
 import LogoDesc from "./../asset/LogoDesc.svg";
-import { FormMasuk } from "./Form";
+// import { FormMasuk } from "./Form";
 import { Navigation } from "./Navigation";
 import UserStats from "./UserStats";
 

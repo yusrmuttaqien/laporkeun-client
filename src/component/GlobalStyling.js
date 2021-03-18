@@ -37,6 +37,23 @@ const GlobalStyle = createGlobalStyle`
       outline: none;
       -webkit-tap-highlight-color: transparent;
   }
+
+  ::-webkit-scrollbar {
+    width: 7px;
+    height: 7px;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: ${Theme.color.grey};
+  }
+
+  ::-webkit-scrollbar-thumb:hover{
+    background: ${Theme.color.purple};
+  }
+
+  ::-webkit-scrollbar-track{
+    background: ${Theme.color.darkTransparent};
+  }
 `;
 
 const Label = styled.label`
@@ -103,4 +120,65 @@ const TextArea = styled.textarea`
   }
 `;
 
-export { GlobalStyle, Theme, Label, Input, TextArea };
+const ReportWrapper = styled.div`
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+
+  height: inherit;
+  min-height: inherit;
+`;
+
+const Report = styled.div`
+  background-color: ${(props) => props.theme.color.darkTransparent};
+  backdrop-filter: blur(${(props) => props.theme.value.blur});
+  border-radius: ${(props) => props.theme.value.radius}
+    ${(props) => props.theme.value.radius} 0 0;
+  color: ${(props) => props.theme.color.white};
+
+  height: 95%;
+  width: 88%;
+  max-width: 1340px;
+  padding: 35px 50px 0;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+
+  h1 {
+    font-weight: ${(props) => props.theme.value.font.medium};
+    font-size: 3rem;
+    margin-bottom: 0.3em;
+  }
+`;
+
+const ReportBody = styled.div`
+  flex: 1;
+  display: inherit;
+  flex-direction: column;
+
+  height: 100%;
+
+  overflow: auto;
+`;
+
+const Action = styled.div`
+  cursor: pointer;
+  user-select: none;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+`;
+
+export {
+  GlobalStyle,
+  Theme,
+  Label,
+  Input,
+  TextArea,
+  ReportWrapper,
+  Report,
+  ReportBody,
+  Action,
+};

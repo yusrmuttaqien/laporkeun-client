@@ -1,36 +1,15 @@
 import React, { useState } from "react";
+import { useLocation } from "react-router";
 import styled from "styled-components";
-import { Label, Input, TextArea } from "./GlobalStyling";
-
-const ReportWrapper = styled.div`
-  display: flex;
-  align-items: flex-end;
-  justify-content: center;
-
-  height: inherit;
-  min-height: inherit;
-`;
-
-const Report = styled.div`
-  background-color: ${(props) => props.theme.color.darkTransparent};
-  backdrop-filter: blur(${(props) => props.theme.value.blur});
-  border-radius: ${(props) => props.theme.value.radius}
-    ${(props) => props.theme.value.radius} 0 0;
-  color: ${(props) => props.theme.color.white};
-
-  height: 95%;
-  width: 88%;
-  padding: 35px 50px 0;
-
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-
-  h1 {
-    font-weight: ${(props) => props.theme.value.font.medium};
-    font-size: 3rem;
-  }
-`;
+import {
+  Label,
+  Input,
+  TextArea,
+  ReportWrapper,
+  Report,
+  ReportBody,
+  Action,
+} from "./GlobalStyling";
 
 const ReportHeader = styled.div`
   display: flex;
@@ -43,27 +22,17 @@ const ReportHeader = styled.div`
   }
 `;
 
-const Visibility = styled.div`
-  cursor: pointer;
-  user-select: none;
-
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-
+const ActionCustom = styled(Action)`
   padding: 0.7em 0em;
   width: 5em;
 `;
 
-const ReportBody = styled.div`
-  flex: 1;
-  display: inherit;
-  flex-direction: column;
-
+const ReportBodyCustom = styled(ReportBody)`
   section {
     display: inherit;
-
     justify-content: flex-end;
+
+    padding: 1em 0;
   }
 `;
 
@@ -92,39 +61,37 @@ const CustomButton = styled.button`
 `;
 
 function BuatLaporan() {
-  const [visibility, setVisibility] = useState(false);
+  const [action, setAction] = useState(false);
+  let { pathname } = useLocation();
 
-  const changeVisibility = () => {
-    setVisibility(!visibility);
+  const changeAction = () => {
+    setAction(!action);
   };
 
   return (
     <ReportWrapper>
       <Report>
-        <h1>buat laporanmu</h1>
+        <h1>buat laporanmu ({pathname})</h1>
         <ReportHeader>
           <section>
             <Label htmlFor="judulLaporan">judul laporan</Label>
             <Input type="text" name="judulLaporan" id="judulLaporan" />
           </section>
-          <Visibility
-            title="Ubah visibilitas"
-            onClick={() => changeVisibility()}
-          >
+          <ActionCustom title="Ubah visibilitas" onClick={() => changeAction()}>
             <span className="material-icons">
-              {visibility ? "public" : "public_off"}
+              {action ? "public" : "public_off"}
             </span>
-            {visibility ? "Publik" : "Privat"}
-          </Visibility>
+            {action ? "Publik" : "Privat"}
+          </ActionCustom>
         </ReportHeader>
-        <ReportBody>
+        <ReportBodyCustom>
           <Label htmlFor="isiLaporan">isi laporan</Label>
           <TextArea></TextArea>
           <section>
             <CustomButton>Tambah gambar</CustomButton>
             <CustomButton>Lapor!</CustomButton>
           </section>
-        </ReportBody>
+        </ReportBodyCustom>
       </Report>
     </ReportWrapper>
   );

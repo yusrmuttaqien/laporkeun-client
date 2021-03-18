@@ -7,6 +7,7 @@ import Navbar from "./component/Navbar";
 import { Splash, NotFound } from "./component/Splash";
 import BuatLaporan from "./component/BuatLaporan";
 import { run_check_webp_feature } from "./component/Function";
+import LihatLaporan from "./component/LihatLaporan";
 
 const AppWrapper = styled.div`
   background-image: url(${run_check_webp_feature ? BGWebP : BGProgressive});
@@ -47,6 +48,11 @@ function App() {
           <Switch>
             <Route exact path="/" component={Splash} />
             <Route path="/buatlaporan" component={BuatLaporan} />
+            <Route path="/laporanku" component={LihatLaporan} />
+            <Route path="/laporanpublik" component={LihatLaporan} />
+            <Route path="/laporanbaru" component={LihatLaporan} />
+            <Route path="/tanggapanku" component={LihatLaporan} />
+            <Route path="/petugas" component={LihatLaporan} />
             <Route component={NotFound} />
           </Switch>
         </View>
