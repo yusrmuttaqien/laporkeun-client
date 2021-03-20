@@ -2,9 +2,9 @@ import React from "react";
 import styled from "styled-components";
 
 import LogoDesc from "./../asset/LogoDesc.svg";
-// import { FormMasuk } from "./Form";
-import { Navigation } from "./Navigation";
-import UserStats from "./UserStats";
+import { FormMasuk } from "./Form";
+// import { Navigation } from "./Navigation";
+// import UserStats from "./UserStats";
 
 // TODO: Add responsive styling
 const NavWrapper = styled.div`
@@ -50,9 +50,9 @@ export default function Navbar() {
         draggable="false"
         id="logowDesc"
       />
-      {/* <FormMasuk /> */}
-      <Navigation />
-      <UserStats />
+      <FormMasuk />
+      {/* <Navigation />
+      <UserStats /> */}
     </NavWrapper>
   );
 }

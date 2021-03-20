@@ -1,5 +1,6 @@
 import styled from "styled-components";
 import { Route, BrowserRouter as Router, Switch } from "react-router-dom";
+import { createStore, StoreProvider } from "easy-peasy";
 
 import BGWebP from "./asset/mainBG.webp";
 import BGProgressive from "./asset/mainBG_Progressive.jpg";
@@ -8,6 +9,8 @@ import { Splash, NotFound } from "./component/Splash";
 import BuatLaporan from "./component/BuatLaporan";
 import { run_check_webp_feature } from "./component/Function";
 import LihatLaporan from "./component/LihatLaporan";
+import { state as GlobalState } from "./component/GlobalState";
+import SideDetails from "./component/SideDetails";
 
 const AppWrapper = styled.div`
   background-image: url(${run_check_webp_feature ? BGWebP : BGProgressive});
@@ -20,6 +23,7 @@ const AppWrapper = styled.div`
 
   display: flex;
   position: relative;
+  overflow: hidden;
 `;
 
 const View = styled.div`
@@ -38,25 +42,30 @@ const View = styled.div`
   }
 `;
 
+const Store = createStore(GlobalState);
+
 // TODO: Add dynamics with redux
 function App() {
   return (
     <AppWrapper id="AppWraper">
-      <Router>
-        <Navbar />
-        <View id="View">
-          <Switch>
-            <Route exact path="/" component={Splash} />
-            <Route path="/buatlaporan" component={BuatLaporan} />
-            <Route path="/laporanku" component={LihatLaporan} />
-            <Route path="/laporanpublik" component={LihatLaporan} />
-            <Route path="/laporanbaru" component={LihatLaporan} />
-            <Route path="/tanggapanku" component={LihatLaporan} />
-            <Route path="/petugas" component={LihatLaporan} />
-            <Route component={NotFound} />
-          </Switch>
-        </View>
-      </Router>
+      <StoreProvider store={Store}>
+        <Router>
+          <Navbar /> {/* we're here */}
+          <SideDetails />
+          <View id="View">
+            <Switch>
+              <Route exact path="/" component={Splash} />
+              <Route path="/buatlaporan" component={BuatLaporan} />
+              <Route path="/laporanku" component={LihatLaporan} />
+              <Route path="/laporanpublik" component={LihatLaporan} />
+              <Route path="/laporanbaru" component={LihatLaporan} />
+              <Route path="/tanggapanku" component={LihatLaporan} />
+              <Route path="/petugas" component={LihatLaporan} />
+              <Route component={NotFound} />
+            </Switch>
+          </View>
+        </Router>
+      </StoreProvider>
     </AppWrapper>
   );
 }

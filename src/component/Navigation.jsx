@@ -1,9 +1,9 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 import styled from "styled-components";
+import { useStoreActions } from "easy-peasy";
 
 const NavWrapper = styled.div`
-  /* background-color: green; */
   align-self: flex-end;
 
   height: 50%;
@@ -49,6 +49,12 @@ const NavWrapper = styled.div`
 
 // TODO: Add dynamics with redux
 function Navigation() {
+  const test = useStoreActions((actions) => actions.toggleFocusDetails);
+
+  const runTest = () => {
+    test();
+  };
+
   return (
     <NavWrapper>
       <ul>
@@ -81,6 +87,12 @@ function Navigation() {
           <NavLink to="/petugas" activeClassName="active">
             petugas
           </NavLink>
+        </li>
+        <li>
+          {/* eslint-disable-next-line */}
+          <a href="#" onClick={() => runTest()}>
+            Run Test
+          </a>
         </li>
       </ul>
     </NavWrapper>

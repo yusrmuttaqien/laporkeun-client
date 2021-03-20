@@ -163,7 +163,7 @@ export default function LihatLaporan() {
   return (
     <ReportWrapper>
       <Report>
-        <h1>laporanku ({pathname})</h1>
+        <h1>{pathname.substring(1)}</h1>
         <ReportBodyCustom>
           {DummyDatas.map((value, index) => {
             return (
@@ -173,7 +173,7 @@ export default function LihatLaporan() {
                 <section>{value.vis}</section>
                 <section>{value.stat}</section>
                 <Action title="Buka Detail">
-                  <span className="material-icons">unfold_more</span>
+                  <span className="material-icons">launch</span>
                 </Action>
               </DataList>
             );

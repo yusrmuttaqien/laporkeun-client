@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { useLocation } from "react-router";
 import styled from "styled-components";
 import {
   Label,
@@ -9,6 +8,7 @@ import {
   Report,
   ReportBody,
   Action,
+  Button,
 } from "./GlobalStyling";
 
 const ReportHeader = styled.div`
@@ -36,33 +36,16 @@ const ReportBodyCustom = styled(ReportBody)`
   }
 `;
 
-const CustomButton = styled.button`
-  font-weight: ${(props) => props.theme.value.font.medium};
-  font-size: 1rem;
-  border-radius: ${(props) => props.theme.value.radius};
-  outline: none;
-  border: none;
-  transition: ${(props) => props.theme.value.transition};
-  transition-property: background-color, color;
-  letter-spacing: 0.125em;
-
-  padding: 0.3em 0.8em;
+const CustomButton = styled(Button)`
   margin: 0em 0 0.5em;
 
   &:nth-last-child(1) {
     margin-left: 1em;
   }
-
-  &:hover {
-    color: ${(props) => props.theme.color.white};
-    background-color: ${(props) => props.theme.color.dark};
-    cursor: pointer;
-  }
 `;
 
 function BuatLaporan() {
   const [action, setAction] = useState(false);
-  let { pathname } = useLocation();
 
   const changeAction = () => {
     setAction(!action);
@@ -71,7 +54,7 @@ function BuatLaporan() {
   return (
     <ReportWrapper>
       <Report>
-        <h1>buat laporanmu ({pathname})</h1>
+        <h1>buat laporanmu</h1>
         <ReportHeader>
           <section>
             <Label htmlFor="judulLaporan">judul laporan</Label>

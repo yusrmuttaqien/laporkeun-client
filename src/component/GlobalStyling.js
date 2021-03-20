@@ -1,5 +1,12 @@
 import { createGlobalStyle } from "styled-components";
 import styled from "styled-components";
+// import { useStoreState } from "easy-peasy";
+
+// function PickState() {
+//   const state = useStoreState((state) => state.one);
+
+//   return state;
+// }
 
 const Theme = {
   color: {
@@ -23,6 +30,7 @@ const Theme = {
     UI: {
       navbarDesktop: "300px",
       navbarDesktopSmall: "200px",
+      sideDetails: "400px",
     },
     transition: ".3s ease-in-out",
   },
@@ -36,6 +44,8 @@ const GlobalStyle = createGlobalStyle`
       font-family: 'Jost', sans-serif;
       outline: none;
       -webkit-tap-highlight-color: transparent;
+      -webkit-backface-visibility: hidden;
+      -webkit-transform:translate3d(0,0,0);
   }
 
   ::-webkit-scrollbar {
@@ -171,6 +181,25 @@ const Action = styled.div`
   align-items: center;
 `;
 
+const Button = styled.button`
+  font-weight: ${(props) => props.theme.value.font.medium};
+  font-size: 1rem;
+  border-radius: ${(props) => props.theme.value.radius};
+  outline: none;
+  border: none;
+  transition: ${(props) => props.theme.value.transition};
+  transition-property: background-color, color;
+  letter-spacing: 0.125em;
+
+  padding: 0.3em 0.8em;
+
+  &:hover {
+    color: ${(props) => props.theme.color.white};
+    background-color: ${(props) => props.theme.color.dark};
+    cursor: pointer;
+  }
+`
+
 export {
   GlobalStyle,
   Theme,
@@ -181,4 +210,5 @@ export {
   Report,
   ReportBody,
   Action,
+  Button
 };
