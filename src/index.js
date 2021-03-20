@@ -1,17 +1,23 @@
 import React from "react";
 import ReactDOM from "react-dom";
+import { ThemeProvider } from "styled-components";
 import reportWebVitals from "./reportWebVitals";
+import { createStore, StoreProvider } from "easy-peasy";
 
 import App from "./App";
 import { GlobalStyle, Theme } from "./component/GlobalStyling";
-import { ThemeProvider } from "styled-components";
+import { state } from "./component/GlobalState";
+
+const Store = createStore(state);
 
 ReactDOM.render(
   <React.StrictMode>
-    <ThemeProvider theme={Theme}>
-      <App />
-      <GlobalStyle />
-    </ThemeProvider>
+    <StoreProvider store={Store}>
+      <ThemeProvider theme={Theme}>
+        <App />
+        <GlobalStyle />
+      </ThemeProvider>
+    </StoreProvider>
   </React.StrictMode>,
   document.getElementById("root")
 );

@@ -1,7 +1,9 @@
+// NOTE: Hardcoded variable
 import React from "react";
 import { NavLink } from "react-router-dom";
 import styled from "styled-components";
-import { useStoreActions } from "easy-peasy";
+import { useStoreActions, useStoreState } from "easy-peasy";
+import toast from "react-hot-toast";
 
 const NavWrapper = styled.div`
   align-self: flex-end;
@@ -47,47 +49,61 @@ const NavWrapper = styled.div`
   }
 `;
 
-// TODO: Add dynamics with redux
 function Navigation() {
+  const { role } = useStoreState((state) => ({
+    role: state.session.role,
+  }));
+
   const test = useStoreActions((actions) => actions.toggleFocusDetails);
 
   const runTest = () => {
     test();
+    toast("Cheking");
   };
 
   return (
     <NavWrapper>
       <ul>
-        <li>
-          <NavLink exact to="/buatlaporan" activeClassName="active">
-            buat laporan
-          </NavLink>
-        </li>
-        <li>
-          <NavLink to="/laporanku" activeClassName="active">
-            laporanku
-          </NavLink>
-        </li>
-        <li>
-          <NavLink to="/laporanpublik" activeClassName="active">
-            laporan publik
-          </NavLink>
-        </li>
-        <li>
-          <NavLink to="/laporanbaru" activeClassName="active">
-            laporan baru
-          </NavLink>
-        </li>
-        <li>
-          <NavLink to="/tanggapanku" activeClassName="active">
-            tanggapanku
-          </NavLink>
-        </li>
-        <li>
-          <NavLink to="/petugas" activeClassName="active">
-            petugas
-          </NavLink>
-        </li>
+        {role === "pengguna" && (
+          <>
+            <li>
+              <NavLink exact to="/buatlaporan" activeClassName="active">
+                buat laporan
+              </NavLink>
+            </li>
+            <li>
+              <NavLink to="/laporanku" activeClassName="active">
+                laporanku
+              </NavLink>
+            </li>
+            <li>
+              <NavLink to="/laporanpublik" activeClassName="active">
+                laporan publik
+              </NavLink>
+            </li>
+          </>
+        )}
+        {role === "petugas" || role === "admin" ? (
+          <>
+            <li>
+              <NavLink to="/laporanbaru" activeClassName="active">
+                laporan baru
+              </NavLink>
+            </li>
+            <li>
+              <NavLink to="/tanggapanku" activeClassName="active">
+                tanggapanku
+              </NavLink>
+            </li>
+          </>
+        ) : null}
+        {role === "admin" && (
+          <li>
+            <NavLink to="/petugas" activeClassName="active">
+              petugas
+            </NavLink>
+          </li>
+        )}
         <li>
           {/* eslint-disable-next-line */}
           <a href="#" onClick={() => runTest()}>

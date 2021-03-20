@@ -1,12 +1,13 @@
+// NOTE: Hardcoded variable
 import React from "react";
 import styled from "styled-components";
 
 import LogoDesc from "./../asset/LogoDesc.svg";
-import { FormMasuk } from "./Form";
-// import { Navigation } from "./Navigation";
-// import UserStats from "./UserStats";
+import { FormMasuk, FormDaftar } from "./Form";
+import { Navigation } from "./Navigation";
+import UserStats from "./UserStats";
+import { useStoreState, useStoreActions } from "easy-peasy";
 
-// TODO: Add responsive styling
 const NavWrapper = styled.div`
   display: flex;
   flex-direction: column;
@@ -22,7 +23,10 @@ const NavWrapper = styled.div`
 
   background-color: ${(props) => props.theme.color.darkTransparent};
   backdrop-filter: blur(${(props) => props.theme.value.blur});
-  border-right: 1px solid ${(props) => props.theme.color.white}; // TODO: Add dynamics with redux
+  border-right: ${(props) =>
+    props.isLogged
+      ? `1px solid ${props.theme.color.white}`
+      : "none"};
   transition: ${(props) => props.theme.value.transition};
   transition-property: transform;
 
@@ -40,19 +44,33 @@ const NavWrapper = styled.div`
   }
 `;
 
-// TODO: Add responsive content
 export default function Navbar() {
+  const { formDefault, isLogged } = useStoreState((state) => ({
+    formDefault: state.UI.formDefault,
+    isLogged: state.session.isLogged,
+  }));
+  const { toggleFormDefault } = useStoreActions((actions) => ({
+    toggleFormDefault: actions.toggleFormDefault,
+  }));
+
   return (
-    <NavWrapper>
+    <NavWrapper isLogged={isLogged}>
       <img
         src={LogoDesc}
         alt="Logo with Description"
         draggable="false"
         id="logowDesc"
       />
-      <FormMasuk />
-      {/* <Navigation />
-      <UserStats /> */}
+      {isLogged ? (
+        <>
+          <Navigation />
+          <UserStats />
+        </>
+      ) : formDefault === "Masuk" ? (
+        <FormMasuk toggleFormDefault={toggleFormDefault} />
+      ) : (
+        <FormDaftar toggleFormDefault={toggleFormDefault} />
+      )}
     </NavWrapper>
   );
 }

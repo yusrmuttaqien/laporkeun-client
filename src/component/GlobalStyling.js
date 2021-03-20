@@ -44,8 +44,11 @@ const GlobalStyle = createGlobalStyle`
       font-family: 'Jost', sans-serif;
       outline: none;
       -webkit-tap-highlight-color: transparent;
-      -webkit-backface-visibility: hidden;
-      -webkit-transform:translate3d(0,0,0);
+  }
+
+  .toast {
+    background-color: ${Theme.color.dark};
+    color: ${Theme.color.white};
   }
 
   ::-webkit-scrollbar {
@@ -198,7 +201,7 @@ const Button = styled.button`
     background-color: ${(props) => props.theme.color.dark};
     cursor: pointer;
   }
-`
+`;
 
 export {
   GlobalStyle,
@@ -210,5 +213,5 @@ export {
   Report,
   ReportBody,
   Action,
-  Button
+  Button,
 };

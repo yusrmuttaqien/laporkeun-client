@@ -1,3 +1,4 @@
+//  NOTE: Hardcoded variable
 import React, { useRef } from "react";
 import styled from "styled-components";
 import { useStoreState, useStoreActions } from "easy-peasy";
@@ -36,8 +37,6 @@ const Control = styled.div`
 `;
 
 const Header = styled.div`
-  /* background-color: green; */
-
   height: 30%;
 
   display: flex;
@@ -74,9 +73,12 @@ const Body = styled.div`
 
   section {
     &:nth-child(1) {
-      height: 45%;
+      flex: 1;
 
       overflow: auto;
+
+      margin-bottom: 0.2em;
+      padding-right: 5px;
 
       p {
         font-weight: ${(props) => props.theme.value.font.light};
@@ -90,108 +92,84 @@ const Body = styled.div`
       display: flex;
       flex-direction: column;
 
-      height: 50%;
+      height: 55%;
+
+      ${Label} {
+        font-weight: ${(props) => props.theme.value.font.normal};
+      }
     }
   }
 `;
 
 const CustomButton = styled(Button)`
-    font-size: .85rem;
-`
+  font-size: 0.85rem;
+`;
 
 export default function SideDetails() {
-  const Focus = useStoreState((state) => state.UI.sideDetails.onFocus);
-  const test = useStoreActions((actions) => actions.toggleFocusDetails);
+  const {
+    onFocus,
+    pic,
+    title,
+    report,
+    date,
+    vis,
+    stat,
+    response,
+    role,
+  } = useStoreState((state) => ({
+    onFocus: state.UI.sideDetails.onFocus,
+    pic: state.activeDetails.pic,
+    title: state.activeDetails.title,
+    report: state.activeDetails.report,
+    date: state.activeDetails.date,
+    vis: state.activeDetails.vis,
+    stat: state.activeDetails.stat,
+    response: state.activeDetails.response,
+    role: state.session.role,
+  }));
+  const { toggleFocusDetails } = useStoreActions((actions) => ({
+    toggleFocusDetails: actions.toggleFocusDetails,
+  }));
 
-  const Blur = useRef();
+  const SideDetail = useRef();
 
   return (
     <SideDetailsWrapper
-      onBlur={() => test()}
-      focus={Focus}
+      onBlur={() => toggleFocusDetails()}
+      focus={onFocus}
       tabIndex="0"
-      ref={Blur}
+      ref={SideDetail}
     >
       <Control>
-        <Action onClick={() => Blur.current.blur()} title="Tutup Detail">
+        <Action onClick={() => SideDetail.current.blur()} title="Tutup Detail">
           <span className="material-icons">logout</span>
         </Action>
         <CustomButton>unduh laporan</CustomButton>
       </Control>
       <Header>
-        <img src={DefaultImg} alt="Foto laporan" />
+        <img src={pic ? pic : DefaultImg} alt={title} />
         <section>
-          <h2>judul laporan</h2>
-          <p>03/10/2020 - Publik - Diterima</p>
+          <h2>{title}</h2>
+          <p>{date + " - " + vis + " - " + stat}</p>
         </section>
       </Header>
       <Body>
         <section>
-          <p>
-            Lorem ipsum dolor, sit amet consectetur adipisicing elit. Illum modi
-            suscipit, nostrum sunt eveniet aperiam accusantium odio doloribus
-            explicabo vero vitae iste? Neque, in cumque? Unde praesentium
-            incidunt possimus voluptatibus minima quod, dolor in cumque minus
-            voluptatem eligendi, harum at temporibus. Pariatur placeat nihil
-            aliquam dicta cum illum eius nisi consequatur voluptatem? Maiores
-            possimus laudantium in minima et modi, obcaecati deserunt quisquam
-            ipsum perspiciatis odio autem doloremque quidem perferendis eaque
-            deleniti nemo provident tempora aspernatur ipsam dicta, ab
-            asperiores iste. Id assumenda debitis sint autem veritatis
-            cupiditate delectus velit natus ad quas voluptas, maxime cum
-            aspernatur repellat, nesciunt quos at aperiam mollitia eius suscipit
-            ipsum vel dolores earum. Delectus vel doloribus modi animi commodi.
-            Eveniet reprehenderit quia facilis a dolorem eum reiciendis commodi
-            dolore nostrum unde explicabo molestiae, ab sunt inventore officiis,
-            tempora nobis illo quasi id maxime itaque provident sequi pariatur?
-            Alias maxime error nam tenetur. Animi cum consequatur velit
-            perspiciatis natus est repudiandae, deleniti nihil veniam blanditiis
-            expedita, soluta illo dignissimos fuga necessitatibus itaque nam
-            commodi cumque. Repudiandae consequuntur nobis tenetur repellendus
-            sunt facere aliquam esse ad unde accusantium minima voluptatum
-            rerum, quibusdam pariatur nam eligendi amet saepe dignissimos cumque
-            officiis minus. Laboriosam, soluta at amet in, repudiandae doloribus
-            quam sunt similique laudantium esse cumque voluptas qui. Quis unde
-            eos, quisquam, perspiciatis quo iure ipsa natus culpa eligendi
-            dolor, suscipit aliquid tenetur ut illo non numquam nam ab aliquam
-            provident! Placeat veritatis quisquam neque ea hic laboriosam cumque
-            animi vel quis facilis, beatae accusantium enim non iure incidunt
-            asperiores obcaecati vero dolore, natus architecto dolorum facere
-            sed nisi sapiente. Ab atque exercitationem ipsam dignissimos non,
-            consequatur voluptatum amet magni aspernatur, quis ea fuga
-            temporibus praesentium quod ipsa debitis velit? Ipsum alias
-            similique laboriosam! Officiis fugiat dolorum consectetur tempora,
-            voluptates unde laudantium quis repudiandae cum neque reiciendis
-            eveniet? Necessitatibus eaque voluptatem inventore cum. Nisi
-            voluptate ea voluptatem eaque, reiciendis officia natus error ipsam
-            enim soluta animi eligendi! Distinctio quod dolore, cum adipisci
-            fuga esse sequi quibusdam, corporis cumque aperiam incidunt vel modi
-            voluptatum voluptate doloribus perspiciatis atque minus. Accusamus
-            dicta deserunt maiores illo ducimus perspiciatis, obcaecati,
-            provident explicabo ratione quasi nisi at a eum praesentium velit ea
-            odio commodi recusandae ipsa corrupti sit. Maxime libero amet
-            corrupti, adipisci iure expedita vitae blanditiis eum. Quis ut ab,
-            illo dignissimos alias aliquam eaque dolorum eligendi assumenda,
-            architecto officiis natus cumque accusamus sunt illum! Tenetur
-            consequatur suscipit tempora corporis ad error fugiat omnis dolorum
-            dicta nemo molestias officiis, blanditiis adipisci harum quibusdam
-            ab voluptatibus laudantium? Omnis recusandae nihil accusamus
-            laboriosam ab. Unde minima, delectus doloremque impedit fugiat
-            voluptatibus omnis in sint et officia aliquid sit quisquam facilis,
-            ut quam ad dolorum eos ex incidunt laborum consequatur voluptas!
-            Inventore, beatae accusamus ipsam libero soluta esse facere, et
-            doloremque labore aut ex dolorum quaerat? Hic accusamus repellendus
-            eaque omnis quae, accusantium facere blanditiis aut laborum iure
-            deserunt tempora tempore nam minima laudantium ullam, perferendis
-            cum dolore iusto a earum molestiae in delectus. In debitis incidunt
-            iure quod. Velit, alias animi. Odio quibusdam dignissimos sunt.
-          </p>
+          <p>{report}</p>
         </section>
-        <section>
-          <Label htmlFor="responBalik">respon balik</Label>
-          <TextArea></TextArea>
-          <Button>kirim respon</Button>
-        </section>
+        {role === "pengguna" && response ? (
+          <section>
+            <Label htmlFor="responBalik">respon balik</Label>
+            <TextArea readOnly>{response}</TextArea>
+          </section>
+        ) : null}
+        {role === "admin" || role === "petugas" ? (
+          <section>
+            <Label htmlFor="responBalik">respon balik</Label>
+            <TextArea>{response}</TextArea>
+            <Button>kirim respon</Button>
+          </section>
+        ) : null}
       </Body>
     </SideDetailsWrapper>
   );

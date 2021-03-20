@@ -1,5 +1,6 @@
 import React from "react";
 import styled from "styled-components";
+import { useStoreState } from "easy-peasy";
 
 import defaultUser from "./../asset/defaultUser.svg";
 
@@ -61,21 +62,31 @@ const Details = styled.div`
 `;
 
 const CloseSession = styled.p`
-    cursor: pointer;
-    color: ${props => props.theme.color.purple};
-    font-weight : ${props => props.theme.value.font.medium};
-    letter-spacing: 0.125em;
-`
+  cursor: pointer;
+  color: ${(props) => props.theme.color.purple};
+  font-weight: ${(props) => props.theme.value.font.medium};
+  letter-spacing: 0.125em;
+`;
 
-// TODO: Add dynamics with redux
 export default function UserStats() {
+  const { role, name, NIK, pic } = useStoreState((state) => ({
+    role: state.session.role,
+    name: state.session.name,
+    NIK: state.session.NIK,
+    pic: state.session.pic,
+  }));
+
   return (
     <StatsWrapper>
       <UserDetail>
-        <img src={defaultUser} alt="userProfile" />
+        <img src={pic ? pic : defaultUser} alt="userProfile" />
         <Details>
-          <h1 title="Peter Evaneggtg, Pengguna">Peter Evaneggtg</h1>
-          <p title="937593839406">937593839406</p>
+          <h1
+            title={name + ", " + role.charAt(0).toUpperCase() + role.slice(1)}
+          >
+            {name}
+          </h1>
+          <p title={NIK}>{NIK}</p>
         </Details>
       </UserDetail>
       <CloseSession title="Keluar ?">Keluar</CloseSession>

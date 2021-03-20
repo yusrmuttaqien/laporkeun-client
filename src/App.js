@@ -1,6 +1,6 @@
 import styled from "styled-components";
 import { Route, BrowserRouter as Router, Switch } from "react-router-dom";
-import { createStore, StoreProvider } from "easy-peasy";
+import { Toaster } from "react-hot-toast";
 
 import BGWebP from "./asset/mainBG.webp";
 import BGProgressive from "./asset/mainBG_Progressive.jpg";
@@ -9,7 +9,6 @@ import { Splash, NotFound } from "./component/Splash";
 import BuatLaporan from "./component/BuatLaporan";
 import { run_check_webp_feature } from "./component/Function";
 import LihatLaporan from "./component/LihatLaporan";
-import { state as GlobalState } from "./component/GlobalState";
 import SideDetails from "./component/SideDetails";
 
 const AppWrapper = styled.div`
@@ -42,30 +41,42 @@ const View = styled.div`
   }
 `;
 
-const Store = createStore(GlobalState);
+const WrapToaster = styled.div`
+  position: absolute;
+  top: 0;
+  left: 50%;
+  z-index: 1002;
 
-// TODO: Add dynamics with redux
+  height: 100px;
+  width: 100px;
+
+  pointer-events: none;
+`;
+
 function App() {
   return (
     <AppWrapper id="AppWraper">
-      <StoreProvider store={Store}>
-        <Router>
-          <Navbar /> {/* we're here */}
-          <SideDetails />
-          <View id="View">
-            <Switch>
-              <Route exact path="/" component={Splash} />
-              <Route path="/buatlaporan" component={BuatLaporan} />
-              <Route path="/laporanku" component={LihatLaporan} />
-              <Route path="/laporanpublik" component={LihatLaporan} />
-              <Route path="/laporanbaru" component={LihatLaporan} />
-              <Route path="/tanggapanku" component={LihatLaporan} />
-              <Route path="/petugas" component={LihatLaporan} />
-              <Route component={NotFound} />
-            </Switch>
-          </View>
-        </Router>
-      </StoreProvider>
+      <Router>
+        <Navbar />
+        <SideDetails />
+        <WrapToaster>
+          <Toaster toastOptions={{ className: "toast" }} />
+        </WrapToaster>
+        <View id="View">
+          {" "}
+          {/* we're here */}
+          <Switch>
+            <Route exact path="/" component={Splash} />
+            <Route path="/buatlaporan" component={BuatLaporan} />
+            <Route path="/laporanku" component={LihatLaporan} />
+            <Route path="/laporanpublik" component={LihatLaporan} />
+            <Route path="/laporanbaru" component={LihatLaporan} />
+            <Route path="/tanggapanku" component={LihatLaporan} />
+            <Route path="/petugas" component={LihatLaporan} />
+            <Route component={NotFound} />
+          </Switch>
+        </View>
+      </Router>
     </AppWrapper>
   );
 }
