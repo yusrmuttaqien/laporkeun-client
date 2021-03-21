@@ -12,18 +12,45 @@ export const state = {
     role: "pengguna",
     name: "UserDefault",
     NIK: "7382956278295726",
-    pic: null
+    pic: null,
+    telp: null,
   },
-  activeDetails: {
-    id: null,
+  activeDetail: {
+    id_report: null,
+    id_petugas: null,
+    id_response: null,
     pic: null,
     title: "judul laporan",
-    report: "Lorem ipsum dolor sit amet consectetur adipisicing elit. Recusandae dicta reiciendis ad quae! Voluptatibus soluta suscipit eligendi tenetur quas qui autem aliquid, quaerat sed labore sit atque mollitia pariatur aspernatur veniam ea eius iure corporis fugiat aperiam odio perspiciatis neque eos? Aut, blanditiis debitis nihil consequatur tempore facilis fugit quidem?Lorem ipsum dolor sit amet consectetur adipisicing elit. Adipisci reiciendis dolore illo aut. Quod molestiae sed vero similique, illo, facilis, natus saepe mollitia dolores laborum doloremque facere? Explicabo voluptatem reprehenderit provident officia. Fugiat, accusantium repellat reiciendis error quas maiores inventore delectus facere repellendus itaque veniam numquam consequatur laboriosam sunt laudantium.",
+    report:
+      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Recusandae dicta reiciendis ad quae! Voluptatibus soluta suscipit eligendi tenetur quas qui autem aliquid, quaerat sed labore sit atque mollitia pariatur aspernatur veniam ea eius iure corporis fugiat aperiam odio perspiciatis neque eos? Aut, blanditiis debitis nihil consequatur tempore facilis fugit quidem?Lorem ipsum dolor sit amet consectetur adipisicing elit. Adipisci reiciendis dolore illo aut. Quod molestiae sed vero similique, illo, facilis, natus saepe mollitia dolores laborum doloremque facere? Explicabo voluptatem reprehenderit provident officia. Fugiat, accusantium repellat reiciendis error quas maiores inventore delectus facere repellendus itaque veniam numquam consequatur laboriosam sunt laudantium.",
     date: "03/10/2020",
+    date_response: null,
     vis: "Publik",
     stat: "Diterima",
-    response: null
+    response: "memsedih",
+    NIK: null,
+    name: null,
   },
+  listLaporan: [
+    {
+      id_report: null,
+      id_petugas: null,
+      title: "judul laporan",
+      date: "03/10/2021",
+      date_response: "03/10/2021",
+      vis: "Public",
+      stat: "Diterima",
+      NIK: null,
+    },
+  ],
+  listPetugas: [
+    {
+      id_petugas: null,
+      nama: null,
+      telp: null,
+      date: null,
+    },
+  ],
 
   // Action
   toggleFocusDetails: action((state) => {

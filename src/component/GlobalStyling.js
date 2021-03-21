@@ -203,6 +203,18 @@ const Button = styled.button`
   }
 `;
 
+const Warning = styled.p`
+  &&& {
+    color: ${(props) => props.theme.color.blue};
+    font-weight: ${(props) => props.theme.value.font.light};
+    text-align: left;
+    font-size: 0.8rem;
+    text-decoration: none;
+    cursor: unset;
+    user-select: none;
+  }
+`;
+
 export {
   GlobalStyle,
   Theme,
@@ -214,4 +226,5 @@ export {
   ReportBody,
   Action,
   Button,
+  Warning
 };

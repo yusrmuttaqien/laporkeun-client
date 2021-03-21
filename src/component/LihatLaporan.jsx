@@ -2,129 +2,7 @@ import React from "react";
 import { useLocation } from "react-router";
 import styled from "styled-components";
 import { Report, ReportBody, ReportWrapper, Action } from "./GlobalStyling";
-
-const DummyDatas = [
-  {
-    judul: "judul laporan",
-    tgl: "03/10/2021",
-    vis: "Public",
-    stat: "Diterima",
-  },
-  {
-    judul: "judul laporan",
-    tgl: "03/10/2021",
-    vis: "Public",
-    stat: "Diterima",
-  },
-  {
-    judul: "judul laporan",
-    tgl: "03/10/2021",
-    vis: "Public",
-    stat: "Diterima",
-  },
-  {
-    judul: "judul laporan",
-    tgl: "03/10/2021",
-    vis: "Public",
-    stat: "Diterima",
-  },
-  {
-    judul: "judul laporan",
-    tgl: "03/10/2021",
-    vis: "Public",
-    stat: "Diterima",
-  },
-  {
-    judul: "judul laporan",
-    tgl: "03/10/2021",
-    vis: "Public",
-    stat: "Diterima",
-  },
-  {
-    judul: "judul laporan",
-    tgl: "03/10/2021",
-    vis: "Public",
-    stat: "Diterima",
-  },
-  {
-    judul: "judul laporan",
-    tgl: "03/10/2021",
-    vis: "Public",
-    stat: "Diterima",
-  },
-  {
-    judul: "judul laporan",
-    tgl: "03/10/2021",
-    vis: "Public",
-    stat: "Diterima",
-  },
-  {
-    judul: "judul laporan",
-    tgl: "03/10/2021",
-    vis: "Public",
-    stat: "Diterima",
-  },
-  {
-    judul: "judul laporan",
-    tgl: "03/10/2021",
-    vis: "Public",
-    stat: "Diterima",
-  },
-  {
-    judul: "judul laporan",
-    tgl: "03/10/2021",
-    vis: "Public",
-    stat: "Diterima",
-  },
-  {
-    judul: "judul laporan",
-    tgl: "03/10/2021",
-    vis: "Public",
-    stat: "Diterima",
-  },
-  {
-    judul: "judul laporan",
-    tgl: "03/10/2021",
-    vis: "Public",
-    stat: "Diterima",
-  },
-  {
-    judul: "judul laporan",
-    tgl: "03/10/2021",
-    vis: "Public",
-    stat: "Diterima",
-  },
-  {
-    judul: "judul laporan",
-    tgl: "03/10/2021",
-    vis: "Public",
-    stat: "Diterima",
-  },
-  {
-    judul: "judul laporan",
-    tgl: "03/10/2021",
-    vis: "Public",
-    stat: "Diterima",
-  },
-  {
-    judul: "judul laporan",
-    tgl: "03/10/2021",
-    vis: "Public",
-    stat: "Diterima",
-  },
-  {
-    judul: "judul laporan",
-    tgl: "03/10/2021",
-    vis: "Public",
-    stat: "Diterima",
-  },
-  {
-    judul: "judul laporan",
-    tgl: "03/10/2021",
-    vis: "Public",
-    stat: "Diterima",
-  },
-];
+import { useStoreState } from "easy-peasy";
 
 const ReportBodyCustom = styled(ReportBody)`
   position: relative;
@@ -159,25 +37,64 @@ const DataList = styled.div`
 
 export default function LihatLaporan() {
   let { pathname } = useLocation();
+  pathname = pathname.substring(1);
+
+  const { listLaporan, listPetugas } = useStoreState((state) => ({
+    listLaporan: state.listLaporan,
+    listPetugas: state.listPetugas,
+  }));
+
+  const ToDetails = (id_report) => {
+    console.log(id_report);
+  };
 
   return (
     <ReportWrapper>
       <Report>
-        <h1>{pathname.substring(1)}</h1>
+        <h1>{pathname}</h1>
         <ReportBodyCustom>
-          {DummyDatas.map((value, index) => {
-            return (
+          {pathname === "laporanku" ||
+          pathname === "laporanpublik" ||
+          pathname === "laporanbaru"
+            ? listLaporan.map((laporan, index) => (
+                <DataList key={index}>
+                  <section>{laporan.title}</section>
+                  <section>{laporan.date}</section>
+                  <section>{laporan.vis}</section>
+                  <section>{laporan.stat}</section>
+                  <Action
+                    title="Buka Detail"
+                    onClick={() => ToDetails(laporan.id_report)}
+                  >
+                    <span className="material-icons">launch</span>
+                  </Action>
+                </DataList>
+              ))
+            : null}
+          {pathname === "tanggapanku" &&
+            listLaporan.map((laporan, index) => (
               <DataList key={index}>
-                <section>{value.judul}</section>
-                <section>{value.tgl}</section>
-                <section>{value.vis}</section>
-                <section>{value.stat}</section>
-                <Action title="Buka Detail">
+                <section>{laporan.title}</section>
+                <section>{laporan.id_petugas}</section>
+                <section>{laporan.date_response}</section>
+                <section>{laporan.id_report}</section>
+                <Action
+                  title="Buka Detail"
+                  onClick={() => ToDetails(laporan.id_report)}
+                >
                   <span className="material-icons">launch</span>
                 </Action>
               </DataList>
-            );
-          })}
+            ))}
+          {pathname === "petugas" &&
+            listPetugas.map((petugas, index) => (
+              <DataList key={index}>
+                <section>{petugas.nama}</section>
+                <section>{petugas.id_petugas}</section>
+                <section>{petugas.date}</section>
+                <section>{petugas.telp}</section>
+              </DataList>
+            ))}
         </ReportBodyCustom>
       </Report>
     </ReportWrapper>

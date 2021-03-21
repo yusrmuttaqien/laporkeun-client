@@ -118,13 +118,13 @@ export default function SideDetails() {
     role,
   } = useStoreState((state) => ({
     onFocus: state.UI.sideDetails.onFocus,
-    pic: state.activeDetails.pic,
-    title: state.activeDetails.title,
-    report: state.activeDetails.report,
-    date: state.activeDetails.date,
-    vis: state.activeDetails.vis,
-    stat: state.activeDetails.stat,
-    response: state.activeDetails.response,
+    pic: state.activeDetail.pic,
+    title: state.activeDetail.title,
+    report: state.activeDetail.report,
+    date: state.activeDetail.date,
+    vis: state.activeDetail.vis,
+    stat: state.activeDetail.stat,
+    response: state.activeDetail.response,
     role: state.session.role,
   }));
   const { toggleFocusDetails } = useStoreActions((actions) => ({
@@ -160,13 +160,13 @@ export default function SideDetails() {
         {role === "pengguna" && response ? (
           <section>
             <Label htmlFor="responBalik">respon balik</Label>
-            <TextArea readOnly>{response}</TextArea>
+            <TextArea readOnly value={response}></TextArea>
           </section>
         ) : null}
         {role === "admin" || role === "petugas" ? (
           <section>
             <Label htmlFor="responBalik">respon balik</Label>
-            <TextArea>{response}</TextArea>
+            <TextArea value={response}></TextArea>
             <Button>kirim respon</Button>
           </section>
         ) : null}
