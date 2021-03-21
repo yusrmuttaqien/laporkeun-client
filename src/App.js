@@ -64,8 +64,6 @@ function App() {
           <Toaster toastOptions={{ className: "toast" }} />
         </WrapToaster>
         <View id="View">
-          {" "}
-          {/* we're here */}
           <Switch>
             <Route exact path="/" component={Splash} />
             <PrivateRoute path="/buatlaporan" comp={BuatLaporan} />

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
@@ -96,8 +96,6 @@ function BuatLaporan() {
   const { register, handleSubmit, errors } = useForm({
     resolver: yupResolver(SchemaLaporan),
   });
-
-  const FileName = useRef()
 
   const changeAction = () => {
     setAction(!action);

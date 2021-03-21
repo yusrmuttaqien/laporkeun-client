@@ -59,7 +59,7 @@ export default function LihatLaporan() {
             ? listLaporan.map((laporan, index) => (
                 <DataList key={index}>
                   <section>{laporan.title}</section>
-                  <section>{laporan.date}</section>
+                  <section>{laporan.date_report}</section>
                   <section>{laporan.vis}</section>
                   <section>{laporan.stat}</section>
                   <Action
@@ -89,9 +89,9 @@ export default function LihatLaporan() {
           {pathname === "petugas" &&
             listPetugas.map((petugas, index) => (
               <DataList key={index}>
-                <section>{petugas.nama}</section>
+                <section>{petugas.name_petugas}</section>
                 <section>{petugas.id_petugas}</section>
-                <section>{petugas.date}</section>
+                <section>{petugas.date_akun}</section>
                 <section>{petugas.telp}</section>
               </DataList>
             ))}

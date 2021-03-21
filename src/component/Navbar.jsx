@@ -60,6 +60,7 @@ export default function Navbar() {
         alt="Logo with Description"
         draggable="false"
         id="logowDesc"
+        title="laporkeun! by yusr.dhm"
       />
       {isLogged ? (
         <>

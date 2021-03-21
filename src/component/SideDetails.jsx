@@ -1,8 +1,12 @@
 //  NOTE: Hardcoded variable
-import React, { useRef } from "react";
+//  NOTE: Disabled feature - onBlur
+import React from "react";
 import styled from "styled-components";
 import { useStoreState, useStoreActions } from "easy-peasy";
 import { Action, Button, Label, TextArea } from "./GlobalStyling";
+import { useForm } from "react-hook-form";
+import * as yup from "yup";
+import { yupResolver } from "@hookform/resolvers/yup";
 
 import DefaultImg from "./../asset/defaultReport.jpg";
 
@@ -54,12 +58,23 @@ const Header = styled.div`
   }
 
   section {
+    margin-top: 0.3em;
+
+    h2,
+    p {
+      width: 100%;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
     h2 {
       font-weight: ${(props) => props.theme.value.font.normal};
     }
 
     p {
       font-weight: ${(props) => props.theme.value.font.light};
+      font-size: 0.8rem;
     }
   }
 `;
@@ -77,7 +92,7 @@ const Body = styled.div`
 
       overflow: auto;
 
-      margin-bottom: 0.2em;
+      margin-bottom: 0.5em;
       padding-right: 5px;
 
       p {
@@ -89,13 +104,17 @@ const Body = styled.div`
     }
 
     &:nth-child(2) {
-      display: flex;
-      flex-direction: column;
-
       height: 55%;
+      margin-top: 0.3em;
 
       ${Label} {
         font-weight: ${(props) => props.theme.value.font.normal};
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+
+        width: 100%;
+        height: 2.3em;
       }
     }
   }
@@ -105,43 +124,69 @@ const CustomButton = styled(Button)`
   font-size: 0.85rem;
 `;
 
+const EmbedForm = styled.form`
+  display: flex;
+  flex-direction: column;
+
+  height: 100%;
+`;
+
+const SchemaTanggapan = yup.object().shape({
+  responBalik: yup
+    .string()
+    .required("Respon wajib diisi")
+    .max(2000, "Respon maksimal 2000 karakter"),
+});
+
 export default function SideDetails() {
   const {
     onFocus,
     pic,
     title,
     report,
-    date,
+    date_report,
+    date_response,
     vis,
     stat,
     response,
+    name_pengguna,
+    name_petugas,
     role,
   } = useStoreState((state) => ({
     onFocus: state.UI.sideDetails.onFocus,
     pic: state.activeDetail.pic,
     title: state.activeDetail.title,
     report: state.activeDetail.report,
-    date: state.activeDetail.date,
+    date_report: state.activeDetail.date_report,
+    date_response: state.activeDetail.date_response,
     vis: state.activeDetail.vis,
     stat: state.activeDetail.stat,
     response: state.activeDetail.response,
+    name_pengguna: state.activeDetail.name_pengguna,
+    name_petugas: state.activeDetail.name_petugas,
     role: state.session.role,
   }));
   const { toggleFocusDetails } = useStoreActions((actions) => ({
     toggleFocusDetails: actions.toggleFocusDetails,
   }));
+  const { register, handleSubmit, errors } = useForm({
+    resolver: yupResolver(SchemaTanggapan),
+  });
 
-  const SideDetail = useRef();
+  // const SideDetail = useRef();
+  const onSubmit = (e) => {
+    console.log(e);
+  };
 
   return (
     <SideDetailsWrapper
-      onBlur={() => toggleFocusDetails()}
+      // onBlur={() => toggleFocusDetails()}
       focus={onFocus}
       tabIndex="0"
-      ref={SideDetail}
+      // ref={SideDetail}
     >
       <Control>
-        <Action onClick={() => SideDetail.current.blur()} title="Tutup Detail">
+        <Action onClick={() => toggleFocusDetails()} title="Tutup Detail">
           <span className="material-icons">logout</span>
         </Action>
         <CustomButton>unduh laporan</CustomButton>
@@ -149,8 +194,14 @@ export default function SideDetails() {
       <Header>
         <img src={pic ? pic : DefaultImg} alt={title} />
         <section>
-          <h2>{title}</h2>
-          <p>{date + " - " + vis + " - " + stat}</p>
+          <h2 title={title}>{title}</h2>
+          <p
+            title={
+              name_pengguna + " - " + date_report + " - " + vis + " - " + stat
+            }
+          >
+            {name_pengguna + " - " + date_report + " - " + vis + " - " + stat}
+          </p>
         </section>
       </Header>
       <Body>
@@ -159,15 +210,47 @@ export default function SideDetails() {
         </section>
         {role === "pengguna" && response ? (
           <section>
-            <Label htmlFor="responBalik">respon balik</Label>
-            <TextArea readOnly value={response}></TextArea>
+            <Label
+              htmlFor="responBalik"
+              title={`${date_response && date_response} ${
+                name_petugas && " - " + name_petugas
+              }`}
+            >
+              respon balik {date_response && " - " + date_response}{" "}
+              {name_petugas && " - " + name_petugas}
+            </Label>
+            <TextArea
+              name="responBalik"
+              id="responBalik"
+              readOnly
+              value={response}
+            ></TextArea>
           </section>
         ) : null}
         {role === "admin" || role === "petugas" ? (
           <section>
-            <Label htmlFor="responBalik">respon balik</Label>
-            <TextArea value={response}></TextArea>
-            <Button>kirim respon</Button>
+            <EmbedForm noValidate onSubmit={handleSubmit(onSubmit)}>
+              <Label
+                htmlFor="responBalik"
+                title={`${date_response && date_response} ${
+                  name_petugas && " - " + name_petugas
+                }`}
+              >
+                respon balik {date_response && " - " + date_response}{" "}
+                {name_petugas && " - " + name_petugas}
+              </Label>
+              <TextArea
+                name="responBalik"
+                id="responBalik"
+                defaultValue={response && response}
+                ref={register}
+              ></TextArea>
+              <Button type="submit">
+                {errors.responBalik?.message
+                  ? errors.responBalik?.message
+                  : "Kirim respon"}
+              </Button>
+            </EmbedForm>
           </section>
         ) : null}
       </Body>

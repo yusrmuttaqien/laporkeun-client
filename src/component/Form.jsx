@@ -3,6 +3,8 @@ import { useForm } from "react-hook-form";
 import styled from "styled-components";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { useStoreActions, useStoreState } from "easy-peasy";
+import { toast } from "react-hot-toast";
 
 import { Label, Input, Warning } from "./GlobalStyling";
 
@@ -63,7 +65,7 @@ const SchemaDaftar = yup.object().shape({
     .typeError("NIK harus berupa angka")
     .positive("NIK berupa bilangan positif")
     .integer("NIK berupa bilangan bulat"),
-  nama: yup.string().required("Nama wajib diisi"),
+  name: yup.string().required("Nama wajib diisi"),
   kataSandi: yup
     .string()
     .required("Kata sandi wajib diisi")
@@ -75,7 +77,7 @@ const SchemaMasuk = yup.object().shape({
     .string()
     .required("Kata sandi wajib diisi")
     .min(8, "Kata sandi minimal 8 karakter"),
-  namaNIK: yup.string().required("Nama/NIK wajib diisi"),
+  nameNIK: yup.string().required("Nama/NIK wajib diisi"),
 });
 
 function FormMasuk({ toggleFormDefault }) {
@@ -87,15 +89,17 @@ function FormMasuk({ toggleFormDefault }) {
     toggleFormDefault();
   };
 
-  const onSubmit = () => {};
+  const onSubmit = (data) => {
+    console.log(data);
+  };
 
   return (
     <FormWrapper>
       <Judul>Masuk dulu gan!</Judul>
       <Form noValidate onSubmit={handleSubmit(onSubmit)}>
-        <Label htmlFor="namaNIK">Nama atau NIK</Label>
-        <Input type="text" name="namaNIK" id="namaNIK" ref={register} />
-        <Warning>{errors.namaNIK?.message}</Warning>
+        <Label htmlFor="nameNIK">Nama atau NIK</Label>
+        <Input type="text" name="nameNIK" id="nameNIK" ref={register} />
+        <Warning>{errors.nameNIK?.message}</Warning>
         <Label htmlFor="kataSandi">Kata sandi</Label>
         <Input type="password" name="kataSandi" id="kataSandi" ref={register} />
         <Warning>{errors.kataSandi?.message}</Warning>
@@ -110,20 +114,31 @@ function FormDaftar({ toggleFormDefault }) {
   const { register, handleSubmit, errors } = useForm({
     resolver: yupResolver(SchemaDaftar),
   });
+  const { penggunaRegistration } = useStoreActions((actions) => ({
+    penggunaRegistration: actions.penggunaRegistration,
+  }));
 
   const switching = () => {
     toggleFormDefault();
   };
 
-  const onSubmit = () => {};
+  const onSubmit = (data) => {
+    const load = toast.loading("Tunggu sebentar, mengecek data");
+    
+    if (penggunaRegistration(data)) {
+      toast.success("Berhasil! Selamat datang!", { id: load });
+    } else {
+      toast.error("OOF, kami tidak menemukan datamu", { id: load });
+    }
+  };
 
   return (
     <FormWrapper>
       <Judul>Daftar dulu gan!</Judul>
       <Form noValidate onSubmit={handleSubmit(onSubmit)}>
-        <Label htmlFor="nama">Nama</Label>
-        <Input type="text" name="nama" id="nama" ref={register} />
-        <Warning>{errors.nama?.message}</Warning>
+        <Label htmlFor="name">Nama</Label>
+        <Input type="text" name="name" id="name" ref={register} />
+        <Warning>{errors.name?.message}</Warning>
         <Label htmlFor="NIK">NIK</Label>
         <Input type="number" name="NIK" id="NIK" ref={register} />
         <Warning>{errors.NIK?.message}</Warning>

@@ -1,4 +1,6 @@
-import { action } from "easy-peasy";
+import { action, thunk } from "easy-peasy";
+
+import firebase from "./util/Firebase";
 
 export const state = {
   UI: {
@@ -8,49 +10,54 @@ export const state = {
     formDefault: "Masuk",
   },
   session: {
-    isLogged: true,
-    role: "pengguna",
-    name: "UserDefault",
-    NIK: "7382956278295726",
-    pic: null,
-    telp: null,
+    isLogged: false,
+    role: null, //
+    name: null, //
+    NIK: null, //
+    pic: null, //
+    telp: null, //
   },
   activeDetail: {
-    id_report: null,
-    id_petugas: null,
-    id_response: null,
-    pic: null,
-    title: "judul laporan",
-    report:
-      "Lorem ipsum dolor sit amet consectetur adipisicing elit. Recusandae dicta reiciendis ad quae! Voluptatibus soluta suscipit eligendi tenetur quas qui autem aliquid, quaerat sed labore sit atque mollitia pariatur aspernatur veniam ea eius iure corporis fugiat aperiam odio perspiciatis neque eos? Aut, blanditiis debitis nihil consequatur tempore facilis fugit quidem?Lorem ipsum dolor sit amet consectetur adipisicing elit. Adipisci reiciendis dolore illo aut. Quod molestiae sed vero similique, illo, facilis, natus saepe mollitia dolores laborum doloremque facere? Explicabo voluptatem reprehenderit provident officia. Fugiat, accusantium repellat reiciendis error quas maiores inventore delectus facere repellendus itaque veniam numquam consequatur laboriosam sunt laudantium.",
-    date: "03/10/2020",
-    date_response: null,
-    vis: "Publik",
-    stat: "Diterima",
-    response: "memsedih",
-    NIK: null,
-    name: null,
+    id_report: null, //
+    id_petugas: null, //
+    id_response: null, //
+    pic: null, //
+    title: null, //
+    report: null, //
+    date_report: null, //
+    date_response: null, //
+    vis: null, //
+    stat: null, //
+    response: null, //
+    NIK: null, //
+    name_pengguna: null, //
+    name_petugas: null, //
   },
   listLaporan: [
     {
-      id_report: null,
-      id_petugas: null,
-      title: "judul laporan",
-      date: "03/10/2021",
-      date_response: "03/10/2021",
-      vis: "Public",
-      stat: "Diterima",
-      NIK: null,
+      id_report: null, //
+      id_petugas: null, //
+      title: null, //
+      date_report: null, //
+      date_response: null, //
+      vis: null, //
+      stat: null, //
+      NIK: null, //
     },
   ],
   listPetugas: [
     {
-      id_petugas: null,
-      nama: null,
-      telp: null,
-      date: null,
+      id_petugas: null, //
+      name_petugas: null, //
+      telp: null, //
+      date_akun: null, //
     },
   ],
+
+  // Thunk
+  penggunaRegistration: thunk((actions, payload) => {
+    return payload.name === "anak";
+  }),
 
   // Action
   toggleFocusDetails: action((state) => {
