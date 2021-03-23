@@ -67,7 +67,7 @@ function Navigation() {
         {role === "pengguna" && (
           <>
             <li>
-              <NavLink exact to="/buatlaporan" activeClassName="active">
+              <NavLink to="/buatlaporan" activeClassName="active">
                 buat laporan
               </NavLink>
             </li>

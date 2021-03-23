@@ -123,13 +123,11 @@ function FormDaftar({ toggleFormDefault }) {
   };
 
   const onSubmit = (data) => {
-    const load = toast.loading("Tunggu sebentar, mengecek data");
-    
-    if (penggunaRegistration(data)) {
-      toast.success("Berhasil! Selamat datang!", { id: load });
-    } else {
-      toast.error("OOF, kami tidak menemukan datamu", { id: load });
-    }
+    toast.promise(penggunaRegistration(data), {
+      loading: "Tunggu sebentar kawan :)",
+      success: (msg) => msg,
+      error: (err) => err && err.toString(),
+    });
   };
 
   return (

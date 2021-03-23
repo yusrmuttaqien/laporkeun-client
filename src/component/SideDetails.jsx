@@ -210,21 +210,23 @@ export default function SideDetails() {
         </section>
         {role === "pengguna" && response ? (
           <section>
-            <Label
-              htmlFor="responBalik"
-              title={`${date_response && date_response} ${
-                name_petugas && " - " + name_petugas
-              }`}
-            >
-              respon balik {date_response && " - " + date_response}{" "}
-              {name_petugas && " - " + name_petugas}
-            </Label>
-            <TextArea
-              name="responBalik"
-              id="responBalik"
-              readOnly
-              value={response}
-            ></TextArea>
+            <EmbedForm>
+              <Label
+                htmlFor="responBalik"
+                title={`${date_response && date_response} ${
+                  name_petugas && " - " + name_petugas
+                }`}
+              >
+                respon balik {date_response && " - " + date_response}{" "}
+                {name_petugas && " - " + name_petugas}
+              </Label>
+              <TextArea
+                name="responBalik"
+                id="responBalik"
+                readOnly
+                value={response}
+              ></TextArea>
+            </EmbedForm>
           </section>
         ) : null}
         {role === "admin" || role === "petugas" ? (

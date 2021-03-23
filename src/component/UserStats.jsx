@@ -82,7 +82,9 @@ export default function UserStats() {
         <img src={pic ? pic : defaultUser} alt="userProfile" />
         <Details>
           <h1
-            title={name + ", " + role.charAt(0).toUpperCase() + role.slice(1)}
+            title={`${name}${
+              role && +", " + role.charAt(0).toUpperCase() + role.slice(1)
+            }`}
           >
             {name}
           </h1>
