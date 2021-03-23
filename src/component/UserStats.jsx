@@ -1,6 +1,7 @@
 import React from "react";
 import styled from "styled-components";
-import { useStoreState } from "easy-peasy";
+import { useStoreState, useStoreActions } from "easy-peasy";
+import { toast } from "react-hot-toast";
 
 import defaultUser from "./../asset/defaultUser.svg";
 
@@ -68,13 +69,21 @@ const CloseSession = styled.p`
   letter-spacing: 0.125em;
 `;
 
-export default function UserStats() {
+export default function UserStats(props) {
   const { role, name, NIK, pic } = useStoreState((state) => ({
     role: state.session.role,
     name: state.session.name,
     NIK: state.session.NIK,
     pic: state.session.pic,
   }));
+  const { keluarApp } = useStoreActions((actions) => ({
+    keluarApp: actions.keluarApp,
+  }));
+
+  const exitApp = async () => {
+    await keluarApp();
+    toast('Anda berhasil keluar', {icon: '🥲'})
+  };
 
   return (
     <StatsWrapper>
@@ -83,7 +92,7 @@ export default function UserStats() {
         <Details>
           <h1
             title={`${name}${
-              role && +", " + role.charAt(0).toUpperCase() + role.slice(1)
+              role && ", " + role.charAt(0).toUpperCase() + role.slice(1)
             }`}
           >
             {name}
@@ -91,7 +100,9 @@ export default function UserStats() {
           <p title={NIK}>{NIK}</p>
         </Details>
       </UserDetail>
-      <CloseSession title="Keluar ?">Keluar</CloseSession>
+      <CloseSession onClick={() => exitApp()} title="Keluar ?">
+        Keluar
+      </CloseSession>
     </StatsWrapper>
   );
 }

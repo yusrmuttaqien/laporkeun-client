@@ -10,11 +10,18 @@ import { state } from "./component/GlobalState";
 
 const Store = createStore(state);
 
+const flushPresist = () => {
+  Store.presist
+    .clear()
+    .then(() => {})
+    .catch((err) => {});
+};
+
 ReactDOM.render(
   <React.StrictMode>
     <StoreProvider store={Store}>
       <ThemeProvider theme={Theme}>
-        <App />
+        <App flush={flushPresist}/>
         <GlobalStyle />
       </ThemeProvider>
     </StoreProvider>

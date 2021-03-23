@@ -24,9 +24,7 @@ const NavWrapper = styled.div`
   background-color: ${(props) => props.theme.color.darkTransparent};
   backdrop-filter: blur(${(props) => props.theme.value.blur});
   border-right: ${(props) =>
-    props.isLogged
-      ? `1px solid ${props.theme.color.white}`
-      : "none"};
+    props.isLogged ? `1px solid ${props.theme.color.white}` : "none"};
   transition: ${(props) => props.theme.value.transition};
   transition-property: transform;
 
@@ -44,7 +42,7 @@ const NavWrapper = styled.div`
   }
 `;
 
-export default function Navbar() {
+export default function Navbar(props) {
   const { formDefault, isLogged } = useStoreState((state) => ({
     formDefault: state.UI.formDefault,
     isLogged: state.session.isLogged,
@@ -65,7 +63,7 @@ export default function Navbar() {
       {isLogged ? (
         <>
           <Navigation />
-          <UserStats />
+          <UserStats flush={props.flush} />
         </>
       ) : formDefault === "Masuk" ? (
         <FormMasuk toggleFormDefault={toggleFormDefault} />

@@ -1,6 +1,7 @@
 import styled from "styled-components";
 import { Route, BrowserRouter as Router, Switch } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
+import { useStoreRehydrated } from "easy-peasy";
 
 import BGWebP from "./asset/mainBG.webp";
 import BGProgressive from "./asset/mainBG_Progressive.jpg";
@@ -11,6 +12,7 @@ import { run_check_webp_feature } from "./component/Function";
 import LihatLaporan from "./component/LihatLaporan";
 import SideDetails from "./component/SideDetails";
 import PrivateRoute from "./component/PrivateRoute";
+import rfs from "./component/RFS";
 
 const AppWrapper = styled.div`
   background-image: url(${run_check_webp_feature ? BGWebP : BGProgressive});
@@ -54,11 +56,29 @@ const WrapToaster = styled.div`
   pointer-events: none;
 `;
 
-function App() {
-  return (
+const Presisting = styled.div`
+  background-color: ${(props) => props.theme.color.dark};
+  color: ${(props) => props.theme.color.white};
+  font-weight: ${(props) => props.theme.value.font.medium};
+  ${rfs("2em", "font-size")}
+
+  height: 100vh;
+  min-height: 640px; // TODO: Fix for mobile devices
+  width: 100vw;
+  max-width: 100%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
+
+function App(props) {
+  const isRehydrated = useStoreRehydrated();
+
+  return isRehydrated ? (
     <AppWrapper id="AppWraper">
       <Router>
-        <Navbar />
+        <Navbar flush={props.flush} />
         <SideDetails />
         <WrapToaster>
           <Toaster toastOptions={{ className: "toast" }} />
@@ -77,6 +97,8 @@ function App() {
         </View>
       </Router>
     </AppWrapper>
+  ) : (
+    <Presisting>Mengambil State</Presisting>
   );
 }
 

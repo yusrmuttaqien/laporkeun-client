@@ -1,5 +1,5 @@
 import axios from "axios";
-import { action, thunk } from "easy-peasy";
+import { action, thunk, persist } from "easy-peasy";
 
 const instance = axios.create({
   baseURL: "http://localhost:5000/",
@@ -12,14 +12,15 @@ export const state = {
     },
     formDefault: "Masuk",
   },
-  session: {
+  session: persist({
     isLogged: false,
     role: null,
     name: null,
     NIK: null,
     pic: null,
     telp: null,
-  },
+    token: null,
+  }),
   activeDetail: {
     id_report: null,
     id_petugas: null,
@@ -61,14 +62,27 @@ export const state = {
   penggunaRegistration: thunk(async (actions, payload) => {
     return instance
       .post("/pengguna/registrasi", payload)
-      .then((response) => {
+      .then(async (response) => {
+        await actions.registerAutoLogin(response);
         return Promise.resolve(response.data.notify);
       })
       .catch((err) => {
-        return Promise.reject(
-          err.response.data.notify || err
-        );
+        return Promise.reject(err.response.data.notify || err);
       });
+  }),
+  masukApp: thunk(async (actions, payload) => {
+    return instance
+      .post("/auth/masuk", payload)
+      .then(async (response) => {
+        await actions.registerAutoLogin(response);
+        return Promise.resolve(response.data.notify);
+      })
+      .catch((err) => {
+        return Promise.reject(err.response.data.notify || err);
+      });
+  }),
+  keluarApp: thunk(async (actions, payload) => {
+    await actions.keluarAppState();
   }),
 
   // Action
@@ -93,12 +107,31 @@ export const state = {
       },
     };
   }),
-  setToast: action((state, payload) => {
+  registerAutoLogin: action((state, payload) => {
+    const { NIK, accessToken, name_pengguna, role } = payload.data.responses;
     return {
       ...state,
-      UI: {
-        ...state.UI,
-        toast: { success: payload.success, error: payload.error },
+      session: {
+        ...state.session,
+        isLogged: true,
+        role,
+        name: name_pengguna,
+        NIK,
+        token: accessToken,
+      },
+    };
+  }),
+  keluarAppState: action((state, payload) => {
+    return {
+      ...state,
+      session: {
+        isLogged: false,
+        role: null,
+        name: null,
+        NIK: null,
+        pic: null,
+        telp: null,
+        token: null,
       },
     };
   }),

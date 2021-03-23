@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import styled from "styled-components";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useStoreActions, useStoreState } from "easy-peasy";
+import { useStoreActions } from "easy-peasy";
 import { toast } from "react-hot-toast";
 
 import { Label, Input, Warning } from "./GlobalStyling";
@@ -77,29 +77,36 @@ const SchemaMasuk = yup.object().shape({
     .string()
     .required("Kata sandi wajib diisi")
     .min(8, "Kata sandi minimal 8 karakter"),
-  nameNIK: yup.string().required("Nama/NIK wajib diisi"),
+  name: yup.string().required("Nama wajib diisi"),
 });
 
 function FormMasuk({ toggleFormDefault }) {
   const { register, handleSubmit, errors } = useForm({
     resolver: yupResolver(SchemaMasuk),
   });
+  const { masukApp } = useStoreActions((actions) => ({
+    masukApp: actions.masukApp,
+  }));
 
   const switching = () => {
     toggleFormDefault();
   };
 
   const onSubmit = (data) => {
-    console.log(data);
+    toast.promise(masukApp(data), {
+      loading: "Tunggu sebentar kawan :)",
+      success: (msg) => msg,
+      error: (err) => err && err.toString(),
+    });
   };
 
   return (
     <FormWrapper>
       <Judul>Masuk dulu gan!</Judul>
       <Form noValidate onSubmit={handleSubmit(onSubmit)}>
-        <Label htmlFor="nameNIK">Nama atau NIK</Label>
-        <Input type="text" name="nameNIK" id="nameNIK" ref={register} />
-        <Warning>{errors.nameNIK?.message}</Warning>
+        <Label htmlFor="name">Nama</Label>
+        <Input type="text" name="name" id="name" ref={register} />
+        <Warning>{errors.name?.message}</Warning>
         <Label htmlFor="kataSandi">Kata sandi</Label>
         <Input type="password" name="kataSandi" id="kataSandi" ref={register} />
         <Warning>{errors.kataSandi?.message}</Warning>
