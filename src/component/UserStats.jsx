@@ -82,7 +82,7 @@ export default function UserStats(props) {
 
   const exitApp = async () => {
     await keluarApp();
-    toast('Anda berhasil keluar', {icon: '🥲'})
+    toast.success('Anda berhasil keluar')
   };
 
   return (

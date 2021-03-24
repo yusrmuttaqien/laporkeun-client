@@ -9,7 +9,7 @@ import Navbar from "./component/Navbar";
 import { Splash, NotFound } from "./component/Splash";
 import BuatLaporan from "./component/BuatLaporan";
 import { run_check_webp_feature } from "./component/Function";
-import LihatLaporan from "./component/LihatLaporan";
+import { Laporanku, LaporanPublik } from "./component/LihatLaporan";
 import SideDetails from "./component/SideDetails";
 import PrivateRoute from "./component/PrivateRoute";
 import rfs from "./component/RFS";
@@ -87,11 +87,11 @@ function App(props) {
           <Switch>
             <Route exact path="/" component={Splash} />
             <PrivateRoute path="/buatlaporan" comp={BuatLaporan} />
-            <PrivateRoute path="/laporanku" comp={LihatLaporan} />
-            <PrivateRoute path="/laporanpublik" comp={LihatLaporan} />
-            <PrivateRoute path="/laporanbaru" comp={LihatLaporan} />
-            <PrivateRoute path="/tanggapanku" comp={LihatLaporan} />
-            <PrivateRoute path="/petugas" comp={LihatLaporan} />
+            <PrivateRoute path="/laporanku" comp={Laporanku} />
+            <PrivateRoute path="/laporanpublik" comp={LaporanPublik} />
+            <PrivateRoute path="/laporanbaru" comp={Laporanku} />
+            <PrivateRoute path="/tanggapanku" comp={Laporanku} />
+            <PrivateRoute path="/petugas" comp={Laporanku} />
             <Route component={NotFound} />
           </Switch>
         </View>

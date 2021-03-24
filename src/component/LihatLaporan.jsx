@@ -1,9 +1,17 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router";
 import styled from "styled-components";
-import { Report, ReportBody, ReportWrapper, Action } from "./GlobalStyling";
 import { useStoreState, useStoreActions } from "easy-peasy";
 import { toast } from "react-hot-toast";
+
+import {
+  Report,
+  ReportBody,
+  ReportWrapper,
+  Action,
+  Button,
+} from "./GlobalStyling";
+import { useLaporanku } from "./FetchData";
 
 const ReportBodyCustom = styled(ReportBody)`
   position: relative;
@@ -18,10 +26,16 @@ const DataList = styled.div`
   display: inherit;
   justify-content: space-around;
 
-  padding: 0.3em 0;
+  padding: 0.3em 0.5em;
   margin-bottom: 0.5em;
 
   section {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100px;
+    text-align: center;
+
     &:nth-child(1) {
       font-weight: ${(props) => props.theme.value.font.medium};
     }
@@ -36,54 +50,101 @@ const DataList = styled.div`
   }
 `;
 
-export default function LihatLaporan() {
+function Laporanku() {
   let { pathname } = useLocation();
   pathname = pathname.substring(1);
 
-  const { listLaporan, listPetugas } = useStoreState((state) => ({
-    listLaporan: state.listLaporan,
+  const [page, setPage] = useState(1);
+  const { hasMore, laporanku } = useLaporanku(page);
+
+  const ToDetails = (id_report) => {
+    console.log(id_report);
+  };
+
+  const loadNext = () => {
+    setPage(page + 1);
+  };
+
+  return (
+    <ReportWrapper>
+      <Report>
+        <h1>{pathname}</h1>
+        {laporanku.length === 0 ? (
+          <div>Tidak ada {pathname}</div>
+        ) : (
+          <ReportBodyCustom>
+            {laporanku.map((laporan, index) => (
+              <DataList key={index}>
+                <section title={laporan.title}>{laporan.title}</section>
+                <section>{laporan.date_report}</section>
+                <section>{laporan.vis}</section>
+                <section>{laporan.stat}</section>
+                <Action
+                  title="Buka Detail"
+                  onClick={() => ToDetails(laporan.id_report)}
+                >
+                  <span className="material-icons">launch</span>
+                </Action>
+              </DataList>
+            ))}
+            {hasMore && <Button onClick={() => loadNext()}>Muat lagi</Button>}
+          </ReportBodyCustom>
+        )}
+      </Report>
+    </ReportWrapper>
+  );
+}
+
+function LaporanPublik() {
+  let { pathname } = useLocation();
+  pathname = pathname.substring(1);
+
+  const {
+    laporanku,
+    listPetugas,
+    infinityScroll,
+    infinityNumber,
+  } = useStoreState((state) => ({
+    laporanku: state.laporanku,
     listPetugas: state.listPetugas,
+    infinityScroll: state.UI.infinityScroll,
+    infinityNumber: state.UI.infinityNumber,
   }));
-  const { populateReportSelf } = useStoreActions((actions) => ({
+  const { populateReportSelf, setCountQue } = useStoreActions((actions) => ({
     populateReportSelf: actions.populateReportSelf,
+    setCountQue: actions.setCountQue,
   }));
 
   const ToDetails = (id_report) => {
     console.log(id_report);
   };
 
+  const loadNext = async () => {
+    await setCountQue(infinityNumber + 1);
+  };
+
   useEffect(() => {
-    if (pathname === "laporanku") {
-      toast.promise(populateReportSelf(), {
-        loading: "Tunggu sebentar kawan :)",
-        success: (msg) => msg,
-        error: (err) => err && err.toString(),
-      });
-    } else if (pathname === "laporanpublik") {
-      console.log(pathname);
-    } else if (pathname === "laporanbaru") {
-      console.log(pathname);
-    } else if (pathname === "tanggapanku") {
-      console.log(pathname);
-    } else if (pathname === "petugas") {
-      console.log(pathname);
-    }
-  }, [pathname]);
+    toast.promise(populateReportSelf({ page: infinityNumber, limit: 20 }), {
+      loading: "Tunggu sebentar kawan :)",
+      success: (msg) => msg,
+      error: (err) => err && err.toString(),
+    });
+  }, [infinityNumber, populateReportSelf]);
 
   return (
     <ReportWrapper>
       <Report>
         <h1>{pathname}</h1>
-        {listLaporan.length === 0 || listPetugas.length === 0 ? (
+        {laporanku.length === 0 || listPetugas.length === null ? (
           <div>Tidak ada {pathname}</div>
         ) : (
           <ReportBodyCustom>
             {pathname === "laporanku" ||
             pathname === "laporanpublik" ||
             pathname === "laporanbaru"
-              ? listLaporan.map((laporan, index) => (
+              ? laporanku.map((laporan, index) => (
                   <DataList key={index}>
-                    <section>{laporan.title}</section>
+                    <section title={laporan.title}>{laporan.title}</section>
                     <section>{laporan.date_report}</section>
                     <section>{laporan.vis}</section>
                     <section>{laporan.stat}</section>
@@ -97,7 +158,7 @@ export default function LihatLaporan() {
                 ))
               : null}
             {pathname === "tanggapanku" &&
-              listLaporan.map((laporan, index) => (
+              laporanku.map((laporan, index) => (
                 <DataList key={index}>
                   <section>{laporan.title}</section>
                   <section>{laporan.id_petugas}</section>
@@ -122,7 +183,12 @@ export default function LihatLaporan() {
               ))}
           </ReportBodyCustom>
         )}
+        {infinityScroll && (
+          <Button onClick={() => loadNext()}>Muat lagi</Button>
+        )}
       </Report>
     </ReportWrapper>
   );
 }
+
+export { Laporanku, LaporanPublik };
