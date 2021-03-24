@@ -37,26 +37,8 @@ export const state = {
     name_pengguna: null,
     name_petugas: null,
   },
-  listLaporan: [
-    {
-      id_report: null,
-      id_petugas: null,
-      title: null,
-      date_report: null,
-      date_response: null,
-      vis: null,
-      stat: null,
-      NIK: null,
-    },
-  ],
-  listPetugas: [
-    {
-      id_petugas: null,
-      name_petugas: null,
-      telp: null,
-      date_akun: null,
-    },
-  ],
+  listLaporan: [],
+  listPetugas: [],
 
   // Thunk
   penggunaRegistration: thunk(async (actions, payload) => {
@@ -83,6 +65,30 @@ export const state = {
   }),
   keluarApp: thunk(async (actions, payload) => {
     await actions.keluarAppState();
+  }),
+  newReport: thunk(async (actions, payload, { getState }) => {
+    return instance
+      .post("/laporan/buat", payload, {
+        headers: { authorization: `Bearer ${getState().session.token}` },
+      })
+      .then(async (response) => {
+        return Promise.resolve(response.data.notify);
+      })
+      .catch((err) => {
+        return Promise.reject(err.response.data.notify || err);
+      });
+  }),
+  populateReportSelf: thunk(async (actions, payload, { getState }) => {
+    return instance
+      .get("/laporan/laporanku", {
+        headers: { authorization: `Bearer ${getState().session.token}` },
+      })
+      .then((response) => {
+        return Promise.resolve(response.data.notify);
+      })
+      .catch((err) => {
+        return Promise.reject(err.response.data.notify || err);
+      });
   }),
 
   // Action

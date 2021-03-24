@@ -1,8 +1,9 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useLocation } from "react-router";
 import styled from "styled-components";
 import { Report, ReportBody, ReportWrapper, Action } from "./GlobalStyling";
-import { useStoreState } from "easy-peasy";
+import { useStoreState, useStoreActions } from "easy-peasy";
+import { toast } from "react-hot-toast";
 
 const ReportBodyCustom = styled(ReportBody)`
   position: relative;
@@ -43,25 +44,65 @@ export default function LihatLaporan() {
     listLaporan: state.listLaporan,
     listPetugas: state.listPetugas,
   }));
+  const { populateReportSelf } = useStoreActions((actions) => ({
+    populateReportSelf: actions.populateReportSelf,
+  }));
 
   const ToDetails = (id_report) => {
     console.log(id_report);
   };
 
+  useEffect(() => {
+    if (pathname === "laporanku") {
+      toast.promise(populateReportSelf(), {
+        loading: "Tunggu sebentar kawan :)",
+        success: (msg) => msg,
+        error: (err) => err && err.toString(),
+      });
+    } else if (pathname === "laporanpublik") {
+      console.log(pathname);
+    } else if (pathname === "laporanbaru") {
+      console.log(pathname);
+    } else if (pathname === "tanggapanku") {
+      console.log(pathname);
+    } else if (pathname === "petugas") {
+      console.log(pathname);
+    }
+  }, [pathname]);
+
   return (
     <ReportWrapper>
       <Report>
         <h1>{pathname}</h1>
-        <ReportBodyCustom>
-          {pathname === "laporanku" ||
-          pathname === "laporanpublik" ||
-          pathname === "laporanbaru"
-            ? listLaporan.map((laporan, index) => (
+        {listLaporan.length === 0 || listPetugas.length === 0 ? (
+          <div>Tidak ada {pathname}</div>
+        ) : (
+          <ReportBodyCustom>
+            {pathname === "laporanku" ||
+            pathname === "laporanpublik" ||
+            pathname === "laporanbaru"
+              ? listLaporan.map((laporan, index) => (
+                  <DataList key={index}>
+                    <section>{laporan.title}</section>
+                    <section>{laporan.date_report}</section>
+                    <section>{laporan.vis}</section>
+                    <section>{laporan.stat}</section>
+                    <Action
+                      title="Buka Detail"
+                      onClick={() => ToDetails(laporan.id_report)}
+                    >
+                      <span className="material-icons">launch</span>
+                    </Action>
+                  </DataList>
+                ))
+              : null}
+            {pathname === "tanggapanku" &&
+              listLaporan.map((laporan, index) => (
                 <DataList key={index}>
                   <section>{laporan.title}</section>
-                  <section>{laporan.date_report}</section>
-                  <section>{laporan.vis}</section>
-                  <section>{laporan.stat}</section>
+                  <section>{laporan.id_petugas}</section>
+                  <section>{laporan.date_response}</section>
+                  <section>{laporan.id_report}</section>
                   <Action
                     title="Buka Detail"
                     onClick={() => ToDetails(laporan.id_report)}
@@ -69,33 +110,18 @@ export default function LihatLaporan() {
                     <span className="material-icons">launch</span>
                   </Action>
                 </DataList>
-              ))
-            : null}
-          {pathname === "tanggapanku" &&
-            listLaporan.map((laporan, index) => (
-              <DataList key={index}>
-                <section>{laporan.title}</section>
-                <section>{laporan.id_petugas}</section>
-                <section>{laporan.date_response}</section>
-                <section>{laporan.id_report}</section>
-                <Action
-                  title="Buka Detail"
-                  onClick={() => ToDetails(laporan.id_report)}
-                >
-                  <span className="material-icons">launch</span>
-                </Action>
-              </DataList>
-            ))}
-          {pathname === "petugas" &&
-            listPetugas.map((petugas, index) => (
-              <DataList key={index}>
-                <section>{petugas.name_petugas}</section>
-                <section>{petugas.id_petugas}</section>
-                <section>{petugas.date_akun}</section>
-                <section>{petugas.telp}</section>
-              </DataList>
-            ))}
-        </ReportBodyCustom>
+              ))}
+            {pathname === "petugas" &&
+              listPetugas.map((petugas, index) => (
+                <DataList key={index}>
+                  <section>{petugas.name_petugas}</section>
+                  <section>{petugas.id_petugas}</section>
+                  <section>{petugas.date_akun}</section>
+                  <section>{petugas.telp}</section>
+                </DataList>
+              ))}
+          </ReportBodyCustom>
+        )}
       </Report>
     </ReportWrapper>
   );

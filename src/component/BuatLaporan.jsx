@@ -3,6 +3,8 @@ import styled from "styled-components";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { toast } from "react-hot-toast";
+import { useStoreActions } from "easy-peasy";
 
 import {
   Label,
@@ -92,17 +94,28 @@ const SchemaLaporan = yup.object().shape({
 });
 
 function BuatLaporan() {
-  const [action, setAction] = useState(false);
+  const [action, setAction] = useState("Privat");
   const { register, handleSubmit, errors } = useForm({
     resolver: yupResolver(SchemaLaporan),
   });
+  const { newReport } = useStoreActions((actions) => ({
+    newReport: actions.newReport,
+  }));
 
   const changeAction = () => {
-    setAction(!action);
+    setAction(action === "Privat" ? "Publik" : "Privat");
   };
 
-  const onSubmit = (e) => {
-    console.log("helo", e);
+  const onSubmit = (data, e) => {
+    const datas = { ...data, vis: action };
+    toast.promise(newReport(datas), {
+      loading: "Tunggu sebentar kawan :)",
+      success: (msg) => {
+        e.target.reset();
+        return msg;
+      },
+      error: (err) => err && err.toString(),
+    });
   };
 
   return (
@@ -123,9 +136,9 @@ function BuatLaporan() {
           </section>
           <ActionCustom title="Ubah visibilitas" onClick={() => changeAction()}>
             <span className="material-icons">
-              {action ? "public" : "public_off"}
+              {action === "Publik" ? "public" : "public_off"}
             </span>
-            {action ? "Publik" : "Privat"}
+            {action === "Publik" ? "Publik" : "Privat"}
           </ActionCustom>
         </ReportHeader>
         <ReportBodyCustom>
