@@ -42,7 +42,7 @@ const NavWrapper = styled.div`
   }
 `;
 
-export default function Navbar(props) {
+export default function Navbar() {
   const { formDefault, isLogged } = useStoreState((state) => ({
     formDefault: state.UI.formDefault,
     isLogged: state.session.isLogged,
@@ -63,7 +63,7 @@ export default function Navbar(props) {
       {isLogged ? (
         <>
           <Navigation />
-          <UserStats flush={props.flush} />
+          <UserStats />
         </>
       ) : formDefault === "Masuk" ? (
         <FormMasuk toggleFormDefault={toggleFormDefault} />

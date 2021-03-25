@@ -9,7 +9,12 @@ import Navbar from "./component/Navbar";
 import { Splash, NotFound } from "./component/Splash";
 import BuatLaporan from "./component/BuatLaporan";
 import { run_check_webp_feature } from "./component/Function";
-import { Laporanku, LaporanPublik } from "./component/LihatLaporan";
+import {
+  LaporanBaru,
+  Laporanku,
+  LaporanPublik,
+  Tanggapanku
+} from "./component/LihatLaporan";
 import SideDetails from "./component/SideDetails";
 import PrivateRoute from "./component/PrivateRoute";
 import rfs from "./component/RFS";
@@ -72,13 +77,13 @@ const Presisting = styled.div`
   justify-content: center;
 `;
 
-function App(props) {
+function App() {
   const isRehydrated = useStoreRehydrated();
 
   return isRehydrated ? (
     <AppWrapper id="AppWraper">
       <Router>
-        <Navbar flush={props.flush} />
+        <Navbar />
         <SideDetails />
         <WrapToaster>
           <Toaster toastOptions={{ className: "toast" }} />
@@ -89,8 +94,8 @@ function App(props) {
             <PrivateRoute path="/buatlaporan" comp={BuatLaporan} />
             <PrivateRoute path="/laporanku" comp={Laporanku} />
             <PrivateRoute path="/laporanpublik" comp={LaporanPublik} />
-            <PrivateRoute path="/laporanbaru" comp={Laporanku} />
-            <PrivateRoute path="/tanggapanku" comp={Laporanku} />
+            <PrivateRoute path="/laporanbaru" comp={LaporanBaru} />
+            <PrivateRoute path="/tanggapanku" comp={Tanggapanku} />
             <PrivateRoute path="/petugas" comp={Laporanku} />
             <Route component={NotFound} />
           </Switch>

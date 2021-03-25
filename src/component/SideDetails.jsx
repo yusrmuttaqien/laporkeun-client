@@ -7,8 +7,10 @@ import { Action, Button, Label, TextArea } from "./GlobalStyling";
 import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
+import { toast } from "react-hot-toast";
 
 import DefaultImg from "./../asset/defaultReport.jpg";
+import { useHistory } from "react-router-dom";
 
 const SideDetailsWrapper = styled.div`
   position: absolute;
@@ -138,7 +140,7 @@ const SchemaTanggapan = yup.object().shape({
     .max(2000, "Respon maksimal 2000 karakter"),
 });
 
-export default function SideDetails() {
+export default function SideDetails(props) {
   const {
     onFocus,
     pic,
@@ -166,16 +168,29 @@ export default function SideDetails() {
     name_petugas: state.activeDetail.name_petugas,
     role: state.session.role,
   }));
-  const { toggleFocusDetails } = useStoreActions((actions) => ({
+  const { toggleFocusDetails, newResponse } = useStoreActions((actions) => ({
     toggleFocusDetails: actions.toggleFocusDetails,
+    newResponse: actions.newResponse,
   }));
   const { register, handleSubmit, errors } = useForm({
     resolver: yupResolver(SchemaTanggapan),
   });
+  const history = useHistory();
 
   // const SideDetail = useRef();
-  const onSubmit = (e) => {
-    console.log(e);
+  const onSubmit = (response) => {
+    const Redirect = () => {
+      history.push("/tanggapanku");
+    };
+
+    toast.promise(newResponse(response), {
+      loading: "Menyimpan respon",
+      success: (msg) => {
+        Redirect();
+        return msg;
+      },
+      error: (err) => err.toString(),
+    });
   };
 
   return (
@@ -189,7 +204,10 @@ export default function SideDetails() {
         <Action onClick={() => toggleFocusDetails()} title="Tutup Detail">
           <span className="material-icons">logout</span>
         </Action>
-        <CustomButton>unduh laporan</CustomButton>
+        {role === "admin" && <CustomButton>unduh laporan</CustomButton>}
+        {role === "pengguna" && stat === "Menunggu" ? (
+          <CustomButton>hapus laporan</CustomButton>
+        ) : null}
       </Control>
       <Header>
         <img src={pic ? pic : DefaultImg} alt={title} />
@@ -241,17 +259,30 @@ export default function SideDetails() {
                 respon balik {date_response && " - " + date_response}{" "}
                 {name_petugas && " - " + name_petugas}
               </Label>
-              <TextArea
-                name="responBalik"
-                id="responBalik"
-                defaultValue={response && response}
-                ref={register}
-              ></TextArea>
-              <Button type="submit">
-                {errors.responBalik?.message
-                  ? errors.responBalik?.message
-                  : "Kirim respon"}
-              </Button>
+              {response ? (
+                <TextArea
+                  name="responBalik"
+                  id="responBalik"
+                  readOnly
+                  value={response && response}
+                  ref={register}
+                ></TextArea>
+              ) : (
+                <TextArea
+                  name="responBalik"
+                  id="responBalik"
+                  defaultValue={response && response}
+                  ref={register}
+                ></TextArea>
+              )}
+              {response ? null : (
+                // NOTE: Disabled features - Simultanious Changes
+                <Button type="submit">
+                  {errors.responBalik?.message
+                    ? errors.responBalik?.message
+                    : "Kirim respon"}
+                </Button>
+              )}
             </EmbedForm>
           </section>
         ) : null}

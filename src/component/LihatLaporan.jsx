@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useLocation } from "react-router";
 import styled from "styled-components";
-import { useStoreState, useStoreActions } from "easy-peasy";
-import { toast } from "react-hot-toast";
+import { useStoreActions } from "easy-peasy";
+import { Link } from "react-router-dom";
 
 import {
   Report,
@@ -11,11 +11,31 @@ import {
   Action,
   Button,
 } from "./GlobalStyling";
-import { useLaporanku } from "./FetchData";
+import {
+  useLaporanku,
+  useLaporanPublik,
+  useLaporanBaru,
+  useTanggapanku,
+} from "./FetchData";
+// import NoLaporan from "./../asset/noLaporan.svg";
+import rfs from "./RFS";
 
 const ReportBodyCustom = styled(ReportBody)`
   position: relative;
   padding-right: 5px;
+`;
+
+const ReportBodyCustomNotFound = styled(ReportBody)`
+  justify-content: center;
+  align-items: center;
+
+  img {
+    ${rfs("70%", "width")};
+  }
+
+  a {
+    color: ${(props) => props.theme.color.white};
+  }
 `;
 
 const DataList = styled.div`
@@ -50,15 +70,23 @@ const DataList = styled.div`
   }
 `;
 
+const MoreButton = styled(Button)`
+  margin-bottom: 0.5em;
+`;
+
 function Laporanku() {
   let { pathname } = useLocation();
   pathname = pathname.substring(1);
 
   const [page, setPage] = useState(1);
-  const { hasMore, laporanku } = useLaporanku(page);
+  const { loading, hasMore, laporanku } = useLaporanku(page);
 
-  const ToDetails = (id_report) => {
-    console.log(id_report);
+  const { detailReport } = useStoreActions((actions) => ({
+    detailReport: actions.detailReport,
+  }));
+
+  const ToDetails = async (id_report) => {
+    await detailReport(id_report);
   };
 
   const loadNext = () => {
@@ -69,8 +97,12 @@ function Laporanku() {
     <ReportWrapper>
       <Report>
         <h1>{pathname}</h1>
-        {laporanku.length === 0 ? (
-          <div>Tidak ada {pathname}</div>
+        {laporanku.length === 0 || loading ? (
+          // NOTE: Redesign
+          <ReportBodyCustomNotFound>
+            Tidak ada laporan
+            <Link to="/buatlaporan">Buat laporan disini</Link>
+          </ReportBodyCustomNotFound>
         ) : (
           <ReportBodyCustom>
             {laporanku.map((laporan, index) => (
@@ -81,13 +113,17 @@ function Laporanku() {
                 <section>{laporan.stat}</section>
                 <Action
                   title="Buka Detail"
-                  onClick={() => ToDetails(laporan.id_report)}
+                  onClick={() =>
+                    ToDetails({ id: laporan.id_report, nik: laporan.NIK })
+                  }
                 >
                   <span className="material-icons">launch</span>
                 </Action>
               </DataList>
             ))}
-            {hasMore && <Button onClick={() => loadNext()}>Muat lagi</Button>}
+            {hasMore && (
+              <MoreButton onClick={() => loadNext()}>Muat lagi</MoreButton>
+            )}
           </ReportBodyCustom>
         )}
       </Report>
@@ -99,96 +135,168 @@ function LaporanPublik() {
   let { pathname } = useLocation();
   pathname = pathname.substring(1);
 
-  const {
-    laporanku,
-    listPetugas,
-    infinityScroll,
-    infinityNumber,
-  } = useStoreState((state) => ({
-    laporanku: state.laporanku,
-    listPetugas: state.listPetugas,
-    infinityScroll: state.UI.infinityScroll,
-    infinityNumber: state.UI.infinityNumber,
-  }));
-  const { populateReportSelf, setCountQue } = useStoreActions((actions) => ({
-    populateReportSelf: actions.populateReportSelf,
-    setCountQue: actions.setCountQue,
+  const [page, setPage] = useState(1);
+  const { loading, hasMore, laporanpublik } = useLaporanPublik(page);
+
+  const { detailReport } = useStoreActions((actions) => ({
+    detailReport: actions.detailReport,
   }));
 
-  const ToDetails = (id_report) => {
-    console.log(id_report);
+  const ToDetails = async (id_report) => {
+    await detailReport(id_report);
   };
 
-  const loadNext = async () => {
-    await setCountQue(infinityNumber + 1);
+  const loadNext = () => {
+    setPage(page + 1);
   };
-
-  useEffect(() => {
-    toast.promise(populateReportSelf({ page: infinityNumber, limit: 20 }), {
-      loading: "Tunggu sebentar kawan :)",
-      success: (msg) => msg,
-      error: (err) => err && err.toString(),
-    });
-  }, [infinityNumber, populateReportSelf]);
 
   return (
     <ReportWrapper>
       <Report>
         <h1>{pathname}</h1>
-        {laporanku.length === 0 || listPetugas.length === null ? (
-          <div>Tidak ada {pathname}</div>
+        {laporanpublik.length === 0 || loading ? (
+          // NOTE: Redesign
+          <ReportBodyCustomNotFound>
+            Tidak ada laporan
+            <Link to="/buatlaporan">Buat laporan disini</Link>
+          </ReportBodyCustomNotFound>
         ) : (
           <ReportBodyCustom>
-            {pathname === "laporanku" ||
-            pathname === "laporanpublik" ||
-            pathname === "laporanbaru"
-              ? laporanku.map((laporan, index) => (
-                  <DataList key={index}>
-                    <section title={laporan.title}>{laporan.title}</section>
-                    <section>{laporan.date_report}</section>
-                    <section>{laporan.vis}</section>
-                    <section>{laporan.stat}</section>
-                    <Action
-                      title="Buka Detail"
-                      onClick={() => ToDetails(laporan.id_report)}
-                    >
-                      <span className="material-icons">launch</span>
-                    </Action>
-                  </DataList>
-                ))
-              : null}
-            {pathname === "tanggapanku" &&
-              laporanku.map((laporan, index) => (
-                <DataList key={index}>
-                  <section>{laporan.title}</section>
-                  <section>{laporan.id_petugas}</section>
-                  <section>{laporan.date_response}</section>
-                  <section>{laporan.id_report}</section>
-                  <Action
-                    title="Buka Detail"
-                    onClick={() => ToDetails(laporan.id_report)}
-                  >
-                    <span className="material-icons">launch</span>
-                  </Action>
-                </DataList>
-              ))}
-            {pathname === "petugas" &&
-              listPetugas.map((petugas, index) => (
-                <DataList key={index}>
-                  <section>{petugas.name_petugas}</section>
-                  <section>{petugas.id_petugas}</section>
-                  <section>{petugas.date_akun}</section>
-                  <section>{petugas.telp}</section>
-                </DataList>
-              ))}
+            {laporanpublik.map((laporan, index) => (
+              <DataList key={index}>
+                <section title={laporan.title}>{laporan.title}</section>
+                <section>{laporan.date_report}</section>
+                <section>{laporan.vis}</section>
+                <section>{laporan.stat}</section>
+                <Action
+                  title="Buka Detail"
+                  onClick={() =>
+                    ToDetails({ id: laporan.id_report, nik: laporan.NIK })
+                  }
+                >
+                  <span className="material-icons">launch</span>
+                </Action>
+              </DataList>
+            ))}
+            {hasMore && (
+              <MoreButton onClick={() => loadNext()}>Muat lagi</MoreButton>
+            )}
           </ReportBodyCustom>
-        )}
-        {infinityScroll && (
-          <Button onClick={() => loadNext()}>Muat lagi</Button>
         )}
       </Report>
     </ReportWrapper>
   );
 }
 
-export { Laporanku, LaporanPublik };
+function LaporanBaru() {
+  let { pathname } = useLocation();
+  pathname = pathname.substring(1);
+
+  const [page, setPage] = useState(1);
+  const { hasMore, laporanbaru } = useLaporanBaru(page);
+
+  const { detailReport } = useStoreActions((actions) => ({
+    detailReport: actions.detailReport,
+  }));
+
+  const ToDetails = async (id_report) => {
+    await detailReport(id_report);
+  };
+
+  const loadNext = () => {
+    setPage(page + 1);
+  };
+
+  return (
+    <ReportWrapper>
+      <Report>
+        <h1>{pathname}</h1>
+        {laporanbaru.length === 0 ? (
+          // NOTE: Redesign
+          <ReportBodyCustomNotFound>Tidak ada laporan</ReportBodyCustomNotFound>
+        ) : (
+          <ReportBodyCustom>
+            {laporanbaru.map((laporan, index) => (
+              <DataList key={index}>
+                <section title={laporan.title}>{laporan.title}</section>
+                <section>{laporan.date_report}</section>
+                <section>{laporan.vis}</section>
+                <section>{laporan.stat}</section>
+                <Action
+                  title="Buka Detail"
+                  onClick={() =>
+                    ToDetails({ id: laporan.id_report, nik: laporan.NIK })
+                  }
+                >
+                  <span className="material-icons">launch</span>
+                </Action>
+              </DataList>
+            ))}
+            {hasMore && (
+              <MoreButton onClick={() => loadNext()}>Muat lagi</MoreButton>
+            )}
+          </ReportBodyCustom>
+        )}
+      </Report>
+    </ReportWrapper>
+  );
+}
+
+function Tanggapanku() {
+  let { pathname } = useLocation();
+  pathname = pathname.substring(1);
+
+  const [page, setPage] = useState(1);
+  const { hasMore, laporanbaru } = useTanggapanku(page);
+
+  const { detailReport } = useStoreActions((actions) => ({
+    detailReport: actions.detailReport,
+  }));
+
+  const ToDetails = async (id_report) => {
+    await detailReport(id_report);
+  };
+
+  const loadNext = () => {
+    setPage(page + 1);
+  };
+
+  return (
+    <ReportWrapper>
+      <Report>
+        <h1>{pathname}</h1>
+        {laporanbaru.length === 0 ? (
+          // NOTE: Redesign
+          <ReportBodyCustomNotFound>Tidak ada laporan</ReportBodyCustomNotFound>
+        ) : (
+          <ReportBodyCustom>
+            {laporanbaru.map((laporan, index) => (
+              <DataList key={index}>
+                <section title={laporan.title}>{laporan.title}</section>
+                <section>{laporan.date_response}</section>
+                <section>{laporan.id_petugas}</section>
+                <section>{laporan.stat}</section>
+                <Action
+                  title="Buka Detail"
+                  onClick={() =>
+                    ToDetails({
+                      id: laporan.id_report,
+                      petugas: laporan.id_petugas,
+                    })
+                  }
+                >
+                  <span className="material-icons">launch</span>
+                </Action>
+              </DataList>
+            ))}
+            {hasMore && (
+              <MoreButton onClick={() => loadNext()}>Muat lagi</MoreButton>
+            )}
+          </ReportBodyCustom>
+        )}
+      </Report>
+    </ReportWrapper>
+  );
+}
+
+export { Laporanku, LaporanPublik, LaporanBaru, Tanggapanku };

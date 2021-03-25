@@ -1,4 +1,5 @@
 import { action, thunk, persist } from "easy-peasy";
+import toast from "react-hot-toast";
 
 import { instance } from "./FetchData";
 
@@ -17,6 +18,7 @@ export const state = {
     pic: null,
     telp: null,
     token: null,
+    id_petugas: null,
   }),
   activeDetail: {
     id_report: null,
@@ -49,6 +51,7 @@ export const state = {
   masukApp: thunk(async (actions, payload) => {
     try {
       const response = await instance.post("/auth/masuk", payload);
+      console.log(response);
       await actions.registerAutoLogin(response);
       return await Promise.resolve(response.data.notify);
     } catch (err) {
@@ -65,6 +68,54 @@ export const state = {
       });
       return await Promise.resolve(response.data.notify);
     } catch (err) {
+      return await Promise.reject(err.response.data.notify || err);
+    }
+  }),
+  detailReport: thunk(async (actions, payload, { getState }) => {
+    if (payload.nik) {
+      try {
+        const response = await instance.get("/laporan/detail", {
+          headers: { authorization: `Bearer ${getState().session.token}` },
+          params: { id: payload.id, nik: payload.nik },
+        });
+        console.log(response);
+        await actions.setActiveDetails(response.data.output);
+        actions.toggleFocusDetails();
+        return 0;
+      } catch (err) {
+        toast.error(err.response.data.notify);
+        return 1;
+      }
+    } else {
+      try {
+        const response = await instance.get("/laporan/detailPetugas", {
+          headers: { authorization: `Bearer ${getState().session.token}` },
+          params: { id: payload.id, petugas: payload.petugas },
+        });
+        console.log(response);
+        await actions.setActiveDetails(response.data.output);
+        actions.toggleFocusDetails();
+        return 0;
+      } catch (err) {
+        toast.error(err.response.data.notify);
+        return 1;
+      }
+    }
+  }),
+  newResponse: thunk(async (actions, payload, { getState }) => {
+    try {
+      const datas = {
+        id_petugas: getState().session.id_petugas,
+        id_report: getState().activeDetail.id_report,
+        response: payload.responBalik,
+      };
+      const response = await instance.post("/laporan/respon", datas, {
+        headers: { authorization: `Bearer ${getState().session.token}` },
+      });
+      actions.toggleFocusDetails();
+      return await Promise.resolve(response.data.notify);
+    } catch (err) {
+      console.log(err);
       return await Promise.reject(err.response.data.notify || err);
     }
   }),
@@ -92,16 +143,24 @@ export const state = {
     };
   }),
   registerAutoLogin: action((state, payload) => {
-    const { NIK, accessToken, name_pengguna, role } = payload.data.responses;
+    const {
+      NIK,
+      accessToken,
+      name_pengguna,
+      role,
+      name_petugas,
+      id_petugas,
+    } = payload.data.responses;
     return {
       ...state,
       session: {
         ...state.session,
         isLogged: true,
         role,
-        name: name_pengguna,
-        NIK,
+        name: name_pengguna || name_petugas,
+        NIK: role === "admin" ? "Administrator" : NIK,
         token: accessToken,
+        id_petugas: id_petugas && id_petugas,
       },
     };
   }),
@@ -116,6 +175,15 @@ export const state = {
         pic: null,
         telp: null,
         token: null,
+      },
+    };
+  }),
+  setActiveDetails: action((state, payload) => {
+    console.log(payload);
+    return {
+      ...state,
+      activeDetail: {
+        ...payload,
       },
     };
   }),

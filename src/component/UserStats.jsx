@@ -69,7 +69,7 @@ const CloseSession = styled.p`
   letter-spacing: 0.125em;
 `;
 
-export default function UserStats(props) {
+export default function UserStats() {
   const { role, name, NIK, pic } = useStoreState((state) => ({
     role: state.session.role,
     name: state.session.name,

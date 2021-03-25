@@ -2,8 +2,7 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 import styled from "styled-components";
-import { useStoreActions, useStoreState } from "easy-peasy";
-import toast from "react-hot-toast";
+import { useStoreState } from "easy-peasy";
 
 const NavWrapper = styled.div`
   align-self: flex-end;
@@ -54,13 +53,6 @@ function Navigation() {
     role: state.session.role,
   }));
 
-  const test = useStoreActions((actions) => actions.toggleFocusDetails);
-
-  const runTest = () => {
-    test();
-    toast("Cheking");
-  };
-
   return (
     <NavWrapper>
       <ul>
@@ -104,12 +96,6 @@ function Navigation() {
             </NavLink>
           </li>
         )}
-        <li>
-          {/* eslint-disable-next-line */}
-          <a href="#" onClick={() => runTest()}>
-            Run Test
-          </a>
-        </li>
       </ul>
     </NavWrapper>
   );
