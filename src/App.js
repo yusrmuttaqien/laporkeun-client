@@ -27,6 +27,7 @@ const AppWrapper = styled.div`
   height: 100vh;
   min-height: 640px; // TODO: Fix for mobile devices
   width: 100vw;
+  min-width: 707px;
   max-width: 100%;
 
   display: flex;

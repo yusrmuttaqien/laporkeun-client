@@ -8,29 +8,31 @@ export default function PrivateRoute({ comp: Component, ...rest }) {
     role: state.session.role,
   }));
 
-  const Checker = (role, page) => {
+  let destiny = rest.path;
+
+  const Checker = (role, destiny) => {
     if (role === "admin") {
-      switch (page) {
-        case "LaporanBaru":
-        case "Tanggapanku":
-        case "Petugas":
+      switch (destiny) {
+        case "/laporanbaru":
+        case "/tanggapanku":
+        case "/petugas":
           return true;
         default:
           return false;
       }
     } else if (role === "petugas") {
-      switch (page) {
-        case "LaporanBaru":
-        case "Tanggapanku":
+      switch (destiny) {
+        case "/laporanbaru":
+        case "/tanggapanku":
           return true;
         default:
           return false;
       }
     } else if (role === "pengguna") {
-      switch (page) {
-        case "BuatLaporan":
-        case "Laporanku":
-        case "LaporanPublik":
+      switch (destiny) {
+        case "/buatlaporan":
+        case "/laporanku":
+        case "/laporanpublik":
           return true;
         default:
           return false;
@@ -42,7 +44,7 @@ export default function PrivateRoute({ comp: Component, ...rest }) {
     <Route
       {...rest}
       render={(props) => {
-        return isLogged && Checker(role, Component.name) ? (
+        return isLogged && Checker(role, destiny) ? (
           <Component {...props} />
         ) : (
           <Redirect to="/" />

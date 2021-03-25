@@ -61,7 +61,6 @@ export const state = {
   masukApp: thunk(async (actions, payload) => {
     try {
       const response = await instance.post("/auth/masuk", payload);
-      console.log(response);
       await actions.registerAutoLogin(response);
       return await Promise.resolve(response.data.notify);
     } catch (err) {
@@ -88,7 +87,6 @@ export const state = {
           headers: { authorization: `Bearer ${getState().session.token}` },
           params: { id: payload.id, nik: payload.nik },
         });
-        console.log(response);
         await actions.setActiveDetails(response.data.output);
         actions.toggleFocusDetails();
         return 0;
@@ -102,7 +100,6 @@ export const state = {
           headers: { authorization: `Bearer ${getState().session.token}` },
           params: { id: payload.id, petugas: payload.petugas },
         });
-        console.log(response);
         await actions.setActiveDetails(response.data.output);
         actions.toggleFocusDetails();
         return 0;
@@ -125,12 +122,10 @@ export const state = {
       actions.toggleFocusDetails();
       return await Promise.resolve(response.data.notify);
     } catch (err) {
-      console.log(err);
       return await Promise.reject(err.response.data.notify || err);
     }
   }),
   deletePetugas: thunk(async (actions, payload, { getState }) => {
-    console.log(payload);
     try {
       const response = await instance.post(
         "/petugas/delete",
@@ -209,7 +204,6 @@ export const state = {
     };
   }),
   setActiveDetails: action((state, payload) => {
-    console.log(payload);
     return {
       ...state,
       activeDetail: {

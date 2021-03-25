@@ -80,7 +80,6 @@ function usePetugas(page) {
           },
           params: { page: page, limit: PaginationLimit },
         });
-        console.log(response);
         setPetugas((prevPetugas) => {
           return [
             ...prevPetugas,
@@ -229,7 +228,6 @@ function useTanggapanku(page) {
           },
           params: { page: page, limit: PaginationLimit },
         });
-        console.log(response);
         setLaporanbaru((prevLaporanbaru) => {
           return [
             ...prevLaporanbaru,
