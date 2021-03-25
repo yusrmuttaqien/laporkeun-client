@@ -48,6 +48,16 @@ export const state = {
       return await Promise.reject(err.response.data.notify || err);
     }
   }),
+  petugasRegistration: thunk(async (actions, payload, { getState }) => {
+    try {
+      const response = await instance.post("/petugas/registrasi", payload, {
+        headers: { authorization: `Bearer ${getState().session.token}` },
+      });
+      return await Promise.resolve(response.data.notify);
+    } catch (err) {
+      return await Promise.reject(err.response.data.notify || err);
+    }
+  }),
   masukApp: thunk(async (actions, payload) => {
     try {
       const response = await instance.post("/auth/masuk", payload);
@@ -119,6 +129,21 @@ export const state = {
       return await Promise.reject(err.response.data.notify || err);
     }
   }),
+  deletePetugas: thunk(async (actions, payload, { getState }) => {
+    console.log(payload);
+    try {
+      const response = await instance.post(
+        "/petugas/delete",
+        { id: payload },
+        {
+          headers: { authorization: `Bearer ${getState().session.token}` },
+        }
+      );
+      return await Promise.resolve(response.data.notify);
+    } catch (err) {
+      return await Promise.reject(err.response.data.notify || err);
+    }
+  }),
 
   // Action
   toggleFocusDetails: action((state) => {
@@ -158,7 +183,12 @@ export const state = {
         isLogged: true,
         role,
         name: name_pengguna || name_petugas,
-        NIK: role === "admin" ? "Administrator" : NIK,
+        NIK:
+          role === "admin"
+            ? "Administrator"
+            : role === "petugas"
+            ? "Petugas"
+            : NIK,
         token: accessToken,
         id_petugas: id_petugas && id_petugas,
       },

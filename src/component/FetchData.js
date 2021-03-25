@@ -58,6 +58,55 @@ function useLaporanku(page) {
   return { loading, error, hasMore, laporanku };
 }
 
+function usePetugas(page) {
+  const [hasMore, setHasMore] = useState(false);
+  const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [petugas, setPetugas] = useState([]);
+
+  const { token } = useStoreState((state) => ({
+    token: state.session.token,
+  }));
+
+  useEffect(() => {
+    setLoading(true);
+    setError(false);
+
+    async function fetch() {
+      try {
+        const response = await instance.get("/petugas/list", {
+          headers: {
+            authorization: `Bearer ${token}`,
+          },
+          params: { page: page, limit: PaginationLimit },
+        });
+        console.log(response);
+        setPetugas((prevPetugas) => {
+          return [
+            ...prevPetugas,
+            ...response.data.output.map((datas) => {
+              const { report } = datas;
+              return {
+                name_petugas: report.name_petugas,
+                id_petugas: report.id_petugas,
+                date_akun: report.date_akun,
+                telp: report.telp,
+              };
+            }),
+          ];
+        });
+        setHasMore(response.data.info.next ? true : false);
+        setLoading(false);
+      } catch (err) {
+        setError(err);
+      }
+    }
+    fetch();
+  }, [page, setPetugas, token]);
+
+  return { loading, error, hasMore, petugas };
+}
+
 function useLaporanPublik(page) {
   const [hasMore, setHasMore] = useState(false);
   const [error, setError] = useState(false);
@@ -180,7 +229,7 @@ function useTanggapanku(page) {
           },
           params: { page: page, limit: PaginationLimit },
         });
-        console.log(response)
+        console.log(response);
         setLaporanbaru((prevLaporanbaru) => {
           return [
             ...prevLaporanbaru,
@@ -209,4 +258,11 @@ function useTanggapanku(page) {
   return { loading, error, hasMore, laporanbaru };
 }
 
-export { instance, useLaporanku, useLaporanPublik, useLaporanBaru, useTanggapanku };
+export {
+  instance,
+  useLaporanku,
+  useLaporanPublik,
+  useLaporanBaru,
+  useTanggapanku,
+  usePetugas,
+};

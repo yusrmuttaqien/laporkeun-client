@@ -13,7 +13,8 @@ import {
   LaporanBaru,
   Laporanku,
   LaporanPublik,
-  Tanggapanku
+  Tanggapanku,
+  Petugas,
 } from "./component/LihatLaporan";
 import SideDetails from "./component/SideDetails";
 import PrivateRoute from "./component/PrivateRoute";
@@ -96,7 +97,7 @@ function App() {
             <PrivateRoute path="/laporanpublik" comp={LaporanPublik} />
             <PrivateRoute path="/laporanbaru" comp={LaporanBaru} />
             <PrivateRoute path="/tanggapanku" comp={Tanggapanku} />
-            <PrivateRoute path="/petugas" comp={Laporanku} />
+            <PrivateRoute path="/petugas" comp={Petugas} />
             <Route component={NotFound} />
           </Switch>
         </View>

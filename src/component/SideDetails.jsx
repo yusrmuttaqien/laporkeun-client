@@ -8,9 +8,9 @@ import { useForm } from "react-hook-form";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { toast } from "react-hot-toast";
+import { useHistory } from "react-router-dom";
 
 import DefaultImg from "./../asset/defaultReport.jpg";
-import { useHistory } from "react-router-dom";
 
 const SideDetailsWrapper = styled.div`
   position: absolute;
