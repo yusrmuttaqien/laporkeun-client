@@ -2,6 +2,7 @@ import { action, thunk, persist } from "easy-peasy";
 import toast from "react-hot-toast";
 
 import { instance } from "./FetchData";
+import { storage } from "./util/Firebase";
 
 export const state = {
   UI: {
@@ -71,7 +72,28 @@ export const state = {
     await actions.keluarAppState();
   }),
   newReport: thunk(async (actions, payload, { getState }) => {
+    var theName, type;
+    console.log(payload);
+    if (payload.pic[0]) {
+      type = payload.pic[0].name.split(".");
+      theName = `${getState().session.NIK}_${Date.now()}.${type}`;
+    }
     try {
+      if (payload.pic[0]) {
+        // Firebase Storage
+        type = type[type.length - 1];
+        const file = payload.pic[0];
+        const storageRef = storage.ref("/image");
+        const fileRef = storageRef.child(theName);
+        await fileRef.put(file);
+        payload.pic = theName;
+      }
+      
+      if (!payload.pic[0]) {
+        payload.pic = null;
+      }
+
+      // DB
       const response = await instance.post("/laporan/buat", payload, {
         headers: { authorization: `Bearer ${getState().session.token}` },
       });
@@ -81,17 +103,25 @@ export const state = {
     }
   }),
   detailReport: thunk(async (actions, payload, { getState }) => {
+    const fetchUrl = async (fileName) => {
+      return await storage.ref(`/image/${fileName}`).getDownloadURL();
+    };
+
     if (payload.nik) {
       try {
         const response = await instance.get("/laporan/detail", {
           headers: { authorization: `Bearer ${getState().session.token}` },
           params: { id: payload.id, nik: payload.nik },
         });
+        if (response.data.output.pic) {
+          response.data.output.pic = await fetchUrl(response.data.output.pic);
+        }
         await actions.setActiveDetails(response.data.output);
         actions.toggleFocusDetails();
         return 0;
       } catch (err) {
-        toast.error(err.response.data.notify);
+        console.log(err);
+        toast.error(err || err.response.data.notify);
         return 1;
       }
     } else {
@@ -100,6 +130,9 @@ export const state = {
           headers: { authorization: `Bearer ${getState().session.token}` },
           params: { id: payload.id, petugas: payload.petugas },
         });
+        if (response.data.output.pic) {
+          response.data.output.pic = await fetchUrl(response.data.output.pic);
+        }
         await actions.setActiveDetails(response.data.output);
         actions.toggleFocusDetails();
         return 0;

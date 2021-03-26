@@ -5,6 +5,7 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { toast } from "react-hot-toast";
 import { useStoreActions } from "easy-peasy";
+import { useHistory } from "react-router-dom";
 
 import {
   Label,
@@ -109,13 +110,14 @@ function BuatLaporan() {
   const changeAction = () => {
     setAction(action === "Privat" ? "Publik" : "Privat");
   };
+  const history = useHistory();
 
-  const onSubmit = (data, e) => {
+  const onSubmit = async (data, e) => {
     const datas = { ...data, vis: action };
     toast.promise(newReport(datas), {
       loading: "Tunggu sebentar kawan :)",
       success: (msg) => {
-        e.target.reset();
+        history.push("/laporanku");
         return msg;
       },
       error: (err) => err && err.toString(),
