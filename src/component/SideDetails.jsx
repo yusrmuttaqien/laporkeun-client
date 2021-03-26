@@ -179,8 +179,35 @@ export default function SideDetails(props) {
   });
   const history = useHistory();
 
-  const generatePDF = () => {
+  const generatePDF = async () => {
     const doc = new jsPDF();
+
+    function getDataUri(url) {
+      return new Promise((resolve) => {
+        var image = new Image();
+        image.crossOrigin = "Anonymous"; //getting images from external domain
+
+        image.onload = function () {
+          var canvas = document.createElement("canvas");
+          canvas.width = this.naturalWidth;
+          canvas.height = this.naturalHeight;
+
+          //next three lines for white background in case png has a transparent background
+          var ctx = canvas.getContext("2d");
+          ctx.fillStyle = "#fff"; /// set white fill style
+          ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+          canvas.getContext("2d").drawImage(this, 0, 0);
+
+          resolve(canvas.toDataURL("image/jpeg"));
+        };
+
+        image.src = url;
+      });
+    }
+
+    var pic = await getDataUri(DefaultImg);
+
     var titleText = doc.splitTextToSize(title, 59);
     var reportText = doc.splitTextToSize(report, 120);
     var responseText = doc.splitTextToSize(response, 120);
@@ -188,7 +215,7 @@ export default function SideDetails(props) {
     doc.addImage(FullLogo, "PNG", 55, 15);
 
     doc.setFont("courier", "bold");
-    doc.text(`Laporan user ${name_pengguna}`, 15, 60);
+    doc.text(`Laporan pengguna ${name_pengguna}`, 15, 60);
 
     doc.setFontSize(10);
     doc.setFont("courier", "bold");
@@ -198,7 +225,7 @@ export default function SideDetails(props) {
       65
     );
 
-    doc.addImage(DefaultImg, "PNG", 15, 70, 95, 50);
+    doc.addImage(pic, "JPG", 15, 70, 95, 50);
 
     doc.setFontSize(20);
     doc.setFont("courier", "bold");

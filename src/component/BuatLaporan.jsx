@@ -45,6 +45,9 @@ const ReportBodyCustom = styled(ReportBody)`
 
 const CustomButton = styled(Button)`
   margin: 0em 0 0.5em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 
   &:nth-last-child(1) {
     margin-left: 1em;
@@ -95,6 +98,7 @@ const SchemaLaporan = yup.object().shape({
 
 function BuatLaporan() {
   const [action, setAction] = useState("Privat");
+  const [filename, setFileName] = useState("");
   const { register, handleSubmit, errors } = useForm({
     resolver: yupResolver(SchemaLaporan),
   });
@@ -116,6 +120,10 @@ function BuatLaporan() {
       },
       error: (err) => err && err.toString(),
     });
+  };
+
+  const getFileName = (e) => {
+    setFileName(e.target.files[0].name);
   };
 
   return (
@@ -147,9 +155,22 @@ function BuatLaporan() {
           </Label>
           <TextArea name="isiLaporan" id="isiLaporan" ref={register}></TextArea>
           <section>
-            <CustomButton type="button">
+            <CustomButton
+              type="button"
+              title={
+                errors.pic?.message
+                  ? errors.pic?.message
+                  : filename
+                  ? filename
+                  : "Tambahkan gambar"
+              }
+            >
               <CustomLabel htmlFor="pic">
-                {errors.pic?.message ? errors.pic?.message : "Tambahkan gambar"}
+                {errors.pic?.message
+                  ? errors.pic?.message
+                  : filename
+                  ? filename
+                  : "Tambahkan gambar"}
               </CustomLabel>
               <CustomInput
                 type="file"
@@ -157,9 +178,12 @@ function BuatLaporan() {
                 id="pic"
                 accept="image/x-png,image/gif,image/jpeg"
                 ref={register}
+                onChange={getFileName}
               />
             </CustomButton>
-            <CustomButton type="submit">Lapor!</CustomButton>
+            <CustomButton type="submit" title="Lapor!">
+              Lapor!
+            </CustomButton>
           </section>
         </ReportBodyCustom>
       </AlteredReport>
