@@ -83,27 +83,27 @@ function App() {
   const isRehydrated = useStoreRehydrated();
 
   return isRehydrated ? (
-    <AppWrapper id="AppWraper">
-      <Router>
-        <Navbar />
-        <SideDetails />
-        <WrapToaster>
-          <Toaster toastOptions={{ className: "toast" }} />
-        </WrapToaster>
-        <View id="View">
-          <Switch>
-            <Route exact path="/" component={Splash} />
-            <PrivateRoute path="/buatlaporan" comp={BuatLaporan} />
-            <PrivateRoute path="/laporanku" comp={Laporanku} />
-            <PrivateRoute path="/laporanpublik" comp={LaporanPublik} />
-            <PrivateRoute path="/laporanbaru" comp={LaporanBaru} />
-            <PrivateRoute path="/tanggapanku" comp={Tanggapanku} />
-            <PrivateRoute path="/petugas" comp={Petugas} />
-            <Route component={NotFound} />
-          </Switch>
-        </View>
-      </Router>
-    </AppWrapper>
+      <AppWrapper id="AppWraper">
+        <Router>
+          <Navbar />
+          <SideDetails/>
+          <WrapToaster>
+            <Toaster />
+          </WrapToaster>
+          <View id="View">
+            <Switch>
+              <Route exact path="/" component={Splash} />
+              <PrivateRoute path="/buatlaporan" comp={BuatLaporan} />
+              <PrivateRoute path="/laporanku" comp={Laporanku} />
+              <PrivateRoute path="/laporanpublik" comp={LaporanPublik} />
+              <PrivateRoute path="/laporanbaru" comp={LaporanBaru} />
+              <PrivateRoute path="/tanggapanku" comp={Tanggapanku} />
+              <PrivateRoute path="/petugas" comp={Petugas} />
+              <Route component={NotFound} />
+            </Switch>
+          </View>
+        </Router>
+      </AppWrapper>
   ) : (
     <Presisting>Mengambil State</Presisting>
   );

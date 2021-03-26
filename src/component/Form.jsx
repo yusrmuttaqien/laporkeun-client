@@ -65,7 +65,10 @@ const SchemaDaftar = yup.object().shape({
     .typeError("NIK harus berupa angka")
     .positive("NIK berupa bilangan positif")
     .integer("NIK berupa bilangan bulat"),
-  name: yup.string().required("Nama wajib diisi"),
+  name: yup
+    .string()
+    .required("Nama wajib diisi")
+    .max(30, "Nama maks 30 karakter"),
   kataSandi: yup
     .string()
     .required("Kata sandi wajib diisi")

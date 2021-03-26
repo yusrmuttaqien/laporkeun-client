@@ -208,6 +208,11 @@ export const state = {
       ...state,
       activeDetail: {
         ...payload,
+        name_petugas: payload.name_petugas
+          ? payload.name_petugas
+          : payload.response
+          ? "(petugas telah dihapus)"
+          : null,
       },
     };
   }),

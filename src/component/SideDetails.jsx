@@ -9,8 +9,10 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { toast } from "react-hot-toast";
 import { useHistory } from "react-router-dom";
+import { jsPDF } from "jspdf";
 
 import DefaultImg from "./../asset/defaultReport.jpg";
+import FullLogo from "./../asset/FullLogo.png";
 
 const SideDetailsWrapper = styled.div`
   position: absolute;
@@ -177,6 +179,50 @@ export default function SideDetails(props) {
   });
   const history = useHistory();
 
+  const generatePDF = () => {
+    const doc = new jsPDF();
+    var titleText = doc.splitTextToSize(title, 59);
+    var reportText = doc.splitTextToSize(report, 120);
+    var responseText = doc.splitTextToSize(response, 120);
+
+    doc.addImage(FullLogo, "PNG", 55, 15);
+
+    doc.setFont("courier", "bold");
+    doc.text(`Laporan user ${name_pengguna}`, 15, 60);
+
+    doc.setFontSize(10);
+    doc.setFont("courier", "bold");
+    doc.text(
+      `${date_report} - ditanggapi oleh ${name_petugas} tgl ${date_response}`,
+      15,
+      65
+    );
+
+    doc.addImage(DefaultImg, "PNG", 15, 70, 95, 50);
+
+    doc.setFontSize(20);
+    doc.setFont("courier", "bold");
+    doc.text(titleText, 113, 78);
+
+    doc.setFontSize(18);
+    doc.setFont("courier", "bold");
+    doc.text("Laporan", 15, 135);
+
+    doc.setFontSize(8);
+    doc.setFont("courier", "bold");
+    doc.text(reportText, 15, 140);
+
+    doc.setFontSize(18);
+    doc.setFont("courier", "bold");
+    doc.text("Tanggapan", 110, 135);
+
+    doc.setFontSize(8);
+    doc.setFont("courier", "bold");
+    doc.text(responseText, 110, 140);
+
+    doc.save(`laporkeun! Laporan ${title} oleh ${name_pengguna}.pdf`);
+  };
+
   // const SideDetail = useRef();
   const onSubmit = (response) => {
     const Redirect = () => {
@@ -204,7 +250,11 @@ export default function SideDetails(props) {
         <Action onClick={() => toggleFocusDetails()} title="Tutup Detail">
           <span className="material-icons">logout</span>
         </Action>
-        {role === "admin" && <CustomButton>unduh laporan</CustomButton>}
+        {role === "admin" && response ? (
+          <CustomButton onClick={() => generatePDF()}>
+            unduh laporan
+          </CustomButton>
+        ) : null}
         {role === "pengguna" && stat === "Menunggu" ? (
           <CustomButton>hapus laporan</CustomButton>
         ) : null}

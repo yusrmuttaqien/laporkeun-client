@@ -51,6 +51,16 @@ const GlobalStyle = createGlobalStyle`
     color: ${Theme.color.white};
   }
 
+  ::-moz-selection { /* Code for Firefox */
+    color: ${Theme.color.white} !important;
+    background: ${Theme.color.purple} !important;
+  }
+
+  ::selection {
+    color: ${Theme.color.white} !important;
+    background: ${Theme.color.purple} !important;
+  }
+
   ::-webkit-scrollbar {
     width: 7px;
     height: 7px;
@@ -226,5 +236,5 @@ export {
   ReportBody,
   Action,
   Button,
-  Warning
+  Warning,
 };

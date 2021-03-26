@@ -121,10 +121,14 @@ const SchemaDaftar = yup.object().shape({
     .number()
     .required("NIK wajib diisi")
     .test("len", "Nomor minimal 10 digit", (val) => val.toString().length >= 10)
+    .test("lenmin", "Nomor maksimal 15 digit", (val) => val.toString().length <= 15)
     .typeError("NIK harus berupa angka")
     .positive("NIK berupa bilangan positif")
     .integer("NIK berupa bilangan bulat"),
-  name: yup.string().required("Nama wajib diisi"),
+  name: yup
+    .string()
+    .required("Nama wajib diisi")
+    .max(30, "Nama maks 30 karakter"),
   kataSandi: yup
     .string()
     .required("Kata sandi wajib diisi")
@@ -422,24 +426,27 @@ function Petugas() {
             <MoreButton onClick={() => setIsRegister(!isRegister)}>
               Tambah petugas
             </MoreButton>
-            {petugas.map((petugas, index) => (
-              <DataList key={index}>
-                <section title={petugas.name_petugas}>
-                  {petugas.name_petugas}
-                </section>
-                <section>{petugas.id_petugas}</section>
-                <section>{petugas.date_akun}</section>
-                <section title={petugas.telp}>{petugas.telp}</section>
-                <Action
-                  title="Hapus petugas"
-                  onClick={() => {
-                    hapusPetugas(petugas.id_petugas);
-                  }}
-                >
-                  <span className="material-icons">delete_outline</span>
-                </Action>
-              </DataList>
-            ))}
+            {petugas.map(
+              (petugas, index) =>
+                petugas.name_petugas !== "laporkeun" && (
+                  <DataList key={index}>
+                    <section title={petugas.name_petugas}>
+                      {petugas.name_petugas}
+                    </section>
+                    <section>{petugas.id_petugas}</section>
+                    <section>{petugas.date_akun}</section>
+                    <section title={petugas.telp}>{petugas.telp}</section>
+                    <Action
+                      title="Hapus petugas"
+                      onClick={() => {
+                        hapusPetugas(petugas.id_petugas);
+                      }}
+                    >
+                      <span className="material-icons">delete_outline</span>
+                    </Action>
+                  </DataList>
+                )
+            )}
             {hasMore && (
               <MoreButton onClick={() => loadNext()}>Muat lagi</MoreButton>
             )}
