@@ -2,6 +2,7 @@ import styled from "styled-components";
 import { Route, BrowserRouter as Router, Switch } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { useStoreRehydrated } from "easy-peasy";
+import { useState } from "react";
 
 import BGWebP from "./asset/mainBG.webp";
 import BGProgressive from "./asset/mainBG_Progressive.jpg";
@@ -81,29 +82,46 @@ const Presisting = styled.div`
 
 function App() {
   const isRehydrated = useStoreRehydrated();
+  const [toggleSD, setToggleSD] = useState(false);
 
   return isRehydrated ? (
-      <AppWrapper id="AppWraper">
-        <Router>
-          <Navbar />
-          <SideDetails/>
-          <WrapToaster>
-            <Toaster />
-          </WrapToaster>
-          <View id="View">
-            <Switch>
-              <Route exact path="/" component={Splash} />
-              <PrivateRoute path="/buatlaporan" comp={BuatLaporan} />
-              <PrivateRoute path="/laporanku" comp={Laporanku} />
-              <PrivateRoute path="/laporanpublik" comp={LaporanPublik} />
-              <PrivateRoute path="/laporanbaru" comp={LaporanBaru} />
-              <PrivateRoute path="/tanggapanku" comp={Tanggapanku} />
-              <PrivateRoute path="/petugas" comp={Petugas} />
-              <Route component={NotFound} />
-            </Switch>
-          </View>
-        </Router>
-      </AppWrapper>
+    <AppWrapper id="AppWraper">
+      <Router>
+        <Navbar />
+        <SideDetails sd={{ toggleSD, setToggleSD }} />
+        <WrapToaster>
+          <Toaster />
+        </WrapToaster>
+        <View id="View">
+          <Switch>
+            <Route exact path="/" component={Splash} />
+            <PrivateRoute path="/buatlaporan" comp={BuatLaporan} />
+            <PrivateRoute
+              sd={{ toggleSD, setToggleSD }}
+              path="/laporanku"
+              comp={Laporanku}
+            />
+            <PrivateRoute
+              sd={{ toggleSD, setToggleSD }}
+              path="/laporanpublik"
+              comp={LaporanPublik}
+            />
+            <PrivateRoute
+              sd={{ toggleSD, setToggleSD }}
+              path="/laporanbaru"
+              comp={LaporanBaru}
+            />
+            <PrivateRoute
+              sd={{ toggleSD, setToggleSD }}
+              path="/tanggapanku"
+              comp={Tanggapanku}
+            />
+            <PrivateRoute path="/petugas" comp={Petugas} />
+            <Route component={NotFound} />
+          </Switch>
+        </View>
+      </Router>
+    </AppWrapper>
   ) : (
     <Presisting>Mengambil State</Presisting>
   );

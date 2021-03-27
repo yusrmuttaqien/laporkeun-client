@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
-import { useStoreState } from "easy-peasy";
+import { useStoreState, useStoreActions } from "easy-peasy";
 import axios from "axios";
+import { storage } from "./util/Firebase";
+import toast from "react-hot-toast";
 
 const instance = axios.create({
   baseURL: "http://localhost:5006/",
@@ -256,6 +258,112 @@ function useTanggapanku(page) {
   return { loading, error, hasMore, laporanbaru };
 }
 
+function useDetails() {
+  const {
+    sideDetailsPayload,
+    token,
+  } = useStoreState((state) => ({
+    sideDetailsPayload: state.sideDetailsPayload,
+    token: state.session.token,
+  }));
+  const [activeDetails, setActiveDetails] = useState({
+    id_report: null,
+    id_petugas: null,
+    id_response: null,
+    pic: null,
+    title: null,
+    report: null,
+    date_report: null,
+    date_response: null,
+    vis: null,
+    stat: null,
+    response: null,
+    NIK: null,
+    name_pengguna: null,
+    name_petugas: null,
+  });
+  const { setResponseByIDReport } = useStoreActions(
+    (actions) => ({
+      setResponseByIDReport: actions.setResponseByIDReport,
+    })
+  );
+
+  var backToJSON = JSON.stringify(sideDetailsPayload, undefined, 2);
+  backToJSON = JSON.parse(backToJSON);
+
+  useEffect(() => {
+    const fetch = async () => {
+      if (backToJSON.id && token) {
+        if (backToJSON.nik) {
+          try {
+            const response = await instance.get("/laporan/detail", {
+              headers: { authorization: `Bearer ${token}` },
+              params: { id: backToJSON.id, nik: backToJSON.nik },
+            });
+            if (response.data.output.pic) {
+              response.data.output.pic = await storage
+                .ref(`/image/${response.data.output.pic}`)
+                .getDownloadURL();
+            }
+            const payload = response.data.output;
+            setResponseByIDReport(payload.id_report)
+            setActiveDetails({
+              ...payload,
+              name_petugas: payload.name_petugas
+                ? payload.name_petugas
+                : payload.response
+                ? "(petugas telah dihapus)"
+                : null,
+            });
+            return 0;
+          } catch (err) {
+            toast.error(err.response.data.notify && err.response.data.notify);
+            return 1;
+          }
+        } else if (backToJSON.petugas) {
+          try {
+            const response = await instance.get("/laporan/detailPetugas", {
+              headers: { authorization: `Bearer ${token}` },
+              params: {
+                id: backToJSON.id,
+                petugas: backToJSON.petugas,
+              },
+            });
+            if (response.data.output.pic) {
+              response.data.output.pic = await storage
+                .ref(`/image/${response.data.output.pic}`)
+                .getDownloadURL();
+            }
+            const payload = response.data.output;
+            setResponseByIDReport(payload.id_report)
+            setActiveDetails({
+              ...payload,
+              name_petugas: payload.name_petugas
+                ? payload.name_petugas
+                : payload.response
+                ? "(petugas telah dihapus)"
+                : null,
+            });
+            return 0;
+          } catch (err) {
+            toast.error(err.response.data.notify && err.response.data.notify);
+            return 1;
+          }
+        }
+      }
+    };
+    fetch();
+  }, [
+    backToJSON.id,
+    backToJSON.nik,
+    backToJSON.petugas,
+    token,
+    setResponseByIDReport
+  ]);
+
+  return { activeDetails };
+}
+
 export {
   instance,
   useLaporanku,
@@ -263,4 +371,5 @@ export {
   useLaporanBaru,
   useTanggapanku,
   usePetugas,
+  useDetails,
 };

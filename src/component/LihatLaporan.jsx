@@ -25,7 +25,6 @@ import {
   useTanggapanku,
   usePetugas,
 } from "./FetchData";
-// import NoLaporan from "./../asset/noLaporan.svg";
 import rfs from "./RFS";
 
 const Form = styled.form`
@@ -121,7 +120,11 @@ const SchemaDaftar = yup.object().shape({
     .number()
     .required("NIK wajib diisi")
     .test("len", "Nomor minimal 10 digit", (val) => val.toString().length >= 10)
-    .test("lenmin", "Nomor maksimal 15 digit", (val) => val.toString().length <= 15)
+    .test(
+      "lenmin",
+      "Nomor maksimal 15 digit",
+      (val) => val.toString().length <= 15
+    )
     .typeError("NIK harus berupa angka")
     .positive("NIK berupa bilangan positif")
     .integer("NIK berupa bilangan bulat"),
@@ -135,7 +138,7 @@ const SchemaDaftar = yup.object().shape({
     .min(8, "Kata sandi minimal 8 karakter"),
 });
 
-function Laporanku() {
+function Laporanku(props) {
   let { pathname } = useLocation();
   pathname = pathname.substring(1);
 
@@ -174,9 +177,10 @@ function Laporanku() {
                 <section>{laporan.stat}</section>
                 <Action
                   title="Buka Detail"
-                  onClick={() =>
-                    ToDetails({ id: laporan.id_report, nik: laporan.NIK })
-                  }
+                  onClick={() => {
+                    props.sd.setToggleSD(!props.sd.toggleSD);
+                    ToDetails({ id: laporan.id_report, nik: laporan.NIK });
+                  }}
                 >
                   <span className="material-icons">launch</span>
                 </Action>
@@ -192,7 +196,7 @@ function Laporanku() {
   );
 }
 
-function LaporanPublik() {
+function LaporanPublik(props) {
   let { pathname } = useLocation();
   pathname = pathname.substring(1);
 
@@ -231,9 +235,10 @@ function LaporanPublik() {
                 <section>{laporan.stat}</section>
                 <Action
                   title="Buka Detail"
-                  onClick={() =>
-                    ToDetails({ id: laporan.id_report, nik: laporan.NIK })
-                  }
+                  onClick={() => {
+                    props.sd.setToggleSD(!props.sd.toggleSD);
+                    ToDetails({ id: laporan.id_report, nik: laporan.NIK });
+                  }}
                 >
                   <span className="material-icons">launch</span>
                 </Action>
@@ -249,7 +254,7 @@ function LaporanPublik() {
   );
 }
 
-function LaporanBaru() {
+function LaporanBaru(props) {
   let { pathname } = useLocation();
   pathname = pathname.substring(1);
 
@@ -262,6 +267,7 @@ function LaporanBaru() {
 
   const ToDetails = async (id_report) => {
     await detailReport(id_report);
+    console.log(props);
   };
 
   const loadNext = () => {
@@ -285,9 +291,10 @@ function LaporanBaru() {
                 <section>{laporan.stat}</section>
                 <Action
                   title="Buka Detail"
-                  onClick={() =>
-                    ToDetails({ id: laporan.id_report, nik: laporan.NIK })
-                  }
+                  onClick={() => {
+                    props.sd.setToggleSD(!props.sd.toggleSD);
+                    ToDetails({ id: laporan.id_report, nik: laporan.NIK });
+                  }}
                 >
                   <span className="material-icons">launch</span>
                 </Action>
@@ -303,7 +310,7 @@ function LaporanBaru() {
   );
 }
 
-function Tanggapanku() {
+function Tanggapanku(props) {
   let { pathname } = useLocation();
   pathname = pathname.substring(1);
 
@@ -339,12 +346,13 @@ function Tanggapanku() {
                 <section>{laporan.stat}</section>
                 <Action
                   title="Buka Detail"
-                  onClick={() =>
+                  onClick={() => {
+                    props.sd.setToggleSD(!props.sd.toggleSD);
                     ToDetails({
                       id: laporan.id_report,
                       petugas: laporan.id_petugas,
-                    })
-                  }
+                    });
+                  }}
                 >
                   <span className="material-icons">launch</span>
                 </Action>

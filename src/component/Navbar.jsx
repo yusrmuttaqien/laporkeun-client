@@ -1,12 +1,12 @@
 // NOTE: Hardcoded variable
-import React from "react";
+import React, { useState } from "react";
 import styled from "styled-components";
 
 import LogoDesc from "./../asset/LogoDesc.svg";
 import { FormMasuk, FormDaftar } from "./Form";
 import { Navigation } from "./Navigation";
 import UserStats from "./UserStats";
-import { useStoreState, useStoreActions } from "easy-peasy";
+import { useStoreState } from "easy-peasy";
 
 const NavWrapper = styled.div`
   display: flex;
@@ -43,13 +43,11 @@ const NavWrapper = styled.div`
 `;
 
 export default function Navbar() {
-  const { formDefault, isLogged } = useStoreState((state) => ({
-    formDefault: state.UI.formDefault,
+  const { isLogged } = useStoreState((state) => ({
     isLogged: state.session.isLogged,
   }));
-  const { toggleFormDefault } = useStoreActions((actions) => ({
-    toggleFormDefault: actions.toggleFormDefault,
-  }));
+
+  const [toggle, setToggle] = useState("Masuk");
 
   return (
     <NavWrapper isLogged={isLogged}>
@@ -65,10 +63,10 @@ export default function Navbar() {
           <Navigation />
           <UserStats />
         </>
-      ) : formDefault === "Masuk" ? (
-        <FormMasuk toggleFormDefault={toggleFormDefault} />
+      ) : toggle === "Masuk" ? (
+        <FormMasuk toggleFormDefault={setToggle} />
       ) : (
-        <FormDaftar toggleFormDefault={toggleFormDefault} />
+        <FormDaftar toggleFormDefault={setToggle} />
       )}
     </NavWrapper>
   );

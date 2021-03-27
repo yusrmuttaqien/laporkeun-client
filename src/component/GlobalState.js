@@ -1,16 +1,10 @@
 import { action, thunk, persist } from "easy-peasy";
-import toast from "react-hot-toast";
 
 import { instance } from "./FetchData";
 import { storage } from "./util/Firebase";
 
 export const state = {
-  UI: {
-    sideDetails: {
-      onFocus: false,
-    },
-    formDefault: "Masuk",
-  },
+  sideDetailsPayload: { id: null, nik: null, petugas: null },
   session: persist({
     isLogged: false,
     role: null,
@@ -21,23 +15,7 @@ export const state = {
     token: null,
     id_petugas: null,
   }),
-  activeDetail: {
-    id_report: null,
-    id_petugas: null,
-    id_response: null,
-    pic: null,
-    title: null,
-    report: null,
-    date_report: null,
-    date_response: null,
-    vis: null,
-    stat: null,
-    response: null,
-    NIK: null,
-    name_pengguna: null,
-    name_petugas: null,
-  },
-  listPetugas: [],
+  newResponseByIDReport: null,
 
   // Thunk
   penggunaRegistration: thunk(async (actions, payload) => {
@@ -88,7 +66,7 @@ export const state = {
         await fileRef.put(file);
         payload.pic = theName;
       }
-      
+
       if (!payload.pic[0]) {
         payload.pic = null;
       }
@@ -102,51 +80,14 @@ export const state = {
       return await Promise.reject(err.response.data.notify || err);
     }
   }),
-  detailReport: thunk(async (actions, payload, { getState }) => {
-    const fetchUrl = async (fileName) => {
-      return await storage.ref(`/image/${fileName}`).getDownloadURL();
-    };
-
-    if (payload.nik) {
-      try {
-        const response = await instance.get("/laporan/detail", {
-          headers: { authorization: `Bearer ${getState().session.token}` },
-          params: { id: payload.id, nik: payload.nik },
-        });
-        if (response.data.output.pic) {
-          response.data.output.pic = await fetchUrl(response.data.output.pic);
-        }
-        await actions.setActiveDetails(response.data.output);
-        actions.toggleFocusDetails();
-        return 0;
-      } catch (err) {
-        console.log(err);
-        toast.error(err || err.response.data.notify);
-        return 1;
-      }
-    } else {
-      try {
-        const response = await instance.get("/laporan/detailPetugas", {
-          headers: { authorization: `Bearer ${getState().session.token}` },
-          params: { id: payload.id, petugas: payload.petugas },
-        });
-        if (response.data.output.pic) {
-          response.data.output.pic = await fetchUrl(response.data.output.pic);
-        }
-        await actions.setActiveDetails(response.data.output);
-        actions.toggleFocusDetails();
-        return 0;
-      } catch (err) {
-        toast.error(err.response.data.notify);
-        return 1;
-      }
-    }
+  detailReport: thunk((actions, payload) => {
+    actions.setSideActiveDetails(payload);
   }),
   newResponse: thunk(async (actions, payload, { getState }) => {
     try {
       const datas = {
         id_petugas: getState().session.id_petugas,
-        id_report: getState().activeDetail.id_report,
+        id_report: getState().newResponseByIDReport,
         response: payload.responBalik,
       };
       const response = await instance.post("/laporan/respon", datas, {
@@ -177,21 +118,16 @@ export const state = {
   toggleFocusDetails: action((state) => {
     return {
       ...state,
-      UI: {
-        ...state.UI,
-        sideDetails: {
-          ...state.UI.sideDetails,
-          onFocus: !state.UI.sideDetails.onFocus,
-        },
-      },
+      sideDetailsFocus: !state.sideDetailsFocus,
     };
   }),
-  toggleFormDefault: action((state) => {
+  setSideActiveDetails: action((state, payload) => {
     return {
       ...state,
-      UI: {
-        ...state.UI,
-        formDefault: state.UI.formDefault === "Masuk" ? "Daftar" : "Masuk",
+      sideDetailsPayload: {
+        id: payload.id,
+        nik: payload.nik ? payload.nik : null,
+        petugas: payload.petugas ? payload.petugas : null,
       },
     };
   }),
@@ -236,17 +172,10 @@ export const state = {
       },
     };
   }),
-  setActiveDetails: action((state, payload) => {
+  setResponseByIDReport: action((state, payload) => {
     return {
       ...state,
-      activeDetail: {
-        ...payload,
-        name_petugas: payload.name_petugas
-          ? payload.name_petugas
-          : payload.response
-          ? "(petugas telah dihapus)"
-          : null,
-      },
+      newResponseByIDReport: payload,
     };
   }),
 };

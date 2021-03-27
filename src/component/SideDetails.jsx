@@ -13,6 +13,7 @@ import { jsPDF } from "jspdf";
 
 import DefaultImg from "./../asset/defaultReport.jpg";
 import FullLogo from "./../asset/FullLogo.png";
+import { useDetails } from "./FetchData";
 
 const SideDetailsWrapper = styled.div`
   position: absolute;
@@ -143,35 +144,10 @@ const SchemaTanggapan = yup.object().shape({
 });
 
 export default function SideDetails(props) {
-  const {
-    onFocus,
-    pic,
-    title,
-    report,
-    date_report,
-    date_response,
-    vis,
-    stat,
-    response,
-    name_pengguna,
-    name_petugas,
-    role,
-  } = useStoreState((state) => ({
-    onFocus: state.UI.sideDetails.onFocus,
-    pic: state.activeDetail.pic,
-    title: state.activeDetail.title,
-    report: state.activeDetail.report,
-    date_report: state.activeDetail.date_report,
-    date_response: state.activeDetail.date_response,
-    vis: state.activeDetail.vis,
-    stat: state.activeDetail.stat,
-    response: state.activeDetail.response,
-    name_pengguna: state.activeDetail.name_pengguna,
-    name_petugas: state.activeDetail.name_petugas,
+  const { role } = useStoreState((state) => ({
     role: state.session.role,
   }));
-  const { toggleFocusDetails, newResponse } = useStoreActions((actions) => ({
-    toggleFocusDetails: actions.toggleFocusDetails,
+  const { newResponse } = useStoreActions((actions) => ({
     newResponse: actions.newResponse,
   }));
   const { register, handleSubmit, errors } = useForm({
@@ -268,15 +244,32 @@ export default function SideDetails(props) {
     });
   };
 
+  const { activeDetails } = useDetails();
+  const {
+    pic,
+    title,
+    report,
+    date_report,
+    date_response,
+    vis,
+    stat,
+    response,
+    name_pengguna,
+    name_petugas,
+  } = activeDetails;
+
   return (
     <SideDetailsWrapper
       // onBlur={() => toggleFocusDetails()}
-      focus={onFocus}
+      focus={props.sd.toggleSD}
       tabIndex="0"
       // ref={SideDetail}
     >
       <Control>
-        <Action onClick={() => toggleFocusDetails()} title="Tutup Detail">
+        <Action
+          onClick={() => props.sd.setToggleSD(!props.sd.toggleSD)}
+          title="Tutup Detail"
+        >
           <span className="material-icons">logout</span>
         </Action>
         {role === "admin" && response ? (

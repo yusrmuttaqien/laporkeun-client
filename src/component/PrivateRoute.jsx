@@ -45,7 +45,7 @@ export default function PrivateRoute({ comp: Component, ...rest }) {
       {...rest}
       render={(props) => {
         return isLogged && Checker(role, destiny) ? (
-          <Component {...props} />
+          <Component {...props} sd={rest.sd} />
         ) : (
           <Redirect to="/" />
         );
