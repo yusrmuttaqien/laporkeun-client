@@ -144,11 +144,13 @@ const SchemaTanggapan = yup.object().shape({
 });
 
 export default function SideDetails(props) {
-  const { role } = useStoreState((state) => ({
+  const { role, NIKSession } = useStoreState((state) => ({
     role: state.session.role,
+    NIKSession: state.session.NIK,
   }));
-  const { newResponse } = useStoreActions((actions) => ({
+  const { newResponse, deleteReport } = useStoreActions((actions) => ({
     newResponse: actions.newResponse,
+    deleteReport: actions.deleteReport,
   }));
   const { register, handleSubmit, errors } = useForm({
     resolver: yupResolver(SchemaTanggapan),
@@ -244,6 +246,21 @@ export default function SideDetails(props) {
     });
   };
 
+  const onDelete = () => {
+    const Redirect = () => {
+      history.go(0);
+    };
+
+    toast.promise(deleteReport(), {
+      loading: "Menghapus laporan",
+      success: (msg) => {
+        Redirect();
+        return msg;
+      },
+      error: (err) => err.toString(),
+    });
+  };
+
   const { activeDetails } = useDetails();
   const {
     pic,
@@ -256,6 +273,7 @@ export default function SideDetails(props) {
     response,
     name_pengguna,
     name_petugas,
+    NIK,
   } = activeDetails;
 
   return (
@@ -277,8 +295,8 @@ export default function SideDetails(props) {
             unduh laporan
           </CustomButton>
         ) : null}
-        {role === "pengguna" && stat === "Menunggu" ? (
-          <CustomButton>hapus laporan</CustomButton>
+        {role === "pengguna" && stat === "Menunggu" && NIKSession === NIK ? (
+          <CustomButton onClick={() => onDelete()}>hapus laporan</CustomButton>
         ) : null}
       </Control>
       <Header>

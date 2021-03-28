@@ -90,6 +90,63 @@ const DataList = styled.div`
   padding: 0.3em 0.5em;
   margin-bottom: 0.5em;
 
+  &:nth-child(1) {
+    background-color: ${(props) => props.theme.color.purple};
+    font-weight: ${(props) => props.theme.value.font.medium};
+    color: ${(props) => props.theme.color.white};
+
+    position: sticky;
+    top: 0;
+
+    cursor: default;
+
+    ${Action} {
+      cursor: default;
+    }
+  }
+
+  section {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100px;
+    text-align: center;
+
+    &:nth-child(1) {
+      font-weight: ${(props) => props.theme.value.font.medium};
+    }
+  }
+
+  @media only screen and (max-width: 950px) {
+    section {
+      &:nth-child(2) {
+        display: none;
+      }
+    }
+  }
+`;
+
+const ForcedDataList = styled.div`
+  background-color: ${(props) => props.theme.color.purple};
+  font-weight: ${(props) => props.theme.value.font.medium};
+  color: ${(props) => props.theme.color.white};
+  border-radius: ${(props) => props.theme.value.radius};
+
+  display: inherit;
+  justify-content: space-around;
+
+  padding: 0.3em 0.5em;
+  margin-bottom: 0.5em;
+
+  position: sticky;
+  top: 0;
+
+  cursor: default;
+
+  ${Action} {
+    cursor: default;
+  }
+
   section {
     white-space: nowrap;
     overflow: hidden;
@@ -169,6 +226,13 @@ function Laporanku(props) {
           </ReportBodyCustomNotFound>
         ) : (
           <ReportBodyCustom>
+            <DataList>
+              <section>Judul Laporan</section>
+              <section>Tanggal lapor</section>
+              <section>Visibilitas</section>
+              <section>Status</section>
+              <Action>Aksi</Action>
+            </DataList>
             {laporanku.map((laporan, index) => (
               <DataList key={index}>
                 <section title={laporan.title}>{laporan.title}</section>
@@ -227,6 +291,13 @@ function LaporanPublik(props) {
           </ReportBodyCustomNotFound>
         ) : (
           <ReportBodyCustom>
+            <DataList>
+              <section>Judul Laporan</section>
+              <section>Tanggal lapor</section>
+              <section>Visibilitas</section>
+              <section>Status</section>
+              <Action>Aksi</Action>
+            </DataList>
             {laporanpublik.map((laporan, index) => (
               <DataList key={index}>
                 <section title={laporan.title}>{laporan.title}</section>
@@ -267,7 +338,7 @@ function LaporanBaru(props) {
 
   const ToDetails = async (id_report) => {
     await detailReport(id_report);
-    console.log(props);
+    props.sd.setToggleSD(!props.sd.toggleSD);
   };
 
   const loadNext = () => {
@@ -283,6 +354,13 @@ function LaporanBaru(props) {
           <ReportBodyCustomNotFound>Tidak ada laporan</ReportBodyCustomNotFound>
         ) : (
           <ReportBodyCustom>
+            <DataList>
+              <section>Judul Laporan</section>
+              <section>Tanggal lapor</section>
+              <section>Visibilitas</section>
+              <section>Status</section>
+              <Action>Aksi</Action>
+            </DataList>
             {laporanbaru.map((laporan, index) => (
               <DataList key={index}>
                 <section title={laporan.title}>{laporan.title}</section>
@@ -338,6 +416,13 @@ function Tanggapanku(props) {
           <ReportBodyCustomNotFound>Tidak ada laporan</ReportBodyCustomNotFound>
         ) : (
           <ReportBodyCustom>
+            <DataList>
+              <section>Judul Laporan</section>
+              <section title="Tanggal respon">Tanggal respon</section>
+              <section>ID petugas</section>
+              <section>Status</section>
+              <Action>Aksi</Action>
+            </DataList>
             {laporanbaru.map((laporan, index) => (
               <DataList key={index}>
                 <section title={laporan.title}>{laporan.title}</section>
@@ -434,6 +519,13 @@ function Petugas() {
             <MoreButton onClick={() => setIsRegister(!isRegister)}>
               Tambah petugas
             </MoreButton>
+            <ForcedDataList>
+              <section title="Nama petugas">Nama petugas</section>
+              <section>ID petugas</section>
+              <section>Tanggal buat</section>
+              <section>No telp</section>
+              <Action>Aksi</Action>
+            </ForcedDataList>
             {petugas.map(
               (petugas, index) =>
                 petugas.name_petugas !== "laporkeun" && (

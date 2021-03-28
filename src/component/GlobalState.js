@@ -1,4 +1,5 @@
 import { action, thunk, persist } from "easy-peasy";
+import toast from "react-hot-toast";
 
 import { instance } from "./FetchData";
 import { storage } from "./util/Firebase";
@@ -51,7 +52,6 @@ export const state = {
   }),
   newReport: thunk(async (actions, payload, { getState }) => {
     var theName, type;
-    console.log(payload);
     if (payload.pic[0]) {
       type = payload.pic[0].name.split(".");
       theName = `${getState().session.NIK}_${Date.now()}.${type}`;
@@ -101,16 +101,40 @@ export const state = {
   }),
   deletePetugas: thunk(async (actions, payload, { getState }) => {
     try {
-      const response = await instance.post(
-        "/petugas/delete",
-        { id: payload },
-        {
-          headers: { authorization: `Bearer ${getState().session.token}` },
-        }
-      );
+      const response = await instance.delete("/petugas/delete", {
+        params: { id: payload },
+        headers: { authorization: `Bearer ${getState().session.token}` },
+      });
       return await Promise.resolve(response.data.notify);
     } catch (err) {
       return await Promise.reject(err.response.data.notify || err);
+    }
+  }),
+  deleteReport: thunk(async (actions, payload, { getState }) => {
+    try {
+      const response = await instance.delete("/laporan/delete", {
+        params: { id: getState().newResponseByIDReport },
+        headers: { authorization: `Bearer ${getState().session.token}` },
+      });
+      const { pic, id_response } = response.data.foward;
+
+      if (pic) {
+        try {
+          await storage.ref(`/image/${response.data.foward.pic}`).delete();
+          toast.success("Foto berhasil dihapus");
+        } catch (err) {
+          console.log(err);
+          return await Promise.reject(err);
+        }
+      }
+      if (id_response) {
+        return await Promise.reject("Laporan telah ditanggapi");
+      }
+
+      return await Promise.resolve(response.data.notify);
+    } catch (err) {
+      console.log(err);
+      return await Promise.reject(err || err.response.data.notify);
     }
   }),
 

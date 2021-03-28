@@ -259,10 +259,7 @@ function useTanggapanku(page) {
 }
 
 function useDetails() {
-  const {
-    sideDetailsPayload,
-    token,
-  } = useStoreState((state) => ({
+  const { sideDetailsPayload, token } = useStoreState((state) => ({
     sideDetailsPayload: state.sideDetailsPayload,
     token: state.session.token,
   }));
@@ -282,11 +279,9 @@ function useDetails() {
     name_pengguna: null,
     name_petugas: null,
   });
-  const { setResponseByIDReport } = useStoreActions(
-    (actions) => ({
-      setResponseByIDReport: actions.setResponseByIDReport,
-    })
-  );
+  const { setResponseByIDReport } = useStoreActions((actions) => ({
+    setResponseByIDReport: actions.setResponseByIDReport,
+  }));
 
   var backToJSON = JSON.stringify(sideDetailsPayload, undefined, 2);
   backToJSON = JSON.parse(backToJSON);
@@ -306,7 +301,7 @@ function useDetails() {
                 .getDownloadURL();
             }
             const payload = response.data.output;
-            setResponseByIDReport(payload.id_report)
+            setResponseByIDReport(payload.id_report);
             setActiveDetails({
               ...payload,
               name_petugas: payload.name_petugas
@@ -335,7 +330,7 @@ function useDetails() {
                 .getDownloadURL();
             }
             const payload = response.data.output;
-            setResponseByIDReport(payload.id_report)
+            setResponseByIDReport(payload.id_report);
             setActiveDetails({
               ...payload,
               name_petugas: payload.name_petugas
@@ -358,7 +353,7 @@ function useDetails() {
     backToJSON.nik,
     backToJSON.petugas,
     token,
-    setResponseByIDReport
+    setResponseByIDReport,
   ]);
 
   return { activeDetails };
