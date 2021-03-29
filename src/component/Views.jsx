@@ -821,6 +821,22 @@ function Petugas() {
   );
 }
 
+function Pengaturan() {
+  let { pathname } = useLocation();
+  pathname = pathname.substring(1);
+
+  return (
+    <ReportWrapper>
+      <CustomReport>
+        <div className="reportHeader">
+          <h1 title={pathname}>{pathname}</h1>
+          <Button>Simpan</Button>
+        </div>
+      </CustomReport>
+    </ReportWrapper>
+  );
+}
+
 export {
   Laporanku,
   LaporanPublik,
@@ -828,4 +844,5 @@ export {
   Tanggapanku,
   Petugas,
   SemuaTanggapan,
+  Pengaturan,
 };

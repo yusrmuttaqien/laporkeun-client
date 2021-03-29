@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import styled from "styled-components";
 
 import LogoDesc from "./../asset/LogoDesc.svg";
+import About from "./../asset/about.svg";
 import { FormMasuk, FormDaftar } from "./Form";
 import { Navigation } from "./Navigation";
 import UserStats from "./UserStats";
@@ -42,6 +43,44 @@ const NavWrapper = styled.div`
   }
 `;
 
+const LogoContainer = styled.div`
+  height: 87px;
+  width: 100%;
+
+  position: relative;
+
+  text-align: center;
+
+  section {
+    transition: ${(props) => props.theme.value.transition};
+    transition-property: opacity;
+    
+    &:nth-child(1) {
+      opacity: 1;
+    }
+
+    &:nth-child(2) {
+      opacity: 0;
+      position: absolute;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+  }
+
+  &:hover {
+    section {
+      &:nth-child(1) {
+        opacity: 0;
+      }
+
+      &:nth-child(2) {
+        opacity: 1;
+      }
+    }
+  }
+`;
+
 export default function Navbar(props) {
   const { isLogged } = useStoreState((state) => ({
     isLogged: state.session.isLogged,
@@ -51,13 +90,26 @@ export default function Navbar(props) {
 
   return (
     <NavWrapper isLogged={isLogged}>
-      <img
-        src={LogoDesc}
-        alt="Logo with Description"
-        draggable="false"
-        id="logowDesc"
-        title="laporkeun! by yusr.dhm"
-      />
+      <LogoContainer>
+        <section>
+          <img
+            src={LogoDesc}
+            alt="Logo with Description"
+            draggable="false"
+            id="logowDesc"
+            title="laporkeun! by yusr.dhm"
+          />
+        </section>
+        <section>
+          <img
+            src={About}
+            alt="Logo with Credit"
+            draggable="false"
+            id="logowDesc"
+            title="laporkeun! by yusr.dhm"
+          />
+        </section>
+      </LogoContainer>
       {isLogged ? (
         <>
           <Navigation />

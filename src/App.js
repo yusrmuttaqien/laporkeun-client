@@ -4,7 +4,10 @@ import { Toaster } from "react-hot-toast";
 import { useStoreRehydrated } from "easy-peasy";
 import { useState } from "react";
 
-import BGWebP from "./asset/mainBG.webp";
+// import BGWebP from "./asset/mainBG.webp";
+// import BGWebP01 from "./asset/mainBG_01.webp";
+// import BGWebP02 from "./asset/mainBG_02.webp";
+import BGWebP03 from "./asset/mainBG_03.webp";
 import BGProgressive from "./asset/mainBG_Progressive.jpg";
 import Navbar from "./component/Navbar";
 import { Splash, NotFound } from "./component/Splash";
@@ -17,13 +20,14 @@ import {
   Tanggapanku,
   Petugas,
   SemuaTanggapan,
-} from "./component/LihatLaporan";
+  Pengaturan
+} from "./component/Views";
 import SideDetails from "./component/SideDetails";
 import PrivateRoute from "./component/PrivateRoute";
 import rfs from "./component/RFS";
 
 const AppWrapper = styled.div`
-  background-image: url(${run_check_webp_feature ? BGWebP : BGProgressive});
+  background-image: url(${run_check_webp_feature ? BGWebP03 : BGProgressive});
   background-size: cover;
 
   height: 100vh;
@@ -127,6 +131,7 @@ function App() {
               comp={SemuaTanggapan}
             />
             <PrivateRoute path="/petugas" comp={Petugas} />
+            <PrivateRoute path="/pengaturan" comp={Pengaturan} />
             <Route component={NotFound} />
           </Switch>
         </View>
