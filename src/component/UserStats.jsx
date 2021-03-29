@@ -69,7 +69,7 @@ const CloseSession = styled.p`
   letter-spacing: 0.125em;
 `;
 
-export default function UserStats() {
+export default function UserStats(props) {
   const { role, name, NIK, pic } = useStoreState((state) => ({
     role: state.session.role,
     name: state.session.name,
@@ -82,6 +82,7 @@ export default function UserStats() {
 
   const exitApp = async () => {
     await keluarApp();
+    props.shut(false)
     toast.success('Anda berhasil keluar')
   };
 

@@ -116,7 +116,7 @@ export const state = {
         params: { id: getState().newResponseByIDReport },
         headers: { authorization: `Bearer ${getState().session.token}` },
       });
-      const { pic, id_response } = response.data.foward;
+      const { pic } = response.data.foward;
 
       if (pic) {
         try {
@@ -127,13 +127,14 @@ export const state = {
           return await Promise.reject(err);
         }
       }
-      if (id_response) {
-        return await Promise.reject("Laporan telah ditanggapi");
-      }
 
       return await Promise.resolve(response.data.notify);
     } catch (err) {
-      console.log(err);
+      console.log(err.response)
+      const { id_response } = err.response.data.foward;
+      if (id_response) {
+        return await Promise.reject("Laporan sudah ditanggapi");
+      }
       return await Promise.reject(err || err.response.data.notify);
     }
   }),
@@ -184,7 +185,7 @@ export const state = {
   }),
   keluarAppState: action((state, payload) => {
     return {
-      ...state,
+      sideDetailsPayload: { id: null, nik: null, petugas: null },
       session: {
         isLogged: false,
         role: null,
@@ -193,7 +194,9 @@ export const state = {
         pic: null,
         telp: null,
         token: null,
+        id_petugas: null,
       },
+      newResponseByIDReport: null,
     };
   }),
   setResponseByIDReport: action((state, payload) => {

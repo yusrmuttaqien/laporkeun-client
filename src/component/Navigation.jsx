@@ -90,11 +90,18 @@ function Navigation() {
           </>
         ) : null}
         {role === "admin" && (
-          <li>
-            <NavLink to="/petugas" activeClassName="active">
-              petugas
-            </NavLink>
-          </li>
+          <>
+            <li>
+              <NavLink to="/semuatanggapan" activeClassName="active">
+                semua tanggapan
+              </NavLink>
+            </li>
+            <li>
+              <NavLink to="/petugas" activeClassName="active">
+                petugas
+              </NavLink>
+            </li>
+          </>
         )}
       </ul>
     </NavWrapper>

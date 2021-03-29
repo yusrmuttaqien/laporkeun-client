@@ -16,6 +16,7 @@ import {
   LaporanPublik,
   Tanggapanku,
   Petugas,
+  SemuaTanggapan,
 } from "./component/LihatLaporan";
 import SideDetails from "./component/SideDetails";
 import PrivateRoute from "./component/PrivateRoute";
@@ -87,7 +88,7 @@ function App() {
   return isRehydrated ? (
     <AppWrapper id="AppWraper">
       <Router>
-        <Navbar />
+        <Navbar shut={setToggleSD} />
         <SideDetails sd={{ toggleSD, setToggleSD }} />
         <WrapToaster>
           <Toaster />
@@ -115,6 +116,11 @@ function App() {
               sd={{ toggleSD, setToggleSD }}
               path="/tanggapanku"
               comp={Tanggapanku}
+            />
+            <PrivateRoute
+              sd={{ toggleSD, setToggleSD }}
+              path="/semuatanggapan"
+              comp={SemuaTanggapan}
             />
             <PrivateRoute path="/petugas" comp={Petugas} />
             <Route component={NotFound} />

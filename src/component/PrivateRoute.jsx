@@ -15,6 +15,7 @@ export default function PrivateRoute({ comp: Component, ...rest }) {
       switch (destiny) {
         case "/laporanbaru":
         case "/tanggapanku":
+        case "/semuatanggapan":
         case "/petugas":
           return true;
         default:

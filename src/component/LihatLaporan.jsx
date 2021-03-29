@@ -24,6 +24,7 @@ import {
   useLaporanBaru,
   useTanggapanku,
   usePetugas,
+  useSemuaTanggapan,
 } from "./FetchData";
 import rfs from "./RFS";
 
@@ -453,6 +454,71 @@ function Tanggapanku(props) {
   );
 }
 
+function SemuaTanggapan(props) {
+  let { pathname } = useLocation();
+  pathname = pathname.substring(1);
+
+  const [page, setPage] = useState(1);
+  const { hasMore, laporanbaru } = useSemuaTanggapan(page);
+
+  const { detailReport } = useStoreActions((actions) => ({
+    detailReport: actions.detailReport,
+  }));
+
+  const ToDetails = async (id_report) => {
+    await detailReport(id_report);
+  };
+
+  const loadNext = () => {
+    setPage(page + 1);
+  };
+
+  return (
+    <ReportWrapper>
+      <Report>
+        <h1>{pathname}</h1>
+        {laporanbaru.length === 0 ? (
+          // NOTE: Redesign
+          <ReportBodyCustomNotFound>Tidak ada laporan</ReportBodyCustomNotFound>
+        ) : (
+          <ReportBodyCustom>
+            <DataList>
+              <section>Judul Laporan</section>
+              <section title="Tanggal respon">Tanggal respon</section>
+              <section>ID petugas</section>
+              <section>Status</section>
+              <Action>Aksi</Action>
+            </DataList>
+            {laporanbaru.map((laporan, index) => (
+              <DataList key={index}>
+                <section title={laporan.title}>{laporan.title}</section>
+                <section>{laporan.date_response}</section>
+                <section>{laporan.id_petugas}</section>
+                <section>{laporan.stat}</section>
+                <Action
+                  title="Buka Detail"
+                  onClick={() => {
+                    props.sd.setToggleSD(!props.sd.toggleSD);
+                    ToDetails({
+                      id: laporan.id_report,
+                      petugas: laporan.id_petugas,
+                    });
+                  }}
+                >
+                  <span className="material-icons">launch</span>
+                </Action>
+              </DataList>
+            ))}
+            {hasMore && (
+              <MoreButton onClick={() => loadNext()}>Muat lagi</MoreButton>
+            )}
+          </ReportBodyCustom>
+        )}
+      </Report>
+    </ReportWrapper>
+  );
+}
+
 function Petugas() {
   let { pathname } = useLocation();
   pathname = pathname.substring(1);
@@ -581,4 +647,11 @@ function Petugas() {
   );
 }
 
-export { Laporanku, LaporanPublik, LaporanBaru, Tanggapanku, Petugas };
+export {
+  Laporanku,
+  LaporanPublik,
+  LaporanBaru,
+  Tanggapanku,
+  Petugas,
+  SemuaTanggapan,
+};

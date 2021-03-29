@@ -258,6 +258,56 @@ function useTanggapanku(page) {
   return { loading, error, hasMore, laporanbaru };
 }
 
+function useSemuaTanggapan(page) {
+  const [hasMore, setHasMore] = useState(false);
+  const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [laporanbaru, setLaporanbaru] = useState([]);
+
+  const { token } = useStoreState((state) => ({
+    token: state.session.token,
+  }));
+
+  useEffect(() => {
+    setLoading(true);
+    setError(false);
+
+    async function fetch() {
+      try {
+        const response = await instance.get("/laporan/semuatanggapan", {
+          headers: {
+            authorization: `Bearer ${token}`,
+          },
+          params: { page: page, limit: PaginationLimit },
+        });
+        setLaporanbaru((prevLaporanbaru) => {
+          return [
+            ...prevLaporanbaru,
+            ...response.data.output.map((data) => {
+              const { report } = data;
+              return {
+                id_report: report.id_report,
+                title: report.report.title,
+                id_petugas: report.id_petugas,
+                date_response: report.date_response,
+                stat: report.report.stat,
+                NIK: report.NIK,
+              };
+            }),
+          ];
+        });
+        setHasMore(response.data.info.next ? true : false);
+        setLoading(false);
+      } catch (err) {
+        setError(err);
+      }
+    }
+    fetch();
+  }, [page, setLaporanbaru, token]);
+
+  return { loading, error, hasMore, laporanbaru };
+}
+
 function useDetails() {
   const { sideDetailsPayload, token } = useStoreState((state) => ({
     sideDetailsPayload: state.sideDetailsPayload,
@@ -367,4 +417,5 @@ export {
   useTanggapanku,
   usePetugas,
   useDetails,
+  useSemuaTanggapan
 };

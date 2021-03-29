@@ -136,6 +136,27 @@ const EmbedForm = styled.form`
   height: 100%;
 `;
 
+const ShowResponse = styled.div`
+  width: 100%;
+  height: 100%;
+
+  border: 1px solid ${(props) => props.theme.color.white};
+  color: ${(props) => props.theme.color.white};
+  border-radius: ${(props) => props.theme.value.radius};
+  opacity: ${(props) => props.theme.value.opacity};
+  font-size: 0.85rem;
+  transition: ${(props) => props.theme.value.transition};
+  transition-property: opacity;
+
+  padding: 0.7em 0.9em;
+  margin-bottom: 1em;
+
+  &:hover,
+  &:focus {
+    opacity: 1;
+  }
+`;
+
 const SchemaTanggapan = yup.object().shape({
   responBalik: yup
     .string()
@@ -163,16 +184,16 @@ export default function SideDetails(props) {
     function getDataUri(url) {
       return new Promise((resolve) => {
         var image = new Image();
-        image.setAttribute("crossorigin", "anonymous"); //getting images from external domain
+        image.setAttribute("crossorigin", "anonymous"); // CORS stuff
 
         image.onload = function () {
           var canvas = document.createElement("canvas");
           canvas.width = this.naturalWidth;
           canvas.height = this.naturalHeight;
 
-          //next three lines for white background in case png has a transparent background
+          // Change transp BG to white
           var ctx = canvas.getContext("2d");
-          ctx.fillStyle = "#fff"; /// set white fill style
+          ctx.fillStyle = "#fff"; // Fill white
           ctx.fillRect(0, 0, canvas.width, canvas.height);
 
           canvas.getContext("2d").drawImage(this, 0, 0);
@@ -239,6 +260,7 @@ export default function SideDetails(props) {
     toast.promise(newResponse(response), {
       loading: "Menyimpan respon",
       success: (msg) => {
+        props.sd.setToggleSD(!props.sd.toggleSD);
         Redirect();
         return msg;
       },
@@ -320,7 +342,7 @@ export default function SideDetails(props) {
           <section>
             <EmbedForm>
               <Label
-                htmlFor="responBalik"
+                htmlFor="responBalikPreview"
                 title={`${date_response && date_response} ${
                   name_petugas && " - " + name_petugas
                 }`}
@@ -328,52 +350,44 @@ export default function SideDetails(props) {
                 respon balik {date_response && " - " + date_response}{" "}
                 {name_petugas && " - " + name_petugas}
               </Label>
-              <TextArea
-                name="responBalik"
-                id="responBalik"
-                readOnly
-                value={response}
-              ></TextArea>
+              <ShowResponse id="responBalikPreview" name="responBalikPreview">
+                {response}
+              </ShowResponse>
             </EmbedForm>
           </section>
         ) : null}
         {role === "admin" || role === "petugas" ? (
           <section>
-            <EmbedForm noValidate onSubmit={handleSubmit(onSubmit)}>
-              <Label
-                htmlFor="responBalik"
-                title={`${date_response && date_response} ${
-                  name_petugas && " - " + name_petugas
-                }`}
-              >
-                respon balik {date_response && " - " + date_response}{" "}
-                {name_petugas && " - " + name_petugas}
-              </Label>
-              {response ? (
+            {response ? (
+              <EmbedForm>
+                <Label
+                  htmlFor="responBalikPreview"
+                  title={`${date_response && date_response} ${
+                    name_petugas && " - " + name_petugas
+                  }`}
+                >
+                  respon balik {date_response && " - " + date_response}{" "}
+                  {name_petugas && " - " + name_petugas}
+                </Label>
+                <ShowResponse id="responBalikPreview" name="responBalikPreview">
+                  {response}
+                </ShowResponse>
+              </EmbedForm>
+            ) : (
+              <EmbedForm noValidate onSubmit={handleSubmit(onSubmit)}>
+                <Label htmlFor="responBalik">respon balik</Label>
                 <TextArea
                   name="responBalik"
                   id="responBalik"
-                  readOnly
-                  value={response && response}
                   ref={register}
                 ></TextArea>
-              ) : (
-                <TextArea
-                  name="responBalik"
-                  id="responBalik"
-                  defaultValue={response && response}
-                  ref={register}
-                ></TextArea>
-              )}
-              {response ? null : (
-                // NOTE: Disabled features - Simultanious Changes
                 <Button type="submit">
                   {errors.responBalik?.message
                     ? errors.responBalik?.message
                     : "Kirim respon"}
                 </Button>
-              )}
-            </EmbedForm>
+              </EmbedForm>
+            )}
           </section>
         ) : null}
       </Body>
