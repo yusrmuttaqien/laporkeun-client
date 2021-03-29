@@ -7,6 +7,7 @@ import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
+import Select from "react-select";
 
 import {
   Report,
@@ -91,6 +92,10 @@ const DataList = styled.div`
   padding: 0.3em 0.5em;
   margin-bottom: 0.5em;
 
+  ${Action} {
+    width: 100px;
+  }
+
   &:nth-child(1) {
     background-color: ${(props) => props.theme.color.purple};
     font-weight: ${(props) => props.theme.value.font.medium};
@@ -103,6 +108,7 @@ const DataList = styled.div`
 
     ${Action} {
       cursor: default;
+      width: 100px;
     }
   }
 
@@ -146,6 +152,7 @@ const ForcedDataList = styled.div`
 
   ${Action} {
     cursor: default;
+    width: 100px;
   }
 
   section {
@@ -196,12 +203,93 @@ const SchemaDaftar = yup.object().shape({
     .min(8, "Kata sandi minimal 8 karakter"),
 });
 
+const CustomReport = styled(Report)`
+  .reportHeader {
+    display: inherit;
+    align-items: center;
+    justify-content: space-between;
+
+    h1 {
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  }
+`;
+
+const CustomSelect = styled(Select)`
+  background-color: transparent;
+  outline: none;
+  width: 200px;
+
+  .Select__control {
+    background-color: transparent;
+    border-color: ${(props) => props.theme.color.grey};
+    box-shadow: none;
+
+    .Select__value-container--has-value {
+      .Select__single-value {
+        color: ${(props) => props.theme.color.grey};
+      }
+    }
+
+    &:hover {
+      border-color: ${(props) => props.theme.color.purple};
+    }
+  }
+
+  .Select__menu {
+    background-color: ${(props) => props.theme.color.darkTransparent};
+    backdrop-filter: blur(${(props) => props.theme.value.blur});
+  }
+
+  .Select__option {
+    &.Select__option--is-selected {
+      background-color: ${(props) => props.theme.color.purple};
+
+      &.Select__option--is-focused {
+        background-color: ${(props) => props.theme.color.purple};
+      }
+    }
+
+    &.Select__option--is-focused {
+      background-color: transparent;
+    }
+  }
+
+  @media only screen and (max-width: 950px) {
+    width: 140px;
+  }
+`;
+
+const CustomAction = styled(Action)`
+  flex-direction: row;
+  justify-content: center;
+  align-self: center;
+
+  width: max-content;
+  margin: 1em 0;
+
+  span {
+    margin-left: 0.5em;
+  }
+`;
+
+const options = [
+  { value: "Date DESC", label: "Terbaru" },
+  { value: "Date ASC", label: "Terlama" },
+  // { value: "stat Menunggu", label: "Menunggu" },
+  // { value: "stat Diterima", label: "Diterima" },
+];
+
 function Laporanku(props) {
   let { pathname } = useLocation();
   pathname = pathname.substring(1);
 
   const [page, setPage] = useState(1);
-  const { loading, hasMore, laporanku } = useLaporanku(page);
+  const [sort, setSort] = useState("Date DESC");
+
+  const { loading, hasMore, laporanku } = useLaporanku(page, sort);
 
   const { detailReport } = useStoreActions((actions) => ({
     detailReport: actions.detailReport,
@@ -217,8 +305,20 @@ function Laporanku(props) {
 
   return (
     <ReportWrapper>
-      <Report>
-        <h1>{pathname}</h1>
+      <CustomReport>
+        <div className="reportHeader">
+          <h1 title={pathname}>{pathname}</h1>
+          <CustomSelect
+            options={options}
+            classNamePrefix={"Select"}
+            defaultValue={options[0]}
+            placeholder="Urutkan dari"
+            onChange={(value) => {
+              setSort(value.value);
+              setPage(1);
+            }}
+          />
+        </div>
         {laporanku.length === 0 || loading ? (
           // NOTE: Redesign
           <ReportBodyCustomNotFound>
@@ -232,7 +332,7 @@ function Laporanku(props) {
               <section>Tanggal lapor</section>
               <section>Visibilitas</section>
               <section>Status</section>
-              <Action>Aksi</Action>
+              <Action>Detail</Action>
             </DataList>
             {laporanku.map((laporan, index) => (
               <DataList key={index}>
@@ -243,7 +343,7 @@ function Laporanku(props) {
                 <Action
                   title="Buka Detail"
                   onClick={() => {
-                    props.sd.setToggleSD(!props.sd.toggleSD);
+                    props.sd.setToggleSD(true);
                     ToDetails({ id: laporan.id_report, nik: laporan.NIK });
                   }}
                 >
@@ -256,7 +356,7 @@ function Laporanku(props) {
             )}
           </ReportBodyCustom>
         )}
-      </Report>
+      </CustomReport>
     </ReportWrapper>
   );
 }
@@ -266,7 +366,9 @@ function LaporanPublik(props) {
   pathname = pathname.substring(1);
 
   const [page, setPage] = useState(1);
-  const { loading, hasMore, laporanpublik } = useLaporanPublik(page);
+  const [sort, setSort] = useState("Date DESC");
+
+  const { loading, hasMore, laporanpublik } = useLaporanPublik(page, sort);
 
   const { detailReport } = useStoreActions((actions) => ({
     detailReport: actions.detailReport,
@@ -282,8 +384,20 @@ function LaporanPublik(props) {
 
   return (
     <ReportWrapper>
-      <Report>
-        <h1>{pathname}</h1>
+      <CustomReport>
+        <div className="reportHeader">
+          <h1 title={pathname}>{pathname}</h1>
+          <CustomSelect
+            options={options}
+            classNamePrefix={"Select"}
+            defaultValue={options[0]}
+            placeholder="Urutkan dari"
+            onChange={(value) => {
+              setSort(value.value);
+              setPage(1);
+            }}
+          />
+        </div>
         {laporanpublik.length === 0 || loading ? (
           // NOTE: Redesign
           <ReportBodyCustomNotFound>
@@ -297,7 +411,7 @@ function LaporanPublik(props) {
               <section>Tanggal lapor</section>
               <section>Visibilitas</section>
               <section>Status</section>
-              <Action>Aksi</Action>
+              <Action>Detail</Action>
             </DataList>
             {laporanpublik.map((laporan, index) => (
               <DataList key={index}>
@@ -308,7 +422,7 @@ function LaporanPublik(props) {
                 <Action
                   title="Buka Detail"
                   onClick={() => {
-                    props.sd.setToggleSD(!props.sd.toggleSD);
+                    props.sd.setToggleSD(true);
                     ToDetails({ id: laporan.id_report, nik: laporan.NIK });
                   }}
                 >
@@ -321,7 +435,7 @@ function LaporanPublik(props) {
             )}
           </ReportBodyCustom>
         )}
-      </Report>
+      </CustomReport>
     </ReportWrapper>
   );
 }
@@ -331,7 +445,9 @@ function LaporanBaru(props) {
   pathname = pathname.substring(1);
 
   const [page, setPage] = useState(1);
-  const { hasMore, laporanbaru } = useLaporanBaru(page);
+  const [sort, setSort] = useState("Date DESC");
+
+  const { hasMore, laporanbaru } = useLaporanBaru(page, sort);
 
   const { detailReport } = useStoreActions((actions) => ({
     detailReport: actions.detailReport,
@@ -348,8 +464,20 @@ function LaporanBaru(props) {
 
   return (
     <ReportWrapper>
-      <Report>
-        <h1>{pathname}</h1>
+      <CustomReport>
+        <div className="reportHeader">
+          <h1 title={pathname}>{pathname}</h1>
+          <CustomSelect
+            options={options}
+            classNamePrefix={"Select"}
+            defaultValue={options[0]}
+            placeholder="Urutkan dari"
+            onChange={(value) => {
+              setSort(value.value);
+              setPage(1);
+            }}
+          />
+        </div>
         {laporanbaru.length === 0 ? (
           // NOTE: Redesign
           <ReportBodyCustomNotFound>Tidak ada laporan</ReportBodyCustomNotFound>
@@ -360,7 +488,7 @@ function LaporanBaru(props) {
               <section>Tanggal lapor</section>
               <section>Visibilitas</section>
               <section>Status</section>
-              <Action>Aksi</Action>
+              <Action>Detail</Action>
             </DataList>
             {laporanbaru.map((laporan, index) => (
               <DataList key={index}>
@@ -371,7 +499,7 @@ function LaporanBaru(props) {
                 <Action
                   title="Buka Detail"
                   onClick={() => {
-                    props.sd.setToggleSD(!props.sd.toggleSD);
+                    props.sd.setToggleSD(true);
                     ToDetails({ id: laporan.id_report, nik: laporan.NIK });
                   }}
                 >
@@ -384,7 +512,7 @@ function LaporanBaru(props) {
             )}
           </ReportBodyCustom>
         )}
-      </Report>
+      </CustomReport>
     </ReportWrapper>
   );
 }
@@ -394,7 +522,9 @@ function Tanggapanku(props) {
   pathname = pathname.substring(1);
 
   const [page, setPage] = useState(1);
-  const { hasMore, laporanbaru } = useTanggapanku(page);
+  const [sort, setSort] = useState("Date DESC");
+
+  const { hasMore, tanggapanku } = useTanggapanku(page, sort);
 
   const { detailReport } = useStoreActions((actions) => ({
     detailReport: actions.detailReport,
@@ -410,9 +540,21 @@ function Tanggapanku(props) {
 
   return (
     <ReportWrapper>
-      <Report>
-        <h1>{pathname}</h1>
-        {laporanbaru.length === 0 ? (
+      <CustomReport>
+        <div className="reportHeader">
+          <h1 title={pathname}>{pathname}</h1>
+          <CustomSelect
+            options={options}
+            classNamePrefix={"Select"}
+            defaultValue={options[0]}
+            placeholder="Urutkan dari"
+            onChange={(value) => {
+              setSort(value.value);
+              setPage(1);
+            }}
+          />
+        </div>
+        {tanggapanku.length === 0 ? (
           // NOTE: Redesign
           <ReportBodyCustomNotFound>Tidak ada laporan</ReportBodyCustomNotFound>
         ) : (
@@ -422,9 +564,9 @@ function Tanggapanku(props) {
               <section title="Tanggal respon">Tanggal respon</section>
               <section>ID petugas</section>
               <section>Status</section>
-              <Action>Aksi</Action>
+              <Action>Detail</Action>
             </DataList>
-            {laporanbaru.map((laporan, index) => (
+            {tanggapanku.map((laporan, index) => (
               <DataList key={index}>
                 <section title={laporan.title}>{laporan.title}</section>
                 <section>{laporan.date_response}</section>
@@ -433,7 +575,7 @@ function Tanggapanku(props) {
                 <Action
                   title="Buka Detail"
                   onClick={() => {
-                    props.sd.setToggleSD(!props.sd.toggleSD);
+                    props.sd.setToggleSD(true);
                     ToDetails({
                       id: laporan.id_report,
                       petugas: laporan.id_petugas,
@@ -449,7 +591,7 @@ function Tanggapanku(props) {
             )}
           </ReportBodyCustom>
         )}
-      </Report>
+      </CustomReport>
     </ReportWrapper>
   );
 }
@@ -459,7 +601,9 @@ function SemuaTanggapan(props) {
   pathname = pathname.substring(1);
 
   const [page, setPage] = useState(1);
-  const { hasMore, laporanbaru } = useSemuaTanggapan(page);
+  const [sort, setSort] = useState("Date DESC");
+
+  const { hasMore, semuaTanggapan } = useSemuaTanggapan(page, sort);
 
   const { detailReport } = useStoreActions((actions) => ({
     detailReport: actions.detailReport,
@@ -475,9 +619,21 @@ function SemuaTanggapan(props) {
 
   return (
     <ReportWrapper>
-      <Report>
-        <h1>{pathname}</h1>
-        {laporanbaru.length === 0 ? (
+      <CustomReport>
+        <div className="reportHeader">
+          <h1 title={pathname}>{pathname}</h1>
+          <CustomSelect
+            options={options}
+            classNamePrefix={"Select"}
+            defaultValue={options[0]}
+            placeholder="Urutkan dari"
+            onChange={(value) => {
+              setSort(value.value);
+              setPage(1);
+            }}
+          />
+        </div>
+        {semuaTanggapan.length === 0 ? (
           // NOTE: Redesign
           <ReportBodyCustomNotFound>Tidak ada laporan</ReportBodyCustomNotFound>
         ) : (
@@ -487,9 +643,9 @@ function SemuaTanggapan(props) {
               <section title="Tanggal respon">Tanggal respon</section>
               <section>ID petugas</section>
               <section>Status</section>
-              <Action>Aksi</Action>
+              <Action>Detail</Action>
             </DataList>
-            {laporanbaru.map((laporan, index) => (
+            {semuaTanggapan.map((laporan, index) => (
               <DataList key={index}>
                 <section title={laporan.title}>{laporan.title}</section>
                 <section>{laporan.date_response}</section>
@@ -498,7 +654,7 @@ function SemuaTanggapan(props) {
                 <Action
                   title="Buka Detail"
                   onClick={() => {
-                    props.sd.setToggleSD(!props.sd.toggleSD);
+                    props.sd.setToggleSD(true);
                     ToDetails({
                       id: laporan.id_report,
                       petugas: laporan.id_petugas,
@@ -514,7 +670,7 @@ function SemuaTanggapan(props) {
             )}
           </ReportBodyCustom>
         )}
-      </Report>
+      </CustomReport>
     </ReportWrapper>
   );
 }
@@ -525,7 +681,9 @@ function Petugas() {
 
   const [page, setPage] = useState(1);
   const [isRegister, setIsRegister] = useState(false);
-  const { loading, hasMore, petugas } = usePetugas(page);
+  const [sort, setSort] = useState("Date DESC");
+
+  const { loading, hasMore, petugas } = usePetugas(page, sort);
 
   const { register, handleSubmit, errors } = useForm({
     resolver: yupResolver(SchemaDaftar),
@@ -566,8 +724,20 @@ function Petugas() {
 
   return (
     <ReportWrapper>
-      <Report>
-        <h1>{pathname}</h1>
+      <CustomReport>
+        <div className="reportHeader">
+          <h1 title={pathname}>{pathname}</h1>
+          <CustomSelect
+            options={options}
+            classNamePrefix={"Select"}
+            defaultValue={options[0]}
+            placeholder="Urutkan dari"
+            onChange={(value) => {
+              setSort(value.value);
+              setPage(1);
+            }}
+          />
+        </div>
         {petugas.length === 0 || loading ? (
           // NOTE: Redesign
           isRegister ? null : (
@@ -590,7 +760,7 @@ function Petugas() {
               <section>ID petugas</section>
               <section>Tanggal buat</section>
               <section>No telp</section>
-              <Action>Aksi</Action>
+              <Action>Hapus</Action>
             </ForcedDataList>
             {petugas.map(
               (petugas, index) =>
@@ -620,9 +790,13 @@ function Petugas() {
         )}
         {isRegister && (
           <ReportBodyCustom>
-            <Action title="Kembali" onClick={() => setIsRegister(!isRegister)}>
+            <CustomAction
+              title="Kembali"
+              onClick={() => setIsRegister(!isRegister)}
+            >
+              Kembali
               <span className="material-icons">logout</span>
-            </Action>
+            </CustomAction>
             <Form noValidate onSubmit={handleSubmit(onSubmit)}>
               <Label htmlFor="name">Nama</Label>
               <Input type="text" name="name" id="name" ref={register} />
@@ -638,11 +812,11 @@ function Petugas() {
                 ref={register}
               />
               <Warning>{errors.kataSandi?.message}</Warning>
-              <button type="submit">Daftar</button>
+              <button type="submit">Daftarkan petugas</button>
             </Form>
           </ReportBodyCustom>
         )}
-      </Report>
+      </CustomReport>
     </ReportWrapper>
   );
 }

@@ -91,7 +91,11 @@ function App() {
         <Navbar shut={setToggleSD} />
         <SideDetails sd={{ toggleSD, setToggleSD }} />
         <WrapToaster>
-          <Toaster />
+          <Toaster
+            toastOptions={{
+              className: "toast",
+            }}
+          />
         </WrapToaster>
         <View id="View">
           <Switch>

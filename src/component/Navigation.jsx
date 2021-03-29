@@ -103,6 +103,11 @@ function Navigation() {
             </li>
           </>
         )}
+        <li>
+          <NavLink to="/pengaturan" activeClassName="active">
+            pengaturan
+          </NavLink>
+        </li>
       </ul>
     </NavWrapper>
   );

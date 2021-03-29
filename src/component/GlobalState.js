@@ -123,14 +123,12 @@ export const state = {
           await storage.ref(`/image/${response.data.foward.pic}`).delete();
           toast.success("Foto berhasil dihapus");
         } catch (err) {
-          console.log(err);
           return await Promise.reject(err);
         }
       }
 
       return await Promise.resolve(response.data.notify);
     } catch (err) {
-      console.log(err.response)
       const { id_response } = err.response.data.foward;
       if (id_response) {
         return await Promise.reject("Laporan sudah ditanggapi");

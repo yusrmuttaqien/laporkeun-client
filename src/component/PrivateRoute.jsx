@@ -17,6 +17,7 @@ export default function PrivateRoute({ comp: Component, ...rest }) {
         case "/tanggapanku":
         case "/semuatanggapan":
         case "/petugas":
+        case "/pengaturan":
           return true;
         default:
           return false;
@@ -25,6 +26,7 @@ export default function PrivateRoute({ comp: Component, ...rest }) {
       switch (destiny) {
         case "/laporanbaru":
         case "/tanggapanku":
+        case "/pengaturan":
           return true;
         default:
           return false;
@@ -34,6 +36,7 @@ export default function PrivateRoute({ comp: Component, ...rest }) {
         case "/buatlaporan":
         case "/laporanku":
         case "/laporanpublik":
+        case "/pengaturan":
           return true;
         default:
           return false;

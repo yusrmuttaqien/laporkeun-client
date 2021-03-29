@@ -6,8 +6,6 @@ import { toast } from "react-hot-toast";
 import defaultUser from "./../asset/defaultUser.svg";
 
 const StatsWrapper = styled.div`
-  /* background-color: blue; */
-
   height: 20%;
   width: 83%;
 
@@ -82,8 +80,8 @@ export default function UserStats(props) {
 
   const exitApp = async () => {
     await keluarApp();
-    props.shut(false)
-    toast.success('Anda berhasil keluar')
+    props.shut(false);
+    toast.success("Anda berhasil keluar");
   };
 
   return (

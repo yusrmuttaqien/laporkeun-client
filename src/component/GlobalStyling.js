@@ -37,13 +37,17 @@ const Theme = {
 };
 
 const GlobalStyle = createGlobalStyle`
+  body {
+    background-color: ${Theme.color.dark};
+  }
+
   * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Jost', sans-serif;
-      outline: none;
-      -webkit-tap-highlight-color: transparent;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Jost', sans-serif;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
   }
 
   .toast {

@@ -10,7 +10,7 @@ const instance = axios.create({
 
 const PaginationLimit = 10;
 
-function useLaporanku(page) {
+function useLaporanku(page, sort) {
   const [hasMore, setHasMore] = useState(false);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -19,6 +19,10 @@ function useLaporanku(page) {
   const { token } = useStoreState((state) => ({
     token: state.session.token,
   }));
+
+  useEffect(() => {
+    setLaporanku([]);
+  }, [sort]);
 
   useEffect(() => {
     setLoading(true);
@@ -30,7 +34,7 @@ function useLaporanku(page) {
           headers: {
             authorization: `Bearer ${token}`,
           },
-          params: { page: page, limit: PaginationLimit },
+          params: { page: page, limit: PaginationLimit, sort: sort },
         });
         setLaporanku((prevLaporanku) => {
           return [
@@ -55,12 +59,12 @@ function useLaporanku(page) {
       }
     }
     fetch();
-  }, [page, setLaporanku, token]);
+  }, [page, setLaporanku, token, sort]);
 
   return { loading, error, hasMore, laporanku };
 }
 
-function usePetugas(page) {
+function usePetugas(page, sort) {
   const [hasMore, setHasMore] = useState(false);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -69,6 +73,10 @@ function usePetugas(page) {
   const { token } = useStoreState((state) => ({
     token: state.session.token,
   }));
+
+  useEffect(() => {
+    setPetugas([]);
+  }, [sort]);
 
   useEffect(() => {
     setLoading(true);
@@ -80,7 +88,7 @@ function usePetugas(page) {
           headers: {
             authorization: `Bearer ${token}`,
           },
-          params: { page: page, limit: PaginationLimit },
+          params: { page: page, limit: PaginationLimit, sort: sort },
         });
         setPetugas((prevPetugas) => {
           return [
@@ -103,12 +111,12 @@ function usePetugas(page) {
       }
     }
     fetch();
-  }, [page, setPetugas, token]);
+  }, [page, setPetugas, token, sort]);
 
   return { loading, error, hasMore, petugas };
 }
 
-function useLaporanPublik(page) {
+function useLaporanPublik(page, sort) {
   const [hasMore, setHasMore] = useState(false);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -117,6 +125,10 @@ function useLaporanPublik(page) {
   const { token } = useStoreState((state) => ({
     token: state.session.token,
   }));
+
+  useEffect(() => {
+    setLaporanpublik([]);
+  }, [sort]);
 
   useEffect(() => {
     setLoading(true);
@@ -128,7 +140,7 @@ function useLaporanPublik(page) {
           headers: {
             authorization: `Bearer ${token}`,
           },
-          params: { page: page, limit: PaginationLimit },
+          params: { page: page, limit: PaginationLimit, sort: sort },
         });
         setLaporanpublik((prevLaporanPublik) => {
           return [
@@ -153,12 +165,12 @@ function useLaporanPublik(page) {
       }
     }
     fetch();
-  }, [page, setLaporanpublik, token]);
+  }, [page, setLaporanpublik, token, sort]);
 
   return { loading, error, hasMore, laporanpublik };
 }
 
-function useLaporanBaru(page) {
+function useLaporanBaru(page, sort) {
   const [hasMore, setHasMore] = useState(false);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -167,6 +179,10 @@ function useLaporanBaru(page) {
   const { token } = useStoreState((state) => ({
     token: state.session.token,
   }));
+
+  useEffect(() => {
+    setLaporanbaru([]);
+  }, [sort]);
 
   useEffect(() => {
     setLoading(true);
@@ -178,7 +194,7 @@ function useLaporanBaru(page) {
           headers: {
             authorization: `Bearer ${token}`,
           },
-          params: { page: page, limit: PaginationLimit },
+          params: { page: page, limit: PaginationLimit, sort: sort },
         });
         setLaporanbaru((prevLaporanbaru) => {
           return [
@@ -203,20 +219,24 @@ function useLaporanBaru(page) {
       }
     }
     fetch();
-  }, [page, setLaporanbaru, token]);
+  }, [page, setLaporanbaru, token, sort]);
 
   return { loading, error, hasMore, laporanbaru };
 }
 
-function useTanggapanku(page) {
+function useTanggapanku(page, sort) {
   const [hasMore, setHasMore] = useState(false);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [laporanbaru, setLaporanbaru] = useState([]);
+  const [tanggapanku, setTanggapanku] = useState([]);
 
   const { token } = useStoreState((state) => ({
     token: state.session.token,
   }));
+
+  useEffect(() => {
+    setTanggapanku([]);
+  }, [sort]);
 
   useEffect(() => {
     setLoading(true);
@@ -228,11 +248,11 @@ function useTanggapanku(page) {
           headers: {
             authorization: `Bearer ${token}`,
           },
-          params: { page: page, limit: PaginationLimit },
+          params: { page: page, limit: PaginationLimit, sort: sort },
         });
-        setLaporanbaru((prevLaporanbaru) => {
+        setTanggapanku((prevTanggapanku) => {
           return [
-            ...prevLaporanbaru,
+            ...prevTanggapanku,
             ...response.data.output.map((data) => {
               const { report } = data;
               return {
@@ -253,20 +273,24 @@ function useTanggapanku(page) {
       }
     }
     fetch();
-  }, [page, setLaporanbaru, token]);
+  }, [page, setTanggapanku, token, sort]);
 
-  return { loading, error, hasMore, laporanbaru };
+  return { loading, error, hasMore, tanggapanku };
 }
 
-function useSemuaTanggapan(page) {
+function useSemuaTanggapan(page, sort) {
   const [hasMore, setHasMore] = useState(false);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [laporanbaru, setLaporanbaru] = useState([]);
+  const [semuaTanggapan, setSemuaTanggapan] = useState([]);
 
   const { token } = useStoreState((state) => ({
     token: state.session.token,
   }));
+
+  useEffect(() => {
+    setSemuaTanggapan([]);
+  }, [sort]);
 
   useEffect(() => {
     setLoading(true);
@@ -278,11 +302,11 @@ function useSemuaTanggapan(page) {
           headers: {
             authorization: `Bearer ${token}`,
           },
-          params: { page: page, limit: PaginationLimit },
+          params: { page: page, limit: PaginationLimit, sort: sort },
         });
-        setLaporanbaru((prevLaporanbaru) => {
+        setSemuaTanggapan((prevSemuaTanggapan) => {
           return [
-            ...prevLaporanbaru,
+            ...prevSemuaTanggapan,
             ...response.data.output.map((data) => {
               const { report } = data;
               return {
@@ -303,9 +327,9 @@ function useSemuaTanggapan(page) {
       }
     }
     fetch();
-  }, [page, setLaporanbaru, token]);
+  }, [page, setSemuaTanggapan, token, sort]);
 
-  return { loading, error, hasMore, laporanbaru };
+  return { loading, error, hasMore, semuaTanggapan };
 }
 
 function useDetails() {
@@ -417,5 +441,5 @@ export {
   useTanggapanku,
   usePetugas,
   useDetails,
-  useSemuaTanggapan
+  useSemuaTanggapan,
 };
