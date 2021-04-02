@@ -136,6 +136,13 @@ export const state = {
       return await Promise.reject(err || err.response.data.notify);
     }
   }),
+  updateProfile: thunk(async (actions, payload, { getState }) => {
+    const checkUsername = await instance.get("/auth/check", {
+      headers: {
+        authorization: `Bearer ${getState().session.token}`,
+      },
+    });
+  }),
 
   // Action
   toggleFocusDetails: action((state) => {

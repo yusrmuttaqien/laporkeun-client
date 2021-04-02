@@ -27,6 +27,10 @@ const ReportHeader = styled.div`
     display: inherit;
     flex-direction: column;
     flex: 1;
+
+    &:nth-child(2) {
+      margin-left: 1em;
+    }
   }
 `;
 
@@ -75,6 +79,10 @@ const SchemaLaporan = yup.object().shape({
     .string()
     .required("Judul wajib diisi")
     .max(30, "Judul maksimal 30 karakter"),
+  loc: yup
+    .string()
+    .required("Lokasi wajib diisi")
+    .max(30, "Lokasi maksimal 30 karakter"),
   isiLaporan: yup
     .string()
     .required("Isi wajib diisi")
@@ -141,6 +149,17 @@ function BuatLaporan() {
               type="text"
               name="judulLaporan"
               id="judulLaporan"
+              ref={register}
+            />
+          </section>
+          <section>
+            <Label htmlFor="loc">
+              lokasi laporan <Warning>{errors.loc?.message}</Warning>
+            </Label>
+            <Input
+              type="text"
+              name="loc"
+              id="loc"
               ref={register}
             />
           </section>

@@ -296,6 +296,7 @@ export default function SideDetails(props) {
     name_pengguna,
     name_petugas,
     NIK,
+    loc,
   } = activeDetails;
 
   return (
@@ -327,10 +328,26 @@ export default function SideDetails(props) {
           <h2 title={title}>{title}</h2>
           <p
             title={
-              name_pengguna + " - " + date_report + " - " + vis + " - " + stat
+              name_pengguna +
+              " - " +
+              date_report +
+              " - " +
+              loc +
+              " - " +
+              vis +
+              " - " +
+              stat
             }
           >
-            {name_pengguna + " - " + date_report + " - " + vis + " - " + stat}
+            {name_pengguna +
+              " - " +
+              date_report +
+              " - " +
+              loc +
+              " - " +
+              vis +
+              " - " +
+              stat}
           </p>
         </section>
       </Header>

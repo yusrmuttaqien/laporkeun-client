@@ -1,13 +1,15 @@
 import React, { useState } from "react";
 import { useLocation } from "react-router";
 import styled from "styled-components";
-import { useStoreActions } from "easy-peasy";
+import { useStoreActions, useStoreState } from "easy-peasy";
 import { Link, useHistory } from "react-router-dom";
 import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import toast from "react-hot-toast";
 import Select from "react-select";
+
+import defaultUser from "./../asset/defaultUser.svg";
 
 import {
   Report,
@@ -63,6 +65,13 @@ const Form = styled.form`
   }
 `;
 
+const CustomFormWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+
+  width: 60%;
+`;
+
 const ReportBodyCustom = styled(ReportBody)`
   position: relative;
   padding-right: 5px;
@@ -82,7 +91,16 @@ const ReportBodyCustomNotFound = styled(ReportBody)`
 `;
 
 const DataList = styled.div`
-  background-color: ${(props) => props.theme.color.white};
+  /* background-color: ${(props) => props.theme.color.white}; */
+  background-color: ${(props) => {
+    if (props.stats === "Diterima") {
+      return props.theme.color.done;
+    } else if (props.stats === "Menunggu") {
+      return props.theme.color.waiting;
+    } else {
+      return props.theme.color.white;
+    }
+  }};
   color: ${(props) => props.theme.color.dark};
   border-radius: ${(props) => props.theme.value.radius};
 
@@ -183,16 +201,16 @@ const MoreButton = styled(Button)`
 const SchemaDaftar = yup.object().shape({
   telp: yup
     .number()
-    .required("NIK wajib diisi")
+    .required("Nomor wajib diisi")
     .test("len", "Nomor minimal 10 digit", (val) => val.toString().length >= 10)
     .test(
       "lenmin",
       "Nomor maksimal 15 digit",
       (val) => val.toString().length <= 15
     )
-    .typeError("NIK harus berupa angka")
-    .positive("NIK berupa bilangan positif")
-    .integer("NIK berupa bilangan bulat"),
+    .typeError("Nomor harus berupa angka")
+    .positive("Nomor berupa bilangan positif")
+    .integer("Nomor berupa bilangan bulat"),
   name: yup
     .string()
     .required("Nama wajib diisi")
@@ -275,6 +293,49 @@ const CustomAction = styled(Action)`
   }
 `;
 
+const CustomButton = styled(Button)`
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+`;
+
+const CustomInput = styled.input`
+  display: none;
+`;
+
+const CustomLabel = styled.label`
+  appearance: none;
+  cursor: pointer;
+`;
+
+const SettingWrapper = styled.form`
+  width: 100%;
+  height: 100%;
+
+  display: flex;
+  flex-direction: row;
+
+  section {
+    display: inherit;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    &:nth-child(1) {
+      width: 60%;
+
+      img {
+        width: 50%;
+        margin-bottom: 2em;
+      }
+    }
+
+    &:nth-child(2) {
+      flex: 1;
+    }
+  }
+`;
+
 const options = [
   { value: "Date DESC", label: "Terbaru" },
   { value: "Date ASC", label: "Terlama" },
@@ -335,7 +396,7 @@ function Laporanku(props) {
               <Action>Detail</Action>
             </DataList>
             {laporanku.map((laporan, index) => (
-              <DataList key={index}>
+              <DataList key={index} stats={laporan.stat}>
                 <section title={laporan.title}>{laporan.title}</section>
                 <section>{laporan.date_report}</section>
                 <section>{laporan.vis}</section>
@@ -414,7 +475,7 @@ function LaporanPublik(props) {
               <Action>Detail</Action>
             </DataList>
             {laporanpublik.map((laporan, index) => (
-              <DataList key={index}>
+              <DataList key={index} stats={laporan.stat}>
                 <section title={laporan.title}>{laporan.title}</section>
                 <section>{laporan.date_report}</section>
                 <section>{laporan.vis}</section>
@@ -491,7 +552,7 @@ function LaporanBaru(props) {
               <Action>Detail</Action>
             </DataList>
             {laporanbaru.map((laporan, index) => (
-              <DataList key={index}>
+              <DataList key={index} stats={laporan.stat}>
                 <section title={laporan.title}>{laporan.title}</section>
                 <section>{laporan.date_report}</section>
                 <section>{laporan.vis}</section>
@@ -567,7 +628,7 @@ function Tanggapanku(props) {
               <Action>Detail</Action>
             </DataList>
             {tanggapanku.map((laporan, index) => (
-              <DataList key={index}>
+              <DataList key={index} stats={laporan.stat}>
                 <section title={laporan.title}>{laporan.title}</section>
                 <section>{laporan.date_response}</section>
                 <section>{laporan.id_petugas}</section>
@@ -646,7 +707,7 @@ function SemuaTanggapan(props) {
               <Action>Detail</Action>
             </DataList>
             {semuaTanggapan.map((laporan, index) => (
-              <DataList key={index}>
+              <DataList key={index} stats={laporan.stat}>
                 <section title={laporan.title}>{laporan.title}</section>
                 <section>{laporan.date_response}</section>
                 <section>{laporan.id_petugas}</section>
@@ -825,13 +886,163 @@ function Pengaturan() {
   let { pathname } = useLocation();
   pathname = pathname.substring(1);
 
+  const { pic } = useStoreState((state) => ({
+    pic: state.session.pic,
+  }));
+
+  const { updateProfile } = useStoreActions((actions) => ({
+    updateProfile: actions.updateProfile,
+  }));
+
+  const [filename, setFileName] = useState("");
+  const [aspectRatio, setAspectRatio] = useState();
+
+  const FILE_SIZE = 1000000;
+  const SUPPORTED_FORMATS = [
+    "image/jpg",
+    "image/jpeg",
+    "image/gif",
+    "image/png",
+  ];
+
+  const SchemaSetting = yup.object().shape({
+    telp: yup
+      .number()
+      .required("Nomor wajib diisi")
+      .test(
+        "len",
+        "Nomor minimal 10 digit",
+        (val) => val.toString().length >= 10
+      )
+      .test(
+        "lenmin",
+        "Nomor maksimal 15 digit",
+        (val) => val.toString().length <= 15
+      )
+      .typeError("Nomor harus berupa angka")
+      .positive("Nomor berupa bilangan positif")
+      .integer("Nomor berupa bilangan bulat"),
+    name: yup
+      .string()
+      .required("Nama wajib diisi")
+      .max(30, "Nama maks 30 karakter"),
+    kataSandi: yup
+      .string()
+      .required("Kata sandi wajib diisi")
+      .min(8, "Kata sandi minimal 8 karakter"),
+    pic: yup
+      .mixed()
+      .test("fileType", "Unsupported File Format", (value) => {
+        if (value.length !== 0 && !SUPPORTED_FORMATS.includes(value[0].type)) {
+          return false;
+        } else {
+          return true;
+        }
+      })
+      .test("fileSize", "File Size is too large", (value) => {
+        if (value.length !== 0 && value[0].size >= FILE_SIZE) {
+          return false;
+        } else {
+          return true;
+        }
+      })
+      .test("fileAspectRatio", "Rasio gambar harus 1:1 / persegi", (value) => {
+        if (value.length !== 0 && aspectRatio !== 1) {
+          return false;
+        } else {
+          return true;
+        }
+      }),
+  });
+
+  const { register, handleSubmit, errors } = useForm({
+    resolver: yupResolver(SchemaSetting),
+  });
+
+  const getFileName = (e) => {
+    setFileName(e.target.files[0].name);
+    const reader = new Image();
+    reader.onload = async () => {
+      await setAspectRatio(reader.height / reader.width);
+    };
+    reader.src = window.URL.createObjectURL(e.target.files[0]);
+  };
+
+  const history = useHistory();
+
+  const onSubmit = (data) => {
+    toast.promise(updateProfile(data), {
+      loading: "Tunggu sebentar kawan :)",
+      success: (msg) => {
+        // history.go(0);
+        return msg;
+      },
+      error: (err) => err && err.toString(),
+    });
+  };
+
   return (
     <ReportWrapper>
       <CustomReport>
         <div className="reportHeader">
           <h1 title={pathname}>{pathname}</h1>
-          <Button>Simpan</Button>
+          <Button type="submit" form="changeSetting">
+            Simpan
+          </Button>
         </div>
+        <SettingWrapper
+          id="changeSetting"
+          noValidate
+          onSubmit={handleSubmit(onSubmit)}
+        >
+          <section>
+            <img src={pic ? pic : defaultUser} alt="" />
+            <CustomButton
+              type="button"
+              title={
+                errors.pic?.message
+                  ? errors.pic?.message
+                  : filename
+                  ? filename
+                  : "Ubah profil"
+              }
+            >
+              <CustomLabel htmlFor="pic">
+                {errors.pic?.message
+                  ? errors.pic?.message
+                  : filename
+                  ? filename
+                  : "Ubah profil"}
+              </CustomLabel>
+              <CustomInput
+                type="file"
+                name="pic"
+                id="pic"
+                accept="image/x-png,image/gif,image/jpeg"
+                ref={register}
+                onChange={getFileName}
+              />
+            </CustomButton>
+          </section>
+          <section>
+            <CustomFormWrapper>
+              <Label htmlFor="name">Nama</Label>
+              <Input type="text" name="name" id="name" ref={register} />
+              <Warning>{errors.name?.message}</Warning>
+              <Label htmlFor="telp">Telp</Label>
+              <Input type="number" name="telp" id="telp" ref={register} />
+              <Warning>{errors.telp?.message}</Warning>
+              <Label htmlFor="kataSandi">Kata sandi</Label>
+              <Input
+                type="password"
+                name="kataSandi"
+                id="kataSandi"
+                ref={register}
+              />
+              <Warning>{errors.kataSandi?.message}</Warning>
+            </CustomFormWrapper>
+          </section>
+        </SettingWrapper>
       </CustomReport>
     </ReportWrapper>
   );

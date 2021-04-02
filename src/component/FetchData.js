@@ -352,6 +352,7 @@ function useDetails() {
     NIK: null,
     name_pengguna: null,
     name_petugas: null,
+    loc: null,
   });
   const { setResponseByIDReport } = useStoreActions((actions) => ({
     setResponseByIDReport: actions.setResponseByIDReport,
@@ -375,6 +376,7 @@ function useDetails() {
                 .getDownloadURL();
             }
             const payload = response.data.output;
+            console.log(payload);
             setResponseByIDReport(payload.id_report);
             setActiveDetails({
               ...payload,
