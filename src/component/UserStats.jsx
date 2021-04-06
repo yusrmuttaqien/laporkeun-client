@@ -25,6 +25,7 @@ const UserDetail = styled.div`
   img {
     width: 3.5rem;
     margin-right: 0.6em;
+    border-radius: 50%;
   }
 `;
 

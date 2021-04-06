@@ -40,11 +40,18 @@ export const state = {
   }),
   masukApp: thunk(async (actions, payload) => {
     try {
-      const response = await instance.post("/auth/masuk", payload);
+      var response = await instance.post("/auth/masuk", payload);
+
+      if (response.data.responses.pic) {
+        var storageRef = storage.ref("/profile");
+        const fileRef = storageRef.child(response.data.responses.pic);
+        response.data.responses.pic = await fileRef.getDownloadURL();
+      }
+
       await actions.registerAutoLogin(response);
       return await Promise.resolve(response.data.notify);
     } catch (err) {
-      return await Promise.reject(err.response.data.notify || err);
+      return await Promise.reject(err);
     }
   }),
   keluarApp: thunk(async (actions, payload) => {
@@ -137,11 +144,59 @@ export const state = {
     }
   }),
   updateProfile: thunk(async (actions, payload, { getState }) => {
-    const checkUsername = await instance.get("/auth/check", {
-      headers: {
-        authorization: `Bearer ${getState().session.token}`,
-      },
-    });
+    var theName, type, imgURL;
+
+    if (payload.pic[0]) {
+      type = payload.pic[0].name.split(".");
+      theName = `${getState().session.name}_${Date.now()}.${type}`;
+    }
+
+    try {
+      if (payload.name !== getState().session.name) {
+        await instance.get("/auth/check", {
+          headers: {
+            authorization: `Bearer ${getState().session.token}`,
+          },
+          params: { newName: payload.name },
+        });
+      }
+
+      if (payload.pic[0]) {
+        // Firebase Storage
+        type = type[type.length - 1];
+        const file = payload.pic[0];
+        var storageRef = storage.ref("/profile");
+        const fileRef = storageRef.child(theName);
+        await fileRef.put(file);
+        imgURL = await fileRef.getDownloadURL();
+        payload.pic = theName;
+        // delete last pic if available
+        if (getState().session.pic) {
+          storageRef = storage.refFromURL(getState().session.pic);
+          await storageRef.delete();
+        }
+      }
+
+      if (!payload.pic[0]) {
+        payload.pic = getState().session.pic;
+      }
+
+      await instance.put("/auth/profile", payload, {
+        headers: {
+          authorization: `Bearer ${getState().session.token}`,
+        },
+      });
+
+      await actions.reSetSession({
+        pic: imgURL,
+        name: payload.name,
+        telp: payload.telp,
+      });
+
+      return await Promise.resolve("Profil berhasil diubah");
+    } catch (err) {
+      return await Promise.reject("Nama sudah ada");
+    }
   }),
 
   // Action
@@ -169,6 +224,8 @@ export const state = {
       role,
       name_petugas,
       id_petugas,
+      password,
+      pic,
     } = payload.data.responses;
     return {
       ...state,
@@ -185,6 +242,8 @@ export const state = {
             : NIK,
         token: accessToken,
         id_petugas: id_petugas && id_petugas,
+        password,
+        pic,
       },
     };
   }),
@@ -208,6 +267,12 @@ export const state = {
     return {
       ...state,
       newResponseByIDReport: payload,
+    };
+  }),
+  reSetSession: action((state, payload) => {
+    return {
+      ...state,
+      session: { ...state.session, ...payload },
     };
   }),
 };

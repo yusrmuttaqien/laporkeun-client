@@ -327,6 +327,7 @@ const SettingWrapper = styled.form`
       img {
         width: 50%;
         margin-bottom: 2em;
+        border-radius: 50%;
       }
     }
 
@@ -886,8 +887,11 @@ function Pengaturan() {
   let { pathname } = useLocation();
   pathname = pathname.substring(1);
 
-  const { pic } = useStoreState((state) => ({
+  const { pic, name, telp, password } = useStoreState((state) => ({
     pic: state.session.pic,
+    name: state.session.name,
+    telp: state.session.telp,
+    password: state.session.password,
   }));
 
   const { updateProfile } = useStoreActions((actions) => ({
@@ -896,6 +900,9 @@ function Pengaturan() {
 
   const [filename, setFileName] = useState("");
   const [aspectRatio, setAspectRatio] = useState();
+  // const [name, setName] = useState(nameSession);
+  // const [telp, setTelp] = useState(telpSession);
+  // const [kataSandi, setKataSandi] = useState("defaultnottouse");
 
   const FILE_SIZE = 1000000;
   const SUPPORTED_FORMATS = [
@@ -908,7 +915,7 @@ function Pengaturan() {
   const SchemaSetting = yup.object().shape({
     telp: yup
       .number()
-      .required("Nomor wajib diisi")
+      .required("Nomor wajib terisi")
       .test(
         "len",
         "Nomor minimal 10 digit",
@@ -924,11 +931,11 @@ function Pengaturan() {
       .integer("Nomor berupa bilangan bulat"),
     name: yup
       .string()
-      .required("Nama wajib diisi")
+      .required("Nama wajib terisi")
       .max(30, "Nama maks 30 karakter"),
     kataSandi: yup
       .string()
-      .required("Kata sandi wajib diisi")
+      .required("Kata sandi wajib terisi")
       .min(8, "Kata sandi minimal 8 karakter"),
     pic: yup
       .mixed()
@@ -967,8 +974,6 @@ function Pengaturan() {
     };
     reader.src = window.URL.createObjectURL(e.target.files[0]);
   };
-
-  const history = useHistory();
 
   const onSubmit = (data) => {
     toast.promise(updateProfile(data), {
@@ -1027,10 +1032,22 @@ function Pengaturan() {
           <section>
             <CustomFormWrapper>
               <Label htmlFor="name">Nama</Label>
-              <Input type="text" name="name" id="name" ref={register} />
+              <Input
+                type="text"
+                name="name"
+                id="name"
+                ref={register}
+                defaultValue={name}
+              />
               <Warning>{errors.name?.message}</Warning>
               <Label htmlFor="telp">Telp</Label>
-              <Input type="number" name="telp" id="telp" ref={register} />
+              <Input
+                type="number"
+                name="telp"
+                id="telp"
+                ref={register}
+                defaultValue={telp}
+              />
               <Warning>{errors.telp?.message}</Warning>
               <Label htmlFor="kataSandi">Kata sandi</Label>
               <Input
@@ -1038,6 +1055,7 @@ function Pengaturan() {
                 name="kataSandi"
                 id="kataSandi"
                 ref={register}
+                defaultValue={password}
               />
               <Warning>{errors.kataSandi?.message}</Warning>
             </CustomFormWrapper>
