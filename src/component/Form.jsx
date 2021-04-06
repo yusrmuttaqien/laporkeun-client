@@ -92,7 +92,7 @@ function FormMasuk({ toggleFormDefault }) {
   }));
 
   const switching = () => {
-    toggleFormDefault();
+    toggleFormDefault("Daftar");
   };
 
   const onSubmit = (data) => {
@@ -129,7 +129,7 @@ function FormDaftar({ toggleFormDefault }) {
   }));
 
   const switching = () => {
-    toggleFormDefault();
+    toggleFormDefault("Masuk");
   };
 
   const onSubmit = (data) => {

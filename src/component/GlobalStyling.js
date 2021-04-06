@@ -13,10 +13,12 @@ const Theme = {
     white: "#E3E3E3",
     dark: "#070602",
     blue: "#357083",
-    darkTransparent: "rgba(7, 6, 2, 0.85)",
+    darkTransparent: "rgba(7, 6, 2, 0.80)",
     whiteTransparent: "rgba(227, 227, 227, 0.85)",
     grey: "#868686",
     purple: "#852366",
+    waiting: "#e63b3b",
+    done: "#3be691",
   },
   value: {
     blur: "15px",
@@ -37,17 +39,22 @@ const Theme = {
 };
 
 const GlobalStyle = createGlobalStyle`
+  body {
+    background-color: ${Theme.color.dark};
+  }
+
   * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: 'Jost', sans-serif;
-      outline: none;
-      -webkit-tap-highlight-color: transparent;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Jost', sans-serif;
+    outline: none;
+    -webkit-tap-highlight-color: transparent;
   }
 
   .toast {
-    background-color: ${Theme.color.dark};
+    background-color: ${Theme.color.darkTransparent};
+    backdrop-filter: blur(${Theme.value.blur});
     color: ${Theme.color.white};
   }
 

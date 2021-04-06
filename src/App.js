@@ -2,8 +2,12 @@ import styled from "styled-components";
 import { Route, BrowserRouter as Router, Switch } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
 import { useStoreRehydrated } from "easy-peasy";
+import { useState } from "react";
 
-import BGWebP from "./asset/mainBG.webp";
+// import BGWebP from "./asset/mainBG.webp";
+// import BGWebP01 from "./asset/mainBG_01.webp";
+// import BGWebP02 from "./asset/mainBG_02.webp";
+import BGWebP03 from "./asset/mainBG_03.webp";
 import BGProgressive from "./asset/mainBG_Progressive.jpg";
 import Navbar from "./component/Navbar";
 import { Splash, NotFound } from "./component/Splash";
@@ -15,19 +19,21 @@ import {
   LaporanPublik,
   Tanggapanku,
   Petugas,
-} from "./component/LihatLaporan";
+  SemuaTanggapan,
+  Pengaturan
+} from "./component/Views";
 import SideDetails from "./component/SideDetails";
 import PrivateRoute from "./component/PrivateRoute";
 import rfs from "./component/RFS";
 
 const AppWrapper = styled.div`
-  background-image: url(${run_check_webp_feature ? BGWebP : BGProgressive});
+  background-image: url(${run_check_webp_feature ? BGWebP03 : BGProgressive});
   background-size: cover;
 
   height: 100vh;
   min-height: 640px; // TODO: Fix for mobile devices
   width: 100vw;
-  min-width: 707px;
+  min-width: 760px;
   max-width: 100%;
 
   display: flex;
@@ -81,29 +87,56 @@ const Presisting = styled.div`
 
 function App() {
   const isRehydrated = useStoreRehydrated();
+  const [toggleSD, setToggleSD] = useState(false);
 
   return isRehydrated ? (
-      <AppWrapper id="AppWraper">
-        <Router>
-          <Navbar />
-          <SideDetails/>
-          <WrapToaster>
-            <Toaster />
-          </WrapToaster>
-          <View id="View">
-            <Switch>
-              <Route exact path="/" component={Splash} />
-              <PrivateRoute path="/buatlaporan" comp={BuatLaporan} />
-              <PrivateRoute path="/laporanku" comp={Laporanku} />
-              <PrivateRoute path="/laporanpublik" comp={LaporanPublik} />
-              <PrivateRoute path="/laporanbaru" comp={LaporanBaru} />
-              <PrivateRoute path="/tanggapanku" comp={Tanggapanku} />
-              <PrivateRoute path="/petugas" comp={Petugas} />
-              <Route component={NotFound} />
-            </Switch>
-          </View>
-        </Router>
-      </AppWrapper>
+    <AppWrapper id="AppWraper">
+      <Router>
+        <Navbar shut={setToggleSD} />
+        <SideDetails sd={{ toggleSD, setToggleSD }} />
+        <WrapToaster>
+          <Toaster
+            toastOptions={{
+              className: "toast",
+            }}
+          />
+        </WrapToaster>
+        <View id="View">
+          <Switch>
+            <Route exact path="/" component={Splash} />
+            <PrivateRoute path="/buatlaporan" comp={BuatLaporan} />
+            <PrivateRoute
+              sd={{ toggleSD, setToggleSD }}
+              path="/laporanku"
+              comp={Laporanku}
+            />
+            <PrivateRoute
+              sd={{ toggleSD, setToggleSD }}
+              path="/laporanpublik"
+              comp={LaporanPublik}
+            />
+            <PrivateRoute
+              sd={{ toggleSD, setToggleSD }}
+              path="/laporanbaru"
+              comp={LaporanBaru}
+            />
+            <PrivateRoute
+              sd={{ toggleSD, setToggleSD }}
+              path="/tanggapanku"
+              comp={Tanggapanku}
+            />
+            <PrivateRoute
+              sd={{ toggleSD, setToggleSD }}
+              path="/semuatanggapan"
+              comp={SemuaTanggapan}
+            />
+            <PrivateRoute path="/petugas" comp={Petugas} />
+            <PrivateRoute path="/pengaturan" comp={Pengaturan} />
+            <Route component={NotFound} />
+          </Switch>
+        </View>
+      </Router>
+    </AppWrapper>
   ) : (
     <Presisting>Mengambil State</Presisting>
   );

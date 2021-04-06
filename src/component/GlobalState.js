@@ -5,12 +5,7 @@ import { instance } from "./FetchData";
 import { storage } from "./util/Firebase";
 
 export const state = {
-  UI: {
-    sideDetails: {
-      onFocus: false,
-    },
-    formDefault: "Masuk",
-  },
+  sideDetailsPayload: { id: null, nik: null, petugas: null },
   session: persist({
     isLogged: false,
     role: null,
@@ -21,23 +16,7 @@ export const state = {
     token: null,
     id_petugas: null,
   }),
-  activeDetail: {
-    id_report: null,
-    id_petugas: null,
-    id_response: null,
-    pic: null,
-    title: null,
-    report: null,
-    date_report: null,
-    date_response: null,
-    vis: null,
-    stat: null,
-    response: null,
-    NIK: null,
-    name_pengguna: null,
-    name_petugas: null,
-  },
-  listPetugas: [],
+  newResponseByIDReport: null,
 
   // Thunk
   penggunaRegistration: thunk(async (actions, payload) => {
@@ -61,11 +40,18 @@ export const state = {
   }),
   masukApp: thunk(async (actions, payload) => {
     try {
-      const response = await instance.post("/auth/masuk", payload);
+      var response = await instance.post("/auth/masuk", payload);
+
+      if (response.data.responses.pic) {
+        var storageRef = storage.ref("/profile");
+        const fileRef = storageRef.child(response.data.responses.pic);
+        response.data.responses.pic = await fileRef.getDownloadURL();
+      }
+
       await actions.registerAutoLogin(response);
       return await Promise.resolve(response.data.notify);
     } catch (err) {
-      return await Promise.reject(err.response.data.notify || err);
+      return await Promise.reject(err);
     }
   }),
   keluarApp: thunk(async (actions, payload) => {
@@ -73,7 +59,6 @@ export const state = {
   }),
   newReport: thunk(async (actions, payload, { getState }) => {
     var theName, type;
-    console.log(payload);
     if (payload.pic[0]) {
       type = payload.pic[0].name.split(".");
       theName = `${getState().session.NIK}_${Date.now()}.${type}`;
@@ -88,7 +73,7 @@ export const state = {
         await fileRef.put(file);
         payload.pic = theName;
       }
-      
+
       if (!payload.pic[0]) {
         payload.pic = null;
       }
@@ -102,51 +87,14 @@ export const state = {
       return await Promise.reject(err.response.data.notify || err);
     }
   }),
-  detailReport: thunk(async (actions, payload, { getState }) => {
-    const fetchUrl = async (fileName) => {
-      return await storage.ref(`/image/${fileName}`).getDownloadURL();
-    };
-
-    if (payload.nik) {
-      try {
-        const response = await instance.get("/laporan/detail", {
-          headers: { authorization: `Bearer ${getState().session.token}` },
-          params: { id: payload.id, nik: payload.nik },
-        });
-        if (response.data.output.pic) {
-          response.data.output.pic = await fetchUrl(response.data.output.pic);
-        }
-        await actions.setActiveDetails(response.data.output);
-        actions.toggleFocusDetails();
-        return 0;
-      } catch (err) {
-        console.log(err);
-        toast.error(err || err.response.data.notify);
-        return 1;
-      }
-    } else {
-      try {
-        const response = await instance.get("/laporan/detailPetugas", {
-          headers: { authorization: `Bearer ${getState().session.token}` },
-          params: { id: payload.id, petugas: payload.petugas },
-        });
-        if (response.data.output.pic) {
-          response.data.output.pic = await fetchUrl(response.data.output.pic);
-        }
-        await actions.setActiveDetails(response.data.output);
-        actions.toggleFocusDetails();
-        return 0;
-      } catch (err) {
-        toast.error(err.response.data.notify);
-        return 1;
-      }
-    }
+  detailReport: thunk((actions, payload) => {
+    actions.setSideActiveDetails(payload);
   }),
   newResponse: thunk(async (actions, payload, { getState }) => {
     try {
       const datas = {
         id_petugas: getState().session.id_petugas,
-        id_report: getState().activeDetail.id_report,
+        id_report: getState().newResponseByIDReport,
         response: payload.responBalik,
       };
       const response = await instance.post("/laporan/respon", datas, {
@@ -160,16 +108,94 @@ export const state = {
   }),
   deletePetugas: thunk(async (actions, payload, { getState }) => {
     try {
-      const response = await instance.post(
-        "/petugas/delete",
-        { id: payload },
-        {
-          headers: { authorization: `Bearer ${getState().session.token}` },
-        }
-      );
+      const response = await instance.delete("/petugas/delete", {
+        params: { id: payload },
+        headers: { authorization: `Bearer ${getState().session.token}` },
+      });
       return await Promise.resolve(response.data.notify);
     } catch (err) {
       return await Promise.reject(err.response.data.notify || err);
+    }
+  }),
+  deleteReport: thunk(async (actions, payload, { getState }) => {
+    try {
+      const response = await instance.delete("/laporan/delete", {
+        params: { id: getState().newResponseByIDReport },
+        headers: { authorization: `Bearer ${getState().session.token}` },
+      });
+      const { pic } = response.data.foward;
+
+      if (pic) {
+        try {
+          await storage.ref(`/image/${response.data.foward.pic}`).delete();
+          toast.success("Foto berhasil dihapus");
+        } catch (err) {
+          return await Promise.reject(err);
+        }
+      }
+
+      return await Promise.resolve(response.data.notify);
+    } catch (err) {
+      const { id_response } = err.response.data.foward;
+      if (id_response) {
+        return await Promise.reject("Laporan sudah ditanggapi");
+      }
+      return await Promise.reject(err || err.response.data.notify);
+    }
+  }),
+  updateProfile: thunk(async (actions, payload, { getState }) => {
+    var theName, type, imgURL;
+
+    if (payload.pic[0]) {
+      type = payload.pic[0].name.split(".");
+      theName = `${getState().session.name}_${Date.now()}.${type}`;
+    }
+
+    try {
+      if (payload.name !== getState().session.name) {
+        await instance.get("/auth/check", {
+          headers: {
+            authorization: `Bearer ${getState().session.token}`,
+          },
+          params: { newName: payload.name },
+        });
+      }
+
+      if (payload.pic[0]) {
+        // Firebase Storage
+        type = type[type.length - 1];
+        const file = payload.pic[0];
+        var storageRef = storage.ref("/profile");
+        const fileRef = storageRef.child(theName);
+        await fileRef.put(file);
+        imgURL = await fileRef.getDownloadURL();
+        payload.pic = theName;
+        // delete last pic if available
+        if (getState().session.pic) {
+          storageRef = storage.refFromURL(getState().session.pic);
+          await storageRef.delete();
+        }
+      }
+
+      if (!payload.pic[0]) {
+        payload.pic = getState().session.pic;
+      }
+
+      await instance.put("/auth/profile", payload, {
+        headers: {
+          authorization: `Bearer ${getState().session.token}`,
+        },
+      });
+
+      await actions.reSetSession({
+        pic: imgURL,
+        name: payload.name,
+        telp: payload.telp,
+      });
+
+      return await Promise.resolve("Profil berhasil diubah");
+    } catch (err) {
+      return await Promise.reject("Nama sudah ada");
     }
   }),
 
@@ -177,21 +203,16 @@ export const state = {
   toggleFocusDetails: action((state) => {
     return {
       ...state,
-      UI: {
-        ...state.UI,
-        sideDetails: {
-          ...state.UI.sideDetails,
-          onFocus: !state.UI.sideDetails.onFocus,
-        },
-      },
+      sideDetailsFocus: !state.sideDetailsFocus,
     };
   }),
-  toggleFormDefault: action((state) => {
+  setSideActiveDetails: action((state, payload) => {
     return {
       ...state,
-      UI: {
-        ...state.UI,
-        formDefault: state.UI.formDefault === "Masuk" ? "Daftar" : "Masuk",
+      sideDetailsPayload: {
+        id: payload.id,
+        nik: payload.nik ? payload.nik : null,
+        petugas: payload.petugas ? payload.petugas : null,
       },
     };
   }),
@@ -203,6 +224,8 @@ export const state = {
       role,
       name_petugas,
       id_petugas,
+      password,
+      pic,
     } = payload.data.responses;
     return {
       ...state,
@@ -219,12 +242,14 @@ export const state = {
             : NIK,
         token: accessToken,
         id_petugas: id_petugas && id_petugas,
+        password,
+        pic,
       },
     };
   }),
   keluarAppState: action((state, payload) => {
     return {
-      ...state,
+      sideDetailsPayload: { id: null, nik: null, petugas: null },
       session: {
         isLogged: false,
         role: null,
@@ -233,20 +258,21 @@ export const state = {
         pic: null,
         telp: null,
         token: null,
+        id_petugas: null,
       },
+      newResponseByIDReport: null,
     };
   }),
-  setActiveDetails: action((state, payload) => {
+  setResponseByIDReport: action((state, payload) => {
     return {
       ...state,
-      activeDetail: {
-        ...payload,
-        name_petugas: payload.name_petugas
-          ? payload.name_petugas
-          : payload.response
-          ? "(petugas telah dihapus)"
-          : null,
-      },
+      newResponseByIDReport: payload,
+    };
+  }),
+  reSetSession: action((state, payload) => {
+    return {
+      ...state,
+      session: { ...state.session, ...payload },
     };
   }),
 };

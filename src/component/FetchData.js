@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
-import { useStoreState } from "easy-peasy";
+import { useStoreState, useStoreActions } from "easy-peasy";
 import axios from "axios";
+import { storage } from "./util/Firebase";
+import toast from "react-hot-toast";
 
 const instance = axios.create({
   baseURL: "http://localhost:5006/",
@@ -8,7 +10,7 @@ const instance = axios.create({
 
 const PaginationLimit = 10;
 
-function useLaporanku(page) {
+function useLaporanku(page, sort) {
   const [hasMore, setHasMore] = useState(false);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -17,6 +19,10 @@ function useLaporanku(page) {
   const { token } = useStoreState((state) => ({
     token: state.session.token,
   }));
+
+  useEffect(() => {
+    setLaporanku([]);
+  }, [sort]);
 
   useEffect(() => {
     setLoading(true);
@@ -28,7 +34,7 @@ function useLaporanku(page) {
           headers: {
             authorization: `Bearer ${token}`,
           },
-          params: { page: page, limit: PaginationLimit },
+          params: { page: page, limit: PaginationLimit, sort: sort },
         });
         setLaporanku((prevLaporanku) => {
           return [
@@ -53,12 +59,12 @@ function useLaporanku(page) {
       }
     }
     fetch();
-  }, [page, setLaporanku, token]);
+  }, [page, setLaporanku, token, sort]);
 
   return { loading, error, hasMore, laporanku };
 }
 
-function usePetugas(page) {
+function usePetugas(page, sort) {
   const [hasMore, setHasMore] = useState(false);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -67,6 +73,10 @@ function usePetugas(page) {
   const { token } = useStoreState((state) => ({
     token: state.session.token,
   }));
+
+  useEffect(() => {
+    setPetugas([]);
+  }, [sort]);
 
   useEffect(() => {
     setLoading(true);
@@ -78,7 +88,7 @@ function usePetugas(page) {
           headers: {
             authorization: `Bearer ${token}`,
           },
-          params: { page: page, limit: PaginationLimit },
+          params: { page: page, limit: PaginationLimit, sort: sort },
         });
         setPetugas((prevPetugas) => {
           return [
@@ -101,12 +111,12 @@ function usePetugas(page) {
       }
     }
     fetch();
-  }, [page, setPetugas, token]);
+  }, [page, setPetugas, token, sort]);
 
   return { loading, error, hasMore, petugas };
 }
 
-function useLaporanPublik(page) {
+function useLaporanPublik(page, sort) {
   const [hasMore, setHasMore] = useState(false);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -115,6 +125,10 @@ function useLaporanPublik(page) {
   const { token } = useStoreState((state) => ({
     token: state.session.token,
   }));
+
+  useEffect(() => {
+    setLaporanpublik([]);
+  }, [sort]);
 
   useEffect(() => {
     setLoading(true);
@@ -126,7 +140,7 @@ function useLaporanPublik(page) {
           headers: {
             authorization: `Bearer ${token}`,
           },
-          params: { page: page, limit: PaginationLimit },
+          params: { page: page, limit: PaginationLimit, sort: sort },
         });
         setLaporanpublik((prevLaporanPublik) => {
           return [
@@ -151,12 +165,12 @@ function useLaporanPublik(page) {
       }
     }
     fetch();
-  }, [page, setLaporanpublik, token]);
+  }, [page, setLaporanpublik, token, sort]);
 
   return { loading, error, hasMore, laporanpublik };
 }
 
-function useLaporanBaru(page) {
+function useLaporanBaru(page, sort) {
   const [hasMore, setHasMore] = useState(false);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -165,6 +179,10 @@ function useLaporanBaru(page) {
   const { token } = useStoreState((state) => ({
     token: state.session.token,
   }));
+
+  useEffect(() => {
+    setLaporanbaru([]);
+  }, [sort]);
 
   useEffect(() => {
     setLoading(true);
@@ -176,7 +194,7 @@ function useLaporanBaru(page) {
           headers: {
             authorization: `Bearer ${token}`,
           },
-          params: { page: page, limit: PaginationLimit },
+          params: { page: page, limit: PaginationLimit, sort: sort },
         });
         setLaporanbaru((prevLaporanbaru) => {
           return [
@@ -201,20 +219,24 @@ function useLaporanBaru(page) {
       }
     }
     fetch();
-  }, [page, setLaporanbaru, token]);
+  }, [page, setLaporanbaru, token, sort]);
 
   return { loading, error, hasMore, laporanbaru };
 }
 
-function useTanggapanku(page) {
+function useTanggapanku(page, sort) {
   const [hasMore, setHasMore] = useState(false);
   const [error, setError] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [laporanbaru, setLaporanbaru] = useState([]);
+  const [tanggapanku, setTanggapanku] = useState([]);
 
   const { token } = useStoreState((state) => ({
     token: state.session.token,
   }));
+
+  useEffect(() => {
+    setTanggapanku([]);
+  }, [sort]);
 
   useEffect(() => {
     setLoading(true);
@@ -226,11 +248,11 @@ function useTanggapanku(page) {
           headers: {
             authorization: `Bearer ${token}`,
           },
-          params: { page: page, limit: PaginationLimit },
+          params: { page: page, limit: PaginationLimit, sort: sort },
         });
-        setLaporanbaru((prevLaporanbaru) => {
+        setTanggapanku((prevTanggapanku) => {
           return [
-            ...prevLaporanbaru,
+            ...prevTanggapanku,
             ...response.data.output.map((data) => {
               const { report } = data;
               return {
@@ -251,9 +273,166 @@ function useTanggapanku(page) {
       }
     }
     fetch();
-  }, [page, setLaporanbaru, token]);
+  }, [page, setTanggapanku, token, sort]);
 
-  return { loading, error, hasMore, laporanbaru };
+  return { loading, error, hasMore, tanggapanku };
+}
+
+function useSemuaTanggapan(page, sort) {
+  const [hasMore, setHasMore] = useState(false);
+  const [error, setError] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [semuaTanggapan, setSemuaTanggapan] = useState([]);
+
+  const { token } = useStoreState((state) => ({
+    token: state.session.token,
+  }));
+
+  useEffect(() => {
+    setSemuaTanggapan([]);
+  }, [sort]);
+
+  useEffect(() => {
+    setLoading(true);
+    setError(false);
+
+    async function fetch() {
+      try {
+        const response = await instance.get("/laporan/semuatanggapan", {
+          headers: {
+            authorization: `Bearer ${token}`,
+          },
+          params: { page: page, limit: PaginationLimit, sort: sort },
+        });
+        setSemuaTanggapan((prevSemuaTanggapan) => {
+          return [
+            ...prevSemuaTanggapan,
+            ...response.data.output.map((data) => {
+              const { report } = data;
+              return {
+                id_report: report.id_report,
+                title: report.report.title,
+                id_petugas: report.id_petugas,
+                date_response: report.date_response,
+                stat: report.report.stat,
+                NIK: report.NIK,
+              };
+            }),
+          ];
+        });
+        setHasMore(response.data.info.next ? true : false);
+        setLoading(false);
+      } catch (err) {
+        setError(err);
+      }
+    }
+    fetch();
+  }, [page, setSemuaTanggapan, token, sort]);
+
+  return { loading, error, hasMore, semuaTanggapan };
+}
+
+function useDetails() {
+  const { sideDetailsPayload, token } = useStoreState((state) => ({
+    sideDetailsPayload: state.sideDetailsPayload,
+    token: state.session.token,
+  }));
+  const [activeDetails, setActiveDetails] = useState({
+    id_report: null,
+    id_petugas: null,
+    id_response: null,
+    pic: null,
+    title: null,
+    report: null,
+    date_report: null,
+    date_response: null,
+    vis: null,
+    stat: null,
+    response: null,
+    NIK: null,
+    name_pengguna: null,
+    name_petugas: null,
+    loc: null,
+  });
+  const { setResponseByIDReport } = useStoreActions((actions) => ({
+    setResponseByIDReport: actions.setResponseByIDReport,
+  }));
+
+  var backToJSON = JSON.stringify(sideDetailsPayload, undefined, 2);
+  backToJSON = JSON.parse(backToJSON);
+
+  useEffect(() => {
+    const fetch = async () => {
+      if (backToJSON.id && token) {
+        if (backToJSON.nik) {
+          try {
+            const response = await instance.get("/laporan/detail", {
+              headers: { authorization: `Bearer ${token}` },
+              params: { id: backToJSON.id, nik: backToJSON.nik },
+            });
+            if (response.data.output.pic) {
+              response.data.output.pic = await storage
+                .ref(`/image/${response.data.output.pic}`)
+                .getDownloadURL();
+            }
+            const payload = response.data.output;
+            console.log(payload);
+            setResponseByIDReport(payload.id_report);
+            setActiveDetails({
+              ...payload,
+              name_petugas: payload.name_petugas
+                ? payload.name_petugas
+                : payload.response
+                ? "(petugas telah dihapus)"
+                : null,
+            });
+            return 0;
+          } catch (err) {
+            toast.error(err.response.data.notify && err.response.data.notify);
+            return 1;
+          }
+        } else if (backToJSON.petugas) {
+          try {
+            const response = await instance.get("/laporan/detailPetugas", {
+              headers: { authorization: `Bearer ${token}` },
+              params: {
+                id: backToJSON.id,
+                petugas: backToJSON.petugas,
+              },
+            });
+            if (response.data.output.pic) {
+              response.data.output.pic = await storage
+                .ref(`/image/${response.data.output.pic}`)
+                .getDownloadURL();
+            }
+            const payload = response.data.output;
+            setResponseByIDReport(payload.id_report);
+            setActiveDetails({
+              ...payload,
+              name_petugas: payload.name_petugas
+                ? payload.name_petugas
+                : payload.response
+                ? "(petugas telah dihapus)"
+                : null,
+            });
+            return 0;
+          } catch (err) {
+            toast.error(err.response.data.notify && err.response.data.notify);
+            return 1;
+          }
+        }
+      }
+    };
+    fetch();
+  }, [
+    backToJSON.id,
+    backToJSON.nik,
+    backToJSON.petugas,
+    token,
+    setResponseByIDReport,
+  ]);
+
+  return { activeDetails };
 }
 
 export {
@@ -263,4 +442,6 @@ export {
   useLaporanBaru,
   useTanggapanku,
   usePetugas,
+  useDetails,
+  useSemuaTanggapan,
 };

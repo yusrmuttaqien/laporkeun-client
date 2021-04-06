@@ -13,6 +13,7 @@ import { jsPDF } from "jspdf";
 
 import DefaultImg from "./../asset/defaultReport.jpg";
 import FullLogo from "./../asset/FullLogo.png";
+import { useDetails } from "./FetchData";
 
 const SideDetailsWrapper = styled.div`
   position: absolute;
@@ -135,6 +136,27 @@ const EmbedForm = styled.form`
   height: 100%;
 `;
 
+const ShowResponse = styled.div`
+  width: 100%;
+  height: 100%;
+
+  border: 1px solid ${(props) => props.theme.color.white};
+  color: ${(props) => props.theme.color.white};
+  border-radius: ${(props) => props.theme.value.radius};
+  opacity: ${(props) => props.theme.value.opacity};
+  font-size: 0.85rem;
+  transition: ${(props) => props.theme.value.transition};
+  transition-property: opacity;
+
+  padding: 0.7em 0.9em;
+  margin-bottom: 1em;
+
+  &:hover,
+  &:focus {
+    opacity: 1;
+  }
+`;
+
 const SchemaTanggapan = yup.object().shape({
   responBalik: yup
     .string()
@@ -143,36 +165,13 @@ const SchemaTanggapan = yup.object().shape({
 });
 
 export default function SideDetails(props) {
-  const {
-    onFocus,
-    pic,
-    title,
-    report,
-    date_report,
-    date_response,
-    vis,
-    stat,
-    response,
-    name_pengguna,
-    name_petugas,
-    role,
-  } = useStoreState((state) => ({
-    onFocus: state.UI.sideDetails.onFocus,
-    pic: state.activeDetail.pic,
-    title: state.activeDetail.title,
-    report: state.activeDetail.report,
-    date_report: state.activeDetail.date_report,
-    date_response: state.activeDetail.date_response,
-    vis: state.activeDetail.vis,
-    stat: state.activeDetail.stat,
-    response: state.activeDetail.response,
-    name_pengguna: state.activeDetail.name_pengguna,
-    name_petugas: state.activeDetail.name_petugas,
+  const { role, NIKSession } = useStoreState((state) => ({
     role: state.session.role,
+    NIKSession: state.session.NIK,
   }));
-  const { toggleFocusDetails, newResponse } = useStoreActions((actions) => ({
-    toggleFocusDetails: actions.toggleFocusDetails,
+  const { newResponse, deleteReport } = useStoreActions((actions) => ({
     newResponse: actions.newResponse,
+    deleteReport: actions.deleteReport,
   }));
   const { register, handleSubmit, errors } = useForm({
     resolver: yupResolver(SchemaTanggapan),
@@ -185,16 +184,16 @@ export default function SideDetails(props) {
     function getDataUri(url) {
       return new Promise((resolve) => {
         var image = new Image();
-        image.setAttribute("crossorigin", "anonymous"); //getting images from external domain
+        image.setAttribute("crossorigin", "anonymous"); // CORS stuff
 
         image.onload = function () {
           var canvas = document.createElement("canvas");
           canvas.width = this.naturalWidth;
           canvas.height = this.naturalHeight;
 
-          //next three lines for white background in case png has a transparent background
+          // Change transp BG to white
           var ctx = canvas.getContext("2d");
-          ctx.fillStyle = "#fff"; /// set white fill style
+          ctx.fillStyle = "#fff"; // Fill white
           ctx.fillRect(0, 0, canvas.width, canvas.height);
 
           canvas.getContext("2d").drawImage(this, 0, 0);
@@ -261,6 +260,7 @@ export default function SideDetails(props) {
     toast.promise(newResponse(response), {
       loading: "Menyimpan respon",
       success: (msg) => {
+        props.sd.setToggleSD(!props.sd.toggleSD);
         Redirect();
         return msg;
       },
@@ -268,15 +268,49 @@ export default function SideDetails(props) {
     });
   };
 
+  const onDelete = () => {
+    const Redirect = () => {
+      history.go(0);
+    };
+
+    toast.promise(deleteReport(), {
+      loading: "Menghapus laporan",
+      success: (msg) => {
+        Redirect();
+        return msg;
+      },
+      error: (err) => err.toString(),
+    });
+  };
+
+  const { activeDetails } = useDetails();
+  const {
+    pic,
+    title,
+    report,
+    date_report,
+    date_response,
+    vis,
+    stat,
+    response,
+    name_pengguna,
+    name_petugas,
+    NIK,
+    loc,
+  } = activeDetails;
+
   return (
     <SideDetailsWrapper
       // onBlur={() => toggleFocusDetails()}
-      focus={onFocus}
+      focus={props.sd.toggleSD}
       tabIndex="0"
       // ref={SideDetail}
     >
       <Control>
-        <Action onClick={() => toggleFocusDetails()} title="Tutup Detail">
+        <Action
+          onClick={() => props.sd.setToggleSD(!props.sd.toggleSD)}
+          title="Tutup Detail"
+        >
           <span className="material-icons">logout</span>
         </Action>
         {role === "admin" && response ? (
@@ -284,8 +318,8 @@ export default function SideDetails(props) {
             unduh laporan
           </CustomButton>
         ) : null}
-        {role === "pengguna" && stat === "Menunggu" ? (
-          <CustomButton>hapus laporan</CustomButton>
+        {role === "pengguna" && stat === "Menunggu" && NIKSession === NIK ? (
+          <CustomButton onClick={() => onDelete()}>hapus laporan</CustomButton>
         ) : null}
       </Control>
       <Header>
@@ -294,10 +328,26 @@ export default function SideDetails(props) {
           <h2 title={title}>{title}</h2>
           <p
             title={
-              name_pengguna + " - " + date_report + " - " + vis + " - " + stat
+              name_pengguna +
+              " - " +
+              date_report +
+              " - " +
+              loc +
+              " - " +
+              vis +
+              " - " +
+              stat
             }
           >
-            {name_pengguna + " - " + date_report + " - " + vis + " - " + stat}
+            {name_pengguna +
+              " - " +
+              date_report +
+              " - " +
+              loc +
+              " - " +
+              vis +
+              " - " +
+              stat}
           </p>
         </section>
       </Header>
@@ -309,7 +359,7 @@ export default function SideDetails(props) {
           <section>
             <EmbedForm>
               <Label
-                htmlFor="responBalik"
+                htmlFor="responBalikPreview"
                 title={`${date_response && date_response} ${
                   name_petugas && " - " + name_petugas
                 }`}
@@ -317,52 +367,44 @@ export default function SideDetails(props) {
                 respon balik {date_response && " - " + date_response}{" "}
                 {name_petugas && " - " + name_petugas}
               </Label>
-              <TextArea
-                name="responBalik"
-                id="responBalik"
-                readOnly
-                value={response}
-              ></TextArea>
+              <ShowResponse id="responBalikPreview" name="responBalikPreview">
+                {response}
+              </ShowResponse>
             </EmbedForm>
           </section>
         ) : null}
         {role === "admin" || role === "petugas" ? (
           <section>
-            <EmbedForm noValidate onSubmit={handleSubmit(onSubmit)}>
-              <Label
-                htmlFor="responBalik"
-                title={`${date_response && date_response} ${
-                  name_petugas && " - " + name_petugas
-                }`}
-              >
-                respon balik {date_response && " - " + date_response}{" "}
-                {name_petugas && " - " + name_petugas}
-              </Label>
-              {response ? (
+            {response ? (
+              <EmbedForm>
+                <Label
+                  htmlFor="responBalikPreview"
+                  title={`${date_response && date_response} ${
+                    name_petugas && " - " + name_petugas
+                  }`}
+                >
+                  respon balik {date_response && " - " + date_response}{" "}
+                  {name_petugas && " - " + name_petugas}
+                </Label>
+                <ShowResponse id="responBalikPreview" name="responBalikPreview">
+                  {response}
+                </ShowResponse>
+              </EmbedForm>
+            ) : (
+              <EmbedForm noValidate onSubmit={handleSubmit(onSubmit)}>
+                <Label htmlFor="responBalik">respon balik</Label>
                 <TextArea
                   name="responBalik"
                   id="responBalik"
-                  readOnly
-                  value={response && response}
                   ref={register}
                 ></TextArea>
-              ) : (
-                <TextArea
-                  name="responBalik"
-                  id="responBalik"
-                  defaultValue={response && response}
-                  ref={register}
-                ></TextArea>
-              )}
-              {response ? null : (
-                // NOTE: Disabled features - Simultanious Changes
                 <Button type="submit">
                   {errors.responBalik?.message
                     ? errors.responBalik?.message
                     : "Kirim respon"}
                 </Button>
-              )}
-            </EmbedForm>
+              </EmbedForm>
+            )}
           </section>
         ) : null}
       </Body>

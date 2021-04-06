@@ -6,8 +6,6 @@ import { toast } from "react-hot-toast";
 import defaultUser from "./../asset/defaultUser.svg";
 
 const StatsWrapper = styled.div`
-  /* background-color: blue; */
-
   height: 20%;
   width: 83%;
 
@@ -27,6 +25,7 @@ const UserDetail = styled.div`
   img {
     width: 3.5rem;
     margin-right: 0.6em;
+    border-radius: 50%;
   }
 `;
 
@@ -69,7 +68,7 @@ const CloseSession = styled.p`
   letter-spacing: 0.125em;
 `;
 
-export default function UserStats() {
+export default function UserStats(props) {
   const { role, name, NIK, pic } = useStoreState((state) => ({
     role: state.session.role,
     name: state.session.name,
@@ -82,7 +81,8 @@ export default function UserStats() {
 
   const exitApp = async () => {
     await keluarApp();
-    toast.success('Anda berhasil keluar')
+    props.shut(false);
+    toast.success("Anda berhasil keluar");
   };
 
   return (
