@@ -11,6 +11,8 @@ import LaporanPublik from "component/LaporanPublik";
 import LaporanBaru from "component/LaporanBaru";
 import Tanggapanku from "component/Tanggapanku";
 import SemuaTanggapan from "component/SemuaTanggapan";
+import Petugas from "component/Petugas";
+import Pengaturan from "component/Pengaturan";
 import { Splash, NotFound } from "component/Splash";
 import PrivateRoute from "util/PrivateRoute";
 import { run_check_webp_feature } from "util/WebPCheck";
@@ -94,28 +96,13 @@ function App() {
           <Switch>
             <Route exact path="/" component={Splash} />
             <PrivateRoute path="/buatlaporan" comp={BuatLaporan} />
-            <PrivateRoute
-              path="/laporanku"
-              comp={Laporanku}
-            />
-            <PrivateRoute
-              path="/laporanpublik"
-              comp={LaporanPublik}
-            />
-            <PrivateRoute
-              path="/laporanbaru"
-              comp={LaporanBaru}
-            />
-            <PrivateRoute
-             path="/tanggapanku"
-             comp={Tanggapanku}
-            />
-            <Route
-              path="/semuatanggapan"
-              component={SemuaTanggapan}
-            />
-            {/* <PrivateRoute path="/petugas" comp={Petugas} /> */}
-            {/* <PrivateRoute path="/pengaturan" comp={Pengaturan} /> */}
+            <PrivateRoute path="/laporanku" comp={Laporanku} />
+            <PrivateRoute path="/laporanpublik" comp={LaporanPublik} />
+            <PrivateRoute path="/laporanbaru" comp={LaporanBaru} />
+            <PrivateRoute path="/tanggapanku" comp={Tanggapanku} />
+            <PrivateRoute path="/semuatanggapan" comp={SemuaTanggapan} />
+            <PrivateRoute path="/petugas" comp={Petugas} />
+            <PrivateRoute path="/pengaturan" comp={Pengaturan} />
             <Route component={NotFound} />
           </Switch>
         </View>

@@ -5,18 +5,6 @@ import { instance } from "../util/CustomHooks";
 import { storage } from "../util/Firebase";
 
 export const state = {
-  sideDetailsPayload: { id: null, nik: null, petugas: null },
-  session: persist({
-    isLogged: false,
-    role: null,
-    name: null,
-    NIK: null,
-    pic: null,
-    telp: null,
-    token: null,
-    id_petugas: null,
-  }),
-  newResponseByIDReport: null,
 
   // Thunk
   penggunaRegistration: thunk(async (actions, payload) => {

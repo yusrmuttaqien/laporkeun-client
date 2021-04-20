@@ -5,12 +5,10 @@ const SUPPORTED_FORMATS = ["image/jpg", "image/jpeg", "image/gif", "image/png"];
 
 const SchemaDaftar = yup.object().shape({
   NIK: yup
-    .number()
+    .string()
     .required("NIK wajib diisi")
-    .test("len", "NIK wajib 16 angka", (val) => val.toString().length === 16)
-    .typeError("NIK harus berupa angka")
-    .positive("NIK berupa bilangan positif")
-    .integer("NIK berupa bilangan bulat"),
+    .test("length", "NIK wajib 16 angka", (val) => val.toString().length === 16)
+    .test("onlyNumber", "NIK berupa angka", (val) => /^\d+$/.test(val)),
   name: yup
     .string()
     .required("Nama wajib diisi")
@@ -67,4 +65,80 @@ const SchemaTanggapan = yup.object().shape({
     .max(2000, "Respon maksimal 2000 karakter"),
 });
 
-export { SchemaDaftar, SchemaMasuk, SchemaLaporan, SchemaTanggapan };
+const SchemaDaftarPetugas = yup.object().shape({
+  telp: yup
+    .number()
+    .required("Nomor wajib diisi")
+    .test("len", "Nomor minimal 10 digit", (val) => val.toString().length >= 10)
+    .test(
+      "lenmin",
+      "Nomor maksimal 15 digit",
+      (val) => val.toString().length <= 15
+    )
+    .typeError("Nomor harus berupa angka")
+    .positive("Nomor berupa bilangan positif")
+    .integer("Nomor berupa bilangan bulat"),
+  name: yup
+    .string()
+    .required("Nama wajib diisi")
+    .max(30, "Nama maks 30 karakter"),
+  kataSandi: yup
+    .string()
+    .required("Kata sandi wajib diisi")
+    .min(8, "Kata sandi minimal 8 karakter"),
+});
+
+const SchemaSetting = yup.object().shape({
+  telp: yup
+    .number()
+    .required("Nomor wajib terisi")
+    .test("len", "Nomor minimal 10 digit", (val) => val.toString().length >= 10)
+    .test(
+      "lenmin",
+      "Nomor maksimal 15 digit",
+      (val) => val.toString().length <= 15
+    )
+    .typeError("Nomor harus berupa angka")
+    .positive("Nomor berupa bilangan positif")
+    .integer("Nomor berupa bilangan bulat"),
+  name: yup
+    .string()
+    .required("Nama wajib terisi")
+    .max(30, "Nama maks 30 karakter"),
+  kataSandi: yup
+    .string()
+    .required("Kata sandi wajib terisi")
+    .min(8, "Kata sandi minimal 8 karakter"),
+  pic: yup
+    .mixed()
+    .test("fileType", "Unsupported File Format", (value) => {
+      if (value.length !== 0 && !SUPPORTED_FORMATS.includes(value[0].type)) {
+        return false;
+      } else {
+        return true;
+      }
+    })
+    .test("fileSize", "File Size is too large", (value) => {
+      if (value.length !== 0 && value[0].size >= FILE_SIZE) {
+        return false;
+      } else {
+        return true;
+      }
+    }),
+  // .test("fileAspectRatio", "Rasio gambar harus 1:1 / persegi", (value) => {
+  //   if (value.length !== 0 && aspectRatio !== 1) {
+  //     return false;
+  //   } else {
+  //     return true;
+  //   }
+  // }),
+});
+
+export {
+  SchemaDaftar,
+  SchemaMasuk,
+  SchemaLaporan,
+  SchemaTanggapan,
+  SchemaDaftarPetugas,
+  SchemaSetting,
+};

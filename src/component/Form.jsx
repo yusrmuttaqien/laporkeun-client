@@ -105,6 +105,7 @@ function FormDaftar() {
   };
 
   const onSubmit = (data) => {
+    console.log(data)
     // func regis
     // toast.promise(, {
     //   loading: "Tunggu sebentar kawan :)",
@@ -121,7 +122,7 @@ function FormDaftar() {
         <Input type="text" name="name" id="name" ref={register} />
         <Warning>{errors.name?.message}</Warning>
         <Label htmlFor="NIK">NIK</Label>
-        <Input type="number" name="NIK" id="NIK" ref={register} />
+        <Input type="text" name="NIK" id="NIK" ref={register} />
         <Warning>{errors.NIK?.message}</Warning>
         <Label htmlFor="kataSandi">Kata sandi</Label>
         <Input type="password" name="kataSandi" id="kataSandi" ref={register} />
