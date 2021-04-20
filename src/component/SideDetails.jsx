@@ -2,18 +2,19 @@
 //  NOTE: Disabled feature - onBlur
 import React from "react";
 import styled from "styled-components";
-import { useStoreState, useStoreActions } from "easy-peasy";
-import { Action, Button, Label, TextArea } from "./GlobalStyling";
 import { useForm } from "react-hook-form";
-import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { toast } from "react-hot-toast";
-import { useHistory } from "react-router-dom";
-import { jsPDF } from "jspdf";
+// import { toast } from "react-hot-toast";
+// import { useHistory } from "react-router-dom";
+import { useState as GlobalState } from "@hookstate/core";
 
-import DefaultImg from "./../asset/defaultReport.jpg";
-import FullLogo from "./../asset/FullLogo.png";
-import { useDetails } from "./FetchData";
+import { useDetails } from "util/CustomHooks";
+import { Action, Button, Label, TextArea } from "style/Components";
+import { SchemaTanggapan } from "util/ValidationSchema";
+import { Instance } from "util/States";
+import GeneratesPDF from "util/GeneratePDF";
+
+import DefaultImg from "asset/defaultReport.jpg";
 
 const SideDetailsWrapper = styled.div`
   position: absolute;
@@ -157,131 +158,20 @@ const ShowResponse = styled.div`
   }
 `;
 
-const SchemaTanggapan = yup.object().shape({
-  responBalik: yup
-    .string()
-    .required("Respon wajib diisi")
-    .max(2000, "Respon maksimal 2000 karakter"),
-});
+export default function SideDetails() {
+  const state = GlobalState(Instance);
+  const { role, NIK: NIKSession } = state.session.get();
+  const sideDetailsStat = state.sideDetails.get();
 
-export default function SideDetails(props) {
-  const { role, NIKSession } = useStoreState((state) => ({
-    role: state.session.role,
-    NIKSession: state.session.NIK,
-  }));
-  const { newResponse, deleteReport } = useStoreActions((actions) => ({
-    newResponse: actions.newResponse,
-    deleteReport: actions.deleteReport,
-  }));
+  const sideDetailsStatToggle = () => {
+    state.sideDetails.set((prev) => !prev);
+  };
+
   const { register, handleSubmit, errors } = useForm({
     resolver: yupResolver(SchemaTanggapan),
   });
-  const history = useHistory();
 
-  const generatePDF = async () => {
-    const doc = new jsPDF();
-
-    function getDataUri(url) {
-      return new Promise((resolve) => {
-        var image = new Image();
-        image.setAttribute("crossorigin", "anonymous"); // CORS stuff
-
-        image.onload = function () {
-          var canvas = document.createElement("canvas");
-          canvas.width = this.naturalWidth;
-          canvas.height = this.naturalHeight;
-
-          // Change transp BG to white
-          var ctx = canvas.getContext("2d");
-          ctx.fillStyle = "#fff"; // Fill white
-          ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-          canvas.getContext("2d").drawImage(this, 0, 0);
-
-          resolve(canvas.toDataURL("image/jpeg"));
-        };
-
-        image.src = url;
-      });
-    }
-
-    if (pic) {
-      var imgUri = await getDataUri(pic);
-    }
-
-    var titleText = doc.splitTextToSize(title, 59);
-    var reportText = doc.splitTextToSize(report, 120);
-    var responseText = doc.splitTextToSize(response, 120);
-
-    doc.addImage(FullLogo, "PNG", 55, 15);
-
-    doc.setFont("courier", "bold");
-    doc.text(`Laporan pengguna ${name_pengguna}`, 15, 60);
-
-    doc.setFontSize(10);
-    doc.setFont("courier", "bold");
-    doc.text(
-      `${date_report} - ditanggapi oleh ${name_petugas} tgl ${date_response}`,
-      15,
-      65
-    );
-
-    doc.addImage(pic ? imgUri : DefaultImg, "PNG", 15, 70, 95, 50);
-
-    doc.setFontSize(20);
-    doc.setFont("courier", "bold");
-    doc.text(titleText, 113, 78);
-
-    doc.setFontSize(18);
-    doc.setFont("courier", "bold");
-    doc.text("Laporan", 15, 135);
-
-    doc.setFontSize(8);
-    doc.setFont("courier", "bold");
-    doc.text(reportText, 15, 140);
-
-    doc.setFontSize(18);
-    doc.setFont("courier", "bold");
-    doc.text("Tanggapan", 110, 135);
-
-    doc.setFontSize(8);
-    doc.setFont("courier", "bold");
-    doc.text(responseText, 110, 140);
-
-    doc.save(`laporkeun! Laporan ${title} oleh ${name_pengguna}.pdf`);
-  };
-
-  // const SideDetail = useRef();
-  const onSubmit = (response) => {
-    const Redirect = () => {
-      history.push("/tanggapanku");
-    };
-
-    toast.promise(newResponse(response), {
-      loading: "Menyimpan respon",
-      success: (msg) => {
-        props.sd.setToggleSD(!props.sd.toggleSD);
-        Redirect();
-        return msg;
-      },
-      error: (err) => err.toString(),
-    });
-  };
-
-  const onDelete = () => {
-    const Redirect = () => {
-      history.go(0);
-    };
-
-    toast.promise(deleteReport(), {
-      loading: "Menghapus laporan",
-      success: (msg) => {
-        Redirect();
-        return msg;
-      },
-      error: (err) => err.toString(),
-    });
-  };
+  // const history = useHistory();
 
   const { activeDetails } = useDetails();
   const {
@@ -299,27 +189,65 @@ export default function SideDetails(props) {
     loc,
   } = activeDetails;
 
+  const generate = () => {
+    const payload = {
+      pic,
+      title,
+      report,
+      date_report,
+      date_response,
+      response,
+      name_pengguna,
+      name_petugas,
+    };
+    // Use toast
+    GeneratesPDF(payload);
+  };
+
+  const onSubmit = (response) => {
+    // const Redirect = () => {
+    //   history.push("/tanggapanku");
+    // };
+
+    // func response
+    // toast.promise(, {
+    //   loading: "Menyimpan respon",
+    //   success: (msg) => {
+    //     props.sd.setToggleSD(!props.sd.toggleSD);
+    //     Redirect();
+    //     return msg;
+    //   },
+    //   error: (err) => err.toString(),
+    // });
+  };
+
+  const onDelete = () => {
+    // const Redirect = () => {
+    //   history.go(0);
+    // };
+
+    //  func del report
+    // toast.promise(, {
+    //   loading: "Menghapus laporan",
+    //   success: (msg) => {
+    //     Redirect();
+    //     return msg;
+    //   },
+    //   error: (err) => err.toString(),
+    // });
+  };
+
   return (
-    <SideDetailsWrapper
-      // onBlur={() => toggleFocusDetails()}
-      focus={props.sd.toggleSD}
-      tabIndex="0"
-      // ref={SideDetail}
-    >
+    <SideDetailsWrapper focus={sideDetailsStat} tabIndex="0">
       <Control>
-        <Action
-          onClick={() => props.sd.setToggleSD(!props.sd.toggleSD)}
-          title="Tutup Detail"
-        >
+        <Action onClick={sideDetailsStatToggle} title="Tutup Detail">
           <span className="material-icons">logout</span>
         </Action>
         {role === "admin" && response ? (
-          <CustomButton onClick={() => generatePDF()}>
-            unduh laporan
-          </CustomButton>
+          <CustomButton onClick={generate}>unduh laporan</CustomButton>
         ) : null}
         {role === "pengguna" && stat === "Menunggu" && NIKSession === NIK ? (
-          <CustomButton onClick={() => onDelete()}>hapus laporan</CustomButton>
+          <CustomButton onClick={onDelete}>hapus laporan</CustomButton>
         ) : null}
       </Control>
       <Header>

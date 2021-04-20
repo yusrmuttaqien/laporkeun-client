@@ -1,8 +1,10 @@
 import { useEffect, useState } from "react";
-import { useStoreState, useStoreActions } from "easy-peasy";
 import axios from "axios";
-import { storage } from "./util/Firebase";
+import { storage } from "util/Firebase";
 import toast from "react-hot-toast";
+import { useState as GlobalState } from "@hookstate/core";
+
+import { Instance } from "util/States";
 
 const instance = axios.create({
   baseURL: "http://localhost:5006/",
@@ -16,9 +18,8 @@ function useLaporanku(page, sort) {
   const [loading, setLoading] = useState(true);
   const [laporanku, setLaporanku] = useState([]);
 
-  const { token } = useStoreState((state) => ({
-    token: state.session.token,
-  }));
+  const state = GlobalState(Instance);
+  const { token } = state.session.get();
 
   useEffect(() => {
     setLaporanku([]);
@@ -70,9 +71,8 @@ function usePetugas(page, sort) {
   const [loading, setLoading] = useState(true);
   const [petugas, setPetugas] = useState([]);
 
-  const { token } = useStoreState((state) => ({
-    token: state.session.token,
-  }));
+  const state = GlobalState(Instance);
+  const { token } = state.session.get();
 
   useEffect(() => {
     setPetugas([]);
@@ -122,9 +122,8 @@ function useLaporanPublik(page, sort) {
   const [loading, setLoading] = useState(true);
   const [laporanpublik, setLaporanpublik] = useState([]);
 
-  const { token } = useStoreState((state) => ({
-    token: state.session.token,
-  }));
+  const state = GlobalState(Instance);
+  const { token } = state.session.get();
 
   useEffect(() => {
     setLaporanpublik([]);
@@ -176,9 +175,8 @@ function useLaporanBaru(page, sort) {
   const [loading, setLoading] = useState(true);
   const [laporanbaru, setLaporanbaru] = useState([]);
 
-  const { token } = useStoreState((state) => ({
-    token: state.session.token,
-  }));
+  const state = GlobalState(Instance);
+  const { token } = state.session.get();
 
   useEffect(() => {
     setLaporanbaru([]);
@@ -230,9 +228,8 @@ function useTanggapanku(page, sort) {
   const [loading, setLoading] = useState(true);
   const [tanggapanku, setTanggapanku] = useState([]);
 
-  const { token } = useStoreState((state) => ({
-    token: state.session.token,
-  }));
+  const state = GlobalState(Instance);
+  const { token } = state.session.get();
 
   useEffect(() => {
     setTanggapanku([]);
@@ -284,9 +281,8 @@ function useSemuaTanggapan(page, sort) {
   const [loading, setLoading] = useState(true);
   const [semuaTanggapan, setSemuaTanggapan] = useState([]);
 
-  const { token } = useStoreState((state) => ({
-    token: state.session.token,
-  }));
+  const state = GlobalState(Instance);
+  const { token } = state.session.get();
 
   useEffect(() => {
     setSemuaTanggapan([]);
@@ -333,10 +329,10 @@ function useSemuaTanggapan(page, sort) {
 }
 
 function useDetails() {
-  const { sideDetailsPayload, token } = useStoreState((state) => ({
-    sideDetailsPayload: state.sideDetailsPayload,
-    token: state.session.token,
-  }));
+  const state = GlobalState(Instance);
+  const { token } = state.session.get();
+  const sideDetailsPayload = state.sideDetailsPayload.get();
+
   const [activeDetails, setActiveDetails] = useState({
     id_report: null,
     id_petugas: null,
@@ -354,9 +350,6 @@ function useDetails() {
     name_petugas: null,
     loc: null,
   });
-  const { setResponseByIDReport } = useStoreActions((actions) => ({
-    setResponseByIDReport: actions.setResponseByIDReport,
-  }));
 
   var backToJSON = JSON.stringify(sideDetailsPayload, undefined, 2);
   backToJSON = JSON.parse(backToJSON);
@@ -377,7 +370,8 @@ function useDetails() {
             }
             const payload = response.data.output;
             console.log(payload);
-            setResponseByIDReport(payload.id_report);
+            // set response by id report
+            // setResponseByIDReport(payload.id_report);
             setActiveDetails({
               ...payload,
               name_petugas: payload.name_petugas
@@ -406,7 +400,8 @@ function useDetails() {
                 .getDownloadURL();
             }
             const payload = response.data.output;
-            setResponseByIDReport(payload.id_report);
+            // set response by id report
+            // setResponseByIDReport(payload.id_report);
             setActiveDetails({
               ...payload,
               name_petugas: payload.name_petugas
@@ -429,7 +424,6 @@ function useDetails() {
     backToJSON.nik,
     backToJSON.petugas,
     token,
-    setResponseByIDReport,
   ]);
 
   return { activeDetails };

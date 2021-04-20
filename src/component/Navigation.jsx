@@ -2,7 +2,9 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 import styled from "styled-components";
-import { useStoreState } from "easy-peasy";
+import { useState as GlobalState } from "@hookstate/core";
+
+import { Instance } from "util/States";
 
 const NavWrapper = styled.div`
   align-self: flex-end;
@@ -48,10 +50,9 @@ const NavWrapper = styled.div`
   }
 `;
 
-function Navigation() {
-  const { role } = useStoreState((state) => ({
-    role: state.session.role,
-  }));
+export default function Navigation() {
+  const state = GlobalState(Instance);
+  const { role } = state.session.get();
 
   return (
     <NavWrapper>

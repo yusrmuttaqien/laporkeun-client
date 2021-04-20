@@ -1,7 +1,9 @@
 import React from "react";
 import styled from "styled-components";
-import { useStoreState, useStoreActions } from "easy-peasy";
 import { toast } from "react-hot-toast";
+import { useState as GlobalState } from "@hookstate/core";
+
+import { Instance } from "util/States";
 
 import defaultUser from "./../asset/defaultUser.svg";
 
@@ -68,20 +70,13 @@ const CloseSession = styled.p`
   letter-spacing: 0.125em;
 `;
 
-export default function UserStats(props) {
-  const { role, name, NIK, pic } = useStoreState((state) => ({
-    role: state.session.role,
-    name: state.session.name,
-    NIK: state.session.NIK,
-    pic: state.session.pic,
-  }));
-  const { keluarApp } = useStoreActions((actions) => ({
-    keluarApp: actions.keluarApp,
-  }));
+export default function UserStats() {
+  const state = GlobalState(Instance);
+  const { role, name, NIK, pic } = state.session.get();
 
   const exitApp = async () => {
-    await keluarApp();
-    props.shut(false);
+    // Add clear state
+    state.sideDetails.set((prev) => !prev);
     toast.success("Anda berhasil keluar");
   };
 
@@ -100,7 +95,7 @@ export default function UserStats(props) {
           <p title={NIK}>{NIK}</p>
         </Details>
       </UserDetail>
-      <CloseSession onClick={() => exitApp()} title="Keluar ?">
+      <CloseSession onClick={exitApp} title="Keluar ?">
         Keluar
       </CloseSession>
     </StatsWrapper>

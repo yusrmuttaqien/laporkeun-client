@@ -1,13 +1,15 @@
 // NOTE: Hardcoded variable
-import React, { useState } from "react";
+import React from "react";
+import { useState as GlobalState } from "@hookstate/core";
 import styled from "styled-components";
 
-import LogoDesc from "./../asset/LogoDesc.svg";
-import About from "./../asset/about.svg";
-import { FormMasuk, FormDaftar } from "./Form";
-import { Navigation } from "./Navigation";
+import Forms from "./Form";
+import Navigation from "./Navigation";
+import { Instance } from "util/States";
 import UserStats from "./UserStats";
-import { useStoreState } from "easy-peasy";
+
+import LogoDesc from "asset/LogoDesc.svg";
+import About from "asset/about.svg";
 
 const NavWrapper = styled.div`
   display: flex;
@@ -54,7 +56,7 @@ const LogoContainer = styled.div`
   section {
     transition: ${(props) => props.theme.value.transition};
     transition-property: opacity;
-    
+
     &:nth-child(1) {
       opacity: 1;
     }
@@ -82,11 +84,8 @@ const LogoContainer = styled.div`
 `;
 
 export default function Navbar(props) {
-  const { isLogged } = useStoreState((state) => ({
-    isLogged: state.session.isLogged,
-  }));
-
-  const [toggle, setToggle] = useState("Masuk");
+  const state = GlobalState(Instance);
+  const { isLogged } = state.session.get();
 
   return (
     <NavWrapper isLogged={isLogged}>
@@ -113,12 +112,10 @@ export default function Navbar(props) {
       {isLogged ? (
         <>
           <Navigation />
-          <UserStats shut={props.shut} />
+          <UserStats />
         </>
-      ) : toggle === "Masuk" ? (
-        <FormMasuk toggleFormDefault={setToggle} />
       ) : (
-        <FormDaftar toggleFormDefault={setToggle} />
+        <Forms />
       )}
     </NavWrapper>
   );

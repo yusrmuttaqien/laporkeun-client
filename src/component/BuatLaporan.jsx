@@ -1,12 +1,11 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import { useForm } from "react-hook-form";
-import * as yup from "yup";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { toast } from "react-hot-toast";
-import { useStoreActions } from "easy-peasy";
-import { useHistory } from "react-router-dom";
+// import { toast } from "react-hot-toast";
+// import { useHistory } from "react-router-dom";
 
+import { SchemaLaporan } from "util/ValidationSchema";
 import {
   Label,
   Input,
@@ -17,7 +16,7 @@ import {
   Action,
   Button,
   Warning,
-} from "./GlobalStyling";
+} from "style/Components";
 
 const ReportHeader = styled.div`
   display: flex;
@@ -71,65 +70,29 @@ const CustomLabel = styled.label`
 // NOTE: Deprecated API
 const AlteredReport = Report.withComponent("form");
 
-const FILE_SIZE = 1000000;
-const SUPPORTED_FORMATS = ["image/jpg", "image/jpeg", "image/gif", "image/png"];
-
-const SchemaLaporan = yup.object().shape({
-  judulLaporan: yup
-    .string()
-    .required("Judul wajib diisi")
-    .max(30, "Judul maksimal 30 karakter"),
-  loc: yup
-    .string()
-    .required("Lokasi wajib diisi")
-    .max(30, "Lokasi maksimal 30 karakter"),
-  isiLaporan: yup
-    .string()
-    .required("Isi wajib diisi")
-    .max(2000, "Isi maksimal 2000 karakter"),
-  pic: yup
-    .mixed()
-    .test("fileType", "Unsupported File Format", (value) => {
-      if (value.length !== 0 && !SUPPORTED_FORMATS.includes(value[0].type)) {
-        return false;
-      } else {
-        return true;
-      }
-    })
-    .test("fileSize", "File Size is too large", (value) => {
-      if (value.length !== 0 && value[0].size >= FILE_SIZE) {
-        return false;
-      } else {
-        return true;
-      }
-    }),
-});
-
 function BuatLaporan() {
   const [action, setAction] = useState("Privat");
   const [filename, setFileName] = useState("");
   const { register, handleSubmit, errors } = useForm({
     resolver: yupResolver(SchemaLaporan),
   });
-  const { newReport } = useStoreActions((actions) => ({
-    newReport: actions.newReport,
-  }));
 
   const changeAction = () => {
     setAction(action === "Privat" ? "Publik" : "Privat");
   };
-  const history = useHistory();
+  // const history = useHistory();
 
   const onSubmit = async (data, e) => {
-    const datas = { ...data, vis: action };
-    toast.promise(newReport(datas), {
-      loading: "Tunggu sebentar kawan :)",
-      success: (msg) => {
-        history.push("/laporanku");
-        return msg;
-      },
-      error: (err) => err && err.toString(),
-    });
+    // const datas = { ...data, vis: action };
+    // func lapor
+    // toast.promise(, {
+    //   loading: "Tunggu sebentar kawan :)",
+    //   success: (msg) => {
+    //     history.push("/laporanku");
+    //     return msg;
+    //   },
+    //   error: (err) => err && err.toString(),
+    // });
   };
 
   const getFileName = (e) => {
@@ -156,14 +119,9 @@ function BuatLaporan() {
             <Label htmlFor="loc">
               lokasi laporan <Warning>{errors.loc?.message}</Warning>
             </Label>
-            <Input
-              type="text"
-              name="loc"
-              id="loc"
-              ref={register}
-            />
+            <Input type="text" name="loc" id="loc" ref={register} />
           </section>
-          <ActionCustom title="Ubah visibilitas" onClick={() => changeAction()}>
+          <ActionCustom title="Ubah visibilitas" onClick={changeAction}>
             <span className="material-icons">
               {action === "Publik" ? "public" : "public_off"}
             </span>

@@ -1,30 +1,22 @@
 import styled from "styled-components";
-import { Route, BrowserRouter as Router, Switch } from "react-router-dom";
 import { Toaster } from "react-hot-toast";
-import { useStoreRehydrated } from "easy-peasy";
-import { useState } from "react";
+import { Route, BrowserRouter as Router, Switch } from "react-router-dom";
+// import rfs from "rfsjs";
 
-// import BGWebP from "./asset/mainBG.webp";
-// import BGWebP01 from "./asset/mainBG_01.webp";
-// import BGWebP02 from "./asset/mainBG_02.webp";
-import BGWebP03 from "./asset/mainBG_03.webp";
-import BGProgressive from "./asset/mainBG_Progressive.jpg";
-import Navbar from "./component/Navbar";
-import { Splash, NotFound } from "./component/Splash";
-import BuatLaporan from "./component/BuatLaporan";
-import { run_check_webp_feature } from "./component/Function";
-import {
-  LaporanBaru,
-  Laporanku,
-  LaporanPublik,
-  Tanggapanku,
-  Petugas,
-  SemuaTanggapan,
-  Pengaturan
-} from "./component/Views";
-import SideDetails from "./component/SideDetails";
-import PrivateRoute from "./component/PrivateRoute";
-import rfs from "./component/RFS";
+import Navbar from "component/Navbar";
+import BuatLaporan from "component/BuatLaporan";
+import SideDetails from "component/SideDetails";
+import Laporanku from "component/Laporanku";
+import LaporanPublik from "component/LaporanPublik";
+import LaporanBaru from "component/LaporanBaru";
+import Tanggapanku from "component/Tanggapanku";
+import SemuaTanggapan from "component/SemuaTanggapan";
+import { Splash, NotFound } from "component/Splash";
+import PrivateRoute from "util/PrivateRoute";
+import { run_check_webp_feature } from "util/WebPCheck";
+
+import BGWebP03 from "asset/mainBG_03.webp";
+import BGProgressive from "asset/mainBG_Progressive.jpg";
 
 const AppWrapper = styled.div`
   background-image: url(${run_check_webp_feature ? BGWebP03 : BGProgressive});
@@ -69,31 +61,28 @@ const WrapToaster = styled.div`
   pointer-events: none;
 `;
 
-const Presisting = styled.div`
-  background-color: ${(props) => props.theme.color.dark};
-  color: ${(props) => props.theme.color.white};
-  font-weight: ${(props) => props.theme.value.font.medium};
-  ${rfs("2em", "font-size")}
+// const Presisting = styled.div`
+//   background-color: ${(props) => props.theme.color.dark};
+//   color: ${(props) => props.theme.color.white};
+//   font-weight: ${(props) => props.theme.value.font.medium};
+//   ${rfs("2em", "font-size")}
 
-  height: 100vh;
-  min-height: 640px; // TODO: Fix for mobile devices
-  width: 100vw;
-  max-width: 100%;
+//   height: 100vh;
+//   min-height: 640px; // TODO: Fix for mobile devices
+//   width: 100vw;
+//   max-width: 100%;
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
+//   display: flex;
+//   align-items: center;
+//   justify-content: center;
+// `;
 
 function App() {
-  const isRehydrated = useStoreRehydrated();
-  const [toggleSD, setToggleSD] = useState(false);
-
-  return isRehydrated ? (
+  return (
     <AppWrapper id="AppWraper">
       <Router>
-        <Navbar shut={setToggleSD} />
-        <SideDetails sd={{ toggleSD, setToggleSD }} />
+        <Navbar />
+        <SideDetails />
         <WrapToaster>
           <Toaster
             toastOptions={{
@@ -106,39 +95,32 @@ function App() {
             <Route exact path="/" component={Splash} />
             <PrivateRoute path="/buatlaporan" comp={BuatLaporan} />
             <PrivateRoute
-              sd={{ toggleSD, setToggleSD }}
               path="/laporanku"
               comp={Laporanku}
             />
             <PrivateRoute
-              sd={{ toggleSD, setToggleSD }}
               path="/laporanpublik"
               comp={LaporanPublik}
             />
             <PrivateRoute
-              sd={{ toggleSD, setToggleSD }}
               path="/laporanbaru"
               comp={LaporanBaru}
             />
             <PrivateRoute
-              sd={{ toggleSD, setToggleSD }}
-              path="/tanggapanku"
-              comp={Tanggapanku}
+             path="/tanggapanku"
+             comp={Tanggapanku}
             />
-            <PrivateRoute
-              sd={{ toggleSD, setToggleSD }}
+            <Route
               path="/semuatanggapan"
-              comp={SemuaTanggapan}
+              component={SemuaTanggapan}
             />
-            <PrivateRoute path="/petugas" comp={Petugas} />
-            <PrivateRoute path="/pengaturan" comp={Pengaturan} />
+            {/* <PrivateRoute path="/petugas" comp={Petugas} /> */}
+            {/* <PrivateRoute path="/pengaturan" comp={Pengaturan} /> */}
             <Route component={NotFound} />
           </Switch>
         </View>
       </Router>
     </AppWrapper>
-  ) : (
-    <Presisting>Mengambil State</Presisting>
   );
 }
 

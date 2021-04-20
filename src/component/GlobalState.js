@@ -1,8 +1,8 @@
 import { action, thunk, persist } from "easy-peasy";
 import toast from "react-hot-toast";
 
-import { instance } from "./FetchData";
-import { storage } from "./util/Firebase";
+import { instance } from "../util/CustomHooks";
+import { storage } from "../util/Firebase";
 
 export const state = {
   sideDetailsPayload: { id: null, nik: null, petugas: null },
