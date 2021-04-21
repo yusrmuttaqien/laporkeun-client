@@ -15,6 +15,7 @@ export const state = {
     telp: null,
     token: null,
     id_petugas: null,
+    picurl: null,
   }),
   newResponseByIDReport: null,
 
@@ -45,6 +46,7 @@ export const state = {
       if (response.data.responses.pic) {
         var storageRef = storage.ref("/profile");
         const fileRef = storageRef.child(response.data.responses.pic);
+        response.data.responses.picurl = response.data.responses.pic;
         response.data.responses.pic = await fileRef.getDownloadURL();
       }
 
@@ -144,7 +146,8 @@ export const state = {
     }
   }),
   updateProfile: thunk(async (actions, payload, { getState }) => {
-    var theName, type, imgURL;
+    var theName, type, imgURL, origin;
+    console.log(payload.pic[0]);
 
     if (payload.pic[0]) {
       type = payload.pic[0].name.split(".");
@@ -178,7 +181,15 @@ export const state = {
       }
 
       if (!payload.pic[0]) {
-        payload.pic = getState().session.pic;
+        payload.pic = getState().session.picurl;
+
+        if (getState().session.picurl) {
+          imgURL = getState().session.picurl;
+          var storageRefs = storage.ref("/profile");
+          const fileRef = storageRefs.child(imgURL);
+          origin = imgURL;
+          imgURL = await fileRef.getDownloadURL();
+        }
       }
 
       await instance.put("/auth/profile", payload, {
@@ -188,6 +199,7 @@ export const state = {
       });
 
       await actions.reSetSession({
+        picurl: theName ? theName : origin,
         pic: imgURL,
         name: payload.name,
         telp: payload.telp,
@@ -195,6 +207,7 @@ export const state = {
 
       return await Promise.resolve("Profil berhasil diubah");
     } catch (err) {
+      console.log(err);
       return await Promise.reject("Nama sudah ada");
     }
   }),
@@ -226,6 +239,8 @@ export const state = {
       id_petugas,
       password,
       pic,
+      telp,
+      picurl,
     } = payload.data.responses;
     return {
       ...state,
@@ -244,6 +259,8 @@ export const state = {
         id_petugas: id_petugas && id_petugas,
         password,
         pic,
+        telp,
+        picurl,
       },
     };
   }),
