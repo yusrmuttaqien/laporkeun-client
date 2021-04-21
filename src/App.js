@@ -1,9 +1,9 @@
 import styled from "styled-components";
 import { Toaster } from "react-hot-toast";
 import { Route, BrowserRouter as Router, Switch } from "react-router-dom";
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useState } from "react";
 import { useState as GlobalState } from "@hookstate/core";
-// import rfs from "rfsjs";
+import rfs from "rfsjs";
 
 import Navbar from "component/Navbar";
 import BuatLaporan from "component/BuatLaporan";
@@ -68,43 +68,50 @@ const WrapToaster = styled.div`
   pointer-events: none;
 `;
 
-// const Presisting = styled.div`
-//   background-color: ${(props) => props.theme.color.dark};
-//   color: ${(props) => props.theme.color.white};
-//   font-weight: ${(props) => props.theme.value.font.medium};
-//   ${rfs("2em", "font-size")}
+const Presisting = styled.div`
+  background-color: ${(props) => props.theme.color.dark};
+  color: ${(props) => props.theme.color.white};
+  font-weight: ${(props) => props.theme.value.font.medium};
+  ${rfs("2em", "font-size")}
 
-//   height: 100vh;
-//   min-height: 640px; // TODO: Fix for mobile devices
-//   width: 100vw;
-//   max-width: 100%;
+  height: 100vh;
+  min-height: 640px; // TODO: Fix for mobile devices
+  width: 100vw;
+  max-width: 100%;
 
-//   display: flex;
-//   align-items: center;
-//   justify-content: center;
-// `;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+`;
 
 function App() {
   const state = GlobalState(Instance);
+  const [isLoading, setIsLoading] = useState(true);
 
   // check login status
   const callGetDetails = useCallback(
     async (user) => {
       const details = await fetchUserData(user.email);
-      state.session.set(details);
+      await state.session.set((prev) => {
+        return { isLogged: true, ...details };
+      });
+      setIsLoading(false);
     },
     [state.session]
   );
 
   useEffect(() => {
     const unsubs = auth.onAuthStateChanged((user) => {
+      // setIsLoading(true);
       if (user) callGetDetails(user);
     });
 
     return unsubs;
   }, [callGetDetails]);
 
-  return (
+  return isLoading ? (
+    <Presisting>Mengambil state</Presisting>
+  ) : (
     <AppWrapper id="AppWraper">
       <Router>
         <Navbar />

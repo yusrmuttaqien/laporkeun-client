@@ -45,7 +45,7 @@ async function fetchUserData(email) {
       details = doc.data();
       details.isLogged = true;
       details.name = name;
-      details.NIK = details.nik
+      details.NIK = details.nik;
     })
     .catch((err) => console.log(err));
 
@@ -84,9 +84,26 @@ async function regisPengguna(cred) {
   }
 }
 
+async function login(cred) {
+  console.log(cred);
+  const { name, kataSandi } = cred;
+  const fakeEmail = name + "@laporkeun.com";
+
+  try {
+    await auth.signInWithEmailAndPassword(fakeEmail, kataSandi);
+    return Promise.resolve(`Selamat datang, ${name}`);
+  } catch (err) {
+    if (err.code === "auth/wrong-password") {
+      return Promise.reject("Password salah");
+    } else if (err.code === "auth/user-not-found") {
+      return Promise.reject("Akun tidak ditemukan");
+    }
+  }
+}
+
 async function logout() {
   await auth.signOut();
   return true;
 }
 
-export { regisPengguna, logout, fetchUserData };
+export { regisPengguna, logout, fetchUserData, login };

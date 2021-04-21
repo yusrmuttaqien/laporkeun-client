@@ -7,7 +7,7 @@ import { useState as GlobalState } from "@hookstate/core";
 
 import { Label, Input, Warning } from "style/Components";
 import { SchemaDaftar, SchemaMasuk } from "util/ValidationSchema";
-import { regisPengguna, logout } from "util/DataFetch";
+import { regisPengguna, login } from "util/DataFetch";
 import { Instance } from "util/States";
 
 const FormWrapper = styled.div`
@@ -72,10 +72,14 @@ function FormMasuk() {
   };
 
   const onSubmit = (data) => {
-    toast.promise(logout(), {
+    setIsLoading(true);
+    toast.promise(login(data), {
       loading: "Tunggu sebentar",
       success: (msg) => msg,
-      error: (err) => err && err.toString(),
+      error: (err) => {
+        setIsLoading(false);
+        return err && err.toString();
+      },
     });
   };
 
