@@ -9,12 +9,12 @@ const State = {
     NIK: null,
     pic: null,
     telp: null,
-    token: null,
-    id_petugas: null,
   },
   sideDetails: false,
   newResponseByIDReport: null,
   forms: "Masuk",
 };
 
-export const Instance = createState(State);
+const Instance = createState(State);
+
+export { Instance, State };

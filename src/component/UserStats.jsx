@@ -2,8 +2,10 @@ import React from "react";
 import styled from "styled-components";
 import { toast } from "react-hot-toast";
 import { useState as GlobalState } from "@hookstate/core";
+import { useHistory } from "react-router-dom";
 
-import { Instance } from "util/States";
+import { Instance, State } from "util/States";
+import { logout } from "util/DataFetch";
 
 import defaultUser from "./../asset/defaultUser.svg";
 
@@ -74,9 +76,13 @@ export default function UserStats() {
   const state = GlobalState(Instance);
   const { role, name, NIK, pic } = state.session.get();
 
+  const history = useHistory();
+
   const exitApp = async () => {
-    // Add clear state
+    await logout();
+    state.session.set(State);
     state.sideDetails.set((prev) => !prev);
+    history.push("/");
     toast.success("Anda berhasil keluar");
   };
 

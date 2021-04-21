@@ -7,11 +7,16 @@ const SchemaDaftar = yup.object().shape({
   NIK: yup
     .string()
     .required("NIK wajib diisi")
-    .test("length", "NIK wajib 16 angka", (val) => val.toString().length === 16)
-    .test("onlyNumber", "NIK berupa angka", (val) => /^\d+$/.test(val)),
+    .test("onlyNumber", "NIK berupa angka", (val) => /^\d+$/.test(val))
+    .test(
+      "length",
+      "NIK wajib 16 angka",
+      (val) => val.toString().length === 16
+    ),
   name: yup
     .string()
     .required("Nama wajib diisi")
+    .test("noAdSign", "Hilangkan tanda '@'", (val) => !val.includes("@"))
     .max(30, "Nama maks 30 karakter"),
   kataSandi: yup
     .string()
@@ -24,7 +29,10 @@ const SchemaMasuk = yup.object().shape({
     .string()
     .required("Kata sandi wajib diisi")
     .min(8, "Kata sandi minimal 8 karakter"),
-  name: yup.string().required("Nama wajib diisi"),
+  name: yup
+    .string()
+    .required("Nama wajib diisi")
+    .test("noAdSign", "Hilangkan tanda '@'", (val) => !val.includes("@")),
 });
 
 const SchemaLaporan = yup.object().shape({
@@ -81,6 +89,7 @@ const SchemaDaftarPetugas = yup.object().shape({
   name: yup
     .string()
     .required("Nama wajib diisi")
+    .test("noAdSign", "Hilangkan tanda '@'", (val) => !val.includes("@"))
     .max(30, "Nama maks 30 karakter"),
   kataSandi: yup
     .string()
@@ -104,6 +113,7 @@ const SchemaSetting = yup.object().shape({
   name: yup
     .string()
     .required("Nama wajib terisi")
+    .test("noAdSign", "Hilangkan tanda '@'", (val) => !val.includes("@"))
     .max(30, "Nama maks 30 karakter"),
   kataSandi: yup
     .string()

@@ -1,12 +1,13 @@
-import React from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import styled from "styled-components";
 import { yupResolver } from "@hookform/resolvers/yup";
-// import { toast } from "react-hot-toast";
+import { toast } from "react-hot-toast";
 import { useState as GlobalState } from "@hookstate/core";
 
 import { Label, Input, Warning } from "style/Components";
 import { SchemaDaftar, SchemaMasuk } from "util/ValidationSchema";
+import { regisPengguna, logout } from "util/DataFetch";
 import { Instance } from "util/States";
 
 const FormWrapper = styled.div`
@@ -60,6 +61,8 @@ const Form = styled.form`
 
 function FormMasuk() {
   const state = GlobalState(Instance);
+  const [isLoading, setIsLoading] = useState(false);
+
   const { register, handleSubmit, errors } = useForm({
     resolver: yupResolver(SchemaMasuk),
   });
@@ -69,12 +72,11 @@ function FormMasuk() {
   };
 
   const onSubmit = (data) => {
-    // func masuk
-    // toast.promise(, {
-    //   loading: "Tunggu sebentar kawan :)",
-    //   success: (msg) => msg,
-    //   error: (err) => err && err.toString(),
-    // });
+    toast.promise(logout(), {
+      loading: "Tunggu sebentar",
+      success: (msg) => msg,
+      error: (err) => err && err.toString(),
+    });
   };
 
   return (
@@ -87,7 +89,9 @@ function FormMasuk() {
         <Label htmlFor="kataSandi">Kata sandi</Label>
         <Input type="password" name="kataSandi" id="kataSandi" ref={register} />
         <Warning>{errors.kataSandi?.message}</Warning>
-        <button type="submit">Masuk</button>
+        <button type="submit" disabled={isLoading}>
+          Masuk
+        </button>
         <p onClick={() => switching()}>belum punya akun nih!</p>
       </Form>
     </FormWrapper>
@@ -96,6 +100,8 @@ function FormMasuk() {
 
 function FormDaftar() {
   const state = GlobalState(Instance);
+  const [isLoading, setIsLoading] = useState(false);
+
   const { register, handleSubmit, errors } = useForm({
     resolver: yupResolver(SchemaDaftar),
   });
@@ -105,13 +111,15 @@ function FormDaftar() {
   };
 
   const onSubmit = (data) => {
-    console.log(data)
-    // func regis
-    // toast.promise(, {
-    //   loading: "Tunggu sebentar kawan :)",
-    //   success: (msg) => msg,
-    //   error: (err) => err && err.toString(),
-    // });
+    setIsLoading(true);
+    toast.promise(regisPengguna(data), {
+      loading: "Tunggu sebentar",
+      success: (msg) => msg,
+      error: (err) => {
+        setIsLoading(false);
+        return err && err.toString();
+      },
+    });
   };
 
   return (
@@ -127,7 +135,9 @@ function FormDaftar() {
         <Label htmlFor="kataSandi">Kata sandi</Label>
         <Input type="password" name="kataSandi" id="kataSandi" ref={register} />
         <Warning>{errors.kataSandi?.message}</Warning>
-        <button type="submit">Daftar</button>
+        <button type="submit" disabled={isLoading}>
+          Daftar
+        </button>
         <p onClick={() => switching()}>udah punya akun nih!</p>
       </Form>
     </FormWrapper>

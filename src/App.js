@@ -1,6 +1,8 @@
 import styled from "styled-components";
 import { Toaster } from "react-hot-toast";
 import { Route, BrowserRouter as Router, Switch } from "react-router-dom";
+import { useEffect, useCallback } from "react";
+import { useState as GlobalState } from "@hookstate/core";
 // import rfs from "rfsjs";
 
 import Navbar from "component/Navbar";
@@ -16,6 +18,9 @@ import Pengaturan from "component/Pengaturan";
 import { Splash, NotFound } from "component/Splash";
 import PrivateRoute from "util/PrivateRoute";
 import { run_check_webp_feature } from "util/WebPCheck";
+import { auth } from "util/Firebase";
+import { fetchUserData } from "util/DataFetch";
+import { Instance } from "util/States";
 
 import BGWebP03 from "asset/mainBG_03.webp";
 import BGProgressive from "asset/mainBG_Progressive.jpg";
@@ -80,6 +85,25 @@ const WrapToaster = styled.div`
 // `;
 
 function App() {
+  const state = GlobalState(Instance);
+
+  // check login status
+  const callGetDetails = useCallback(
+    async (user) => {
+      const details = await fetchUserData(user.email);
+      state.session.set(details);
+    },
+    [state.session]
+  );
+
+  useEffect(() => {
+    const unsubs = auth.onAuthStateChanged((user) => {
+      if (user) callGetDetails(user);
+    });
+
+    return unsubs;
+  }, [callGetDetails]);
+
   return (
     <AppWrapper id="AppWraper">
       <Router>
