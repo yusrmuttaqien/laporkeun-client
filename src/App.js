@@ -86,15 +86,14 @@ const Presisting = styled.div`
 
 function App() {
   const state = GlobalState(Instance);
+  // TODO: Handle this
   const [isLoading, setIsLoading] = useState(true);
 
   // check login status
   const callGetDetails = useCallback(
     async (user) => {
-      const details = await fetchUserData(user.email);
-      await state.session.set((prev) => {
-        return { isLogged: true, ...details };
-      });
+      var details = await fetchUserData(user.email);
+      await state.session.set(details);
       setIsLoading(false);
     },
     [state.session]
@@ -102,8 +101,11 @@ function App() {
 
   useEffect(() => {
     const unsubs = auth.onAuthStateChanged((user) => {
-      // setIsLoading(true);
-      if (user) callGetDetails(user);
+      if (user) {
+        callGetDetails(user);
+      } else {
+        setIsLoading(false);
+      }
     });
 
     return unsubs;

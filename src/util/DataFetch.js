@@ -1,12 +1,15 @@
 import { database, auth } from "util/Firebase";
 
-function userNewTemplate(NIK) {
+function userNewTemplate(cred) {
+  const { NIK, name } = cred;
+
   return {
     nik: NIK,
-    pic: "",
+    pic: null,
     role: "pengguna",
-    telp: "",
+    telp: null,
     acc_date: new Date().toISOString().split("T")[0],
+    name,
   };
 }
 
@@ -34,8 +37,7 @@ async function checkNIK(NIK) {
 }
 
 async function fetchUserData(email) {
-  const name = email.split("@")[0];
-  var details;
+  var details = {};
 
   await database
     .collection("users")
@@ -44,9 +46,10 @@ async function fetchUserData(email) {
     .then((doc) => {
       details = doc.data();
       details.isLogged = true;
-      details.name = name;
       details.NIK = details.nik;
+      // TODO: Handle users picURL
     })
+    //  TODO: Handle this
     .catch((err) => console.log(err));
 
   return details;
@@ -54,8 +57,9 @@ async function fetchUserData(email) {
 
 async function regisPengguna(cred) {
   const { name, NIK, kataSandi } = cred;
-  const usrCred = userNewTemplate(NIK);
-  const fakeEmail = name + "@laporkeun.com";
+  const usrCred = userNewTemplate({ NIK, name });
+  var fakeEmail = name + "@laporkeun.com";
+  fakeEmail = fakeEmail.toLowerCase();
 
   //   Check NIK
   const isExist = await checkNIK(NIK);
@@ -69,35 +73,27 @@ async function regisPengguna(cred) {
   try {
     await auth.createUserWithEmailAndPassword(fakeEmail, kataSandi);
   } catch (err) {
-    if (err.code === "auth/email-already-in-use") {
-      return Promise.reject("Nama sudah dipakai");
-    }
-    return Promise.reject("Kesalahan mendaftarkan akun");
+    return Promise.reject(`Firebase err: ${err.code}`);
   }
 
   //   Create account details
   try {
     await database.collection("users").doc(fakeEmail).set(usrCred);
-    return Promise.resolve("Akun berhasil dibuat");
+    return Promise.resolve(`Akun ${name} berhasil dibuat`);
   } catch (err) {
-    return Promise.reject("Kesalahan menambahkan detail akun");
+    return Promise.reject(`Firebase err: ${err.code}`);
   }
 }
 
 async function login(cred) {
-  console.log(cred);
   const { name, kataSandi } = cred;
-  const fakeEmail = name + "@laporkeun.com";
+  const fakeEmail = name.toLowerCase() + "@laporkeun.com";
 
   try {
     await auth.signInWithEmailAndPassword(fakeEmail, kataSandi);
     return Promise.resolve(`Selamat datang, ${name}`);
   } catch (err) {
-    if (err.code === "auth/wrong-password") {
-      return Promise.reject("Password salah");
-    } else if (err.code === "auth/user-not-found") {
-      return Promise.reject("Akun tidak ditemukan");
-    }
+    return Promise.reject(`Firebase err: ${err.code}`);
   }
 }
 

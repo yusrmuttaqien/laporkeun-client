@@ -68,6 +68,16 @@ const CustomButton = styled(Button)`
   text-overflow: ellipsis;
 `;
 
+const CustomButton02 = styled(Button)`
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+
+  &:nth-child(2) {
+    margin-left: 1em;
+  }
+`;
+
 const CustomInput = styled.input`
   display: none;
 `;
@@ -89,16 +99,14 @@ export default function Pengaturan() {
   pathname = pathname.substring(1);
 
   const state = GlobalState(Instance);
-  const { pic, name, telp, password } = state.session.get();
+  const { pic, name, telp } = state.session.get();
 
   const [filename, setFileName] = useState("");
-  const [/*aspectRatio,*/ setAspectRatio] = useState();
-  // const [name, setName] = useState(nameSession);
-  // const [telp, setTelp] = useState(telpSession);
-  // const [kataSandi, setKataSandi] = useState("defaultnottouse");
+  const [aspectRatio, setAspectRatio] = useState();
 
   const { register, handleSubmit, errors } = useForm({
     resolver: yupResolver(SchemaSetting),
+    context: { aspectRatio },
   });
 
   const getFileName = (e) => {
@@ -111,6 +119,7 @@ export default function Pengaturan() {
   };
 
   const onSubmit = (data) => {
+    console.log(data);
     //   func Update profile
     // toast.promise(, {
     //   loading: "Tunggu sebentar kawan :)",
@@ -127,9 +136,12 @@ export default function Pengaturan() {
       <CustomReport>
         <div className="reportHeader">
           <h1 title={pathname}>{pathname}</h1>
-          <Button type="submit" form="changeSetting">
-            Simpan
-          </Button>
+          <section>
+            <CustomButton02>Hapus akun</CustomButton02>
+            <CustomButton02 type="submit" form="changeSetting">
+              Simpan
+            </CustomButton02>
+          </section>
         </div>
         <SettingWrapper
           id="changeSetting"
@@ -178,11 +190,11 @@ export default function Pengaturan() {
               <Warning>{errors.name?.message}</Warning>
               <Label htmlFor="telp">Telp</Label>
               <Input
-                type="number"
+                type="txt"
                 name="telp"
                 id="telp"
                 ref={register}
-                defaultValue={telp}
+                defaultValue={telp && telp}
               />
               <Warning>{errors.telp?.message}</Warning>
               <Label htmlFor="kataSandi">Kata sandi</Label>
@@ -191,7 +203,6 @@ export default function Pengaturan() {
                 name="kataSandi"
                 id="kataSandi"
                 ref={register}
-                defaultValue={password}
               />
               <Warning>{errors.kataSandi?.message}</Warning>
             </CustomFormWrapper>

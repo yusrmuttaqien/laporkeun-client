@@ -64,7 +64,7 @@ function FormMasuk() {
   const [isLoading, setIsLoading] = useState(false);
 
   const { register, handleSubmit, errors } = useForm({
-    resolver: yupResolver(SchemaMasuk),
+    resolver: yupResolver(SchemaMasuk)
   });
 
   const switching = () => {

@@ -1,5 +1,15 @@
 import { createState } from "@hookstate/core";
 
+const SessionTemplate = {
+  isLogged: false,
+  role: null,
+  name: null,
+  NIK: null,
+  pic: null,
+  picURL: null,
+  telp: null,
+}
+
 const State = {
   sideDetailsPayload: { id: null, nik: null, petugas: null },
   session: {
@@ -8,6 +18,7 @@ const State = {
     name: null,
     NIK: null,
     pic: null,
+    picURL: null,
     telp: null,
   },
   sideDetails: false,
@@ -17,4 +28,4 @@ const State = {
 
 const Instance = createState(State);
 
-export { Instance, State };
+export { Instance, SessionTemplate };
