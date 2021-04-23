@@ -4,7 +4,7 @@ import { useLocation } from "react-router-dom";
 import { useState as GlobalState } from "@hookstate/core";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
-// import toast from "react-hot-toast";
+import toast from "react-hot-toast";
 
 import {
   ReportWrapper,
@@ -16,6 +16,7 @@ import {
 } from "style/Components";
 import { Instance } from "util/States";
 import { SchemaSetting } from "util/ValidationSchema";
+import { updateProfile } from "util/DataFetch";
 
 import defaultUser from "asset/defaultUser.svg";
 
@@ -119,17 +120,18 @@ export default function Pengaturan() {
   };
 
   const onSubmit = (data) => {
-    console.log(data);
-    //   func Update profile
-    // toast.promise(, {
-    //   loading: "Tunggu sebentar kawan :)",
-    //   success: (msg) => {
-    //     // history.go(0);
-    //     return msg;
-    //   },
-    //   error: (err) => err && err.toString(),
-    // });
+    const sessionData = { pic, name, telp };
+    toast.promise(updateProfile({ data, sessionData }), {
+      loading: "Tunggu sebentar kawan :)",
+      success: (msg) => {
+        // history.go(0);
+        return msg;
+      },
+      error: (err) => err && err.toString(),
+    });
   };
+
+  const onDelete = () => {};
 
   return (
     <ReportWrapper>

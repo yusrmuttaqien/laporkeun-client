@@ -1,5 +1,6 @@
 import { database, auth } from "util/Firebase";
 
+// NOTE: Helper Function
 function userNewTemplate(cred) {
   const { NIK, name } = cred;
 
@@ -36,6 +37,31 @@ async function checkNIK(NIK) {
   return isExist;
 }
 
+function checkWithSession(data, sessionData) {
+  const { name, telp, kataSandi, pic } = data;
+  const { name: currName, telp: currTelp } = sessionData;
+  const toChange = {};
+
+  if (name !== currName) {
+    toChange.name = name;
+  }
+
+  if (telp !== currTelp) {
+    toChange.telp = telp;
+  }
+
+  if (kataSandi) {
+    toChange.kataSandi = kataSandi;
+  }
+
+  if (pic[0]) {
+    toChange.pic = pic[0];
+  }
+
+  return toChange;
+}
+
+// NOTE: Main Function
 async function fetchUserData(email) {
   var details = {};
 
@@ -85,6 +111,11 @@ async function regisPengguna(cred) {
   }
 }
 
+async function updateProfile(update) {
+  const { data, sessionData } = update;
+  const dataChange = await checkWithSession(data, sessionData);
+}
+
 async function login(cred) {
   const { name, kataSandi } = cred;
   const fakeEmail = name.toLowerCase() + "@laporkeun.com";
@@ -102,4 +133,4 @@ async function logout() {
   return true;
 }
 
-export { regisPengguna, logout, fetchUserData, login };
+export { regisPengguna, logout, fetchUserData, login, updateProfile };
