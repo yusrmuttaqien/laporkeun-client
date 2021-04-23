@@ -15,6 +15,7 @@ import Tanggapanku from "component/Tanggapanku";
 import SemuaTanggapan from "component/SemuaTanggapan";
 import Petugas from "component/Petugas";
 import Pengaturan from "component/Pengaturan";
+import { Modal } from "component/Modal";
 import { Splash, NotFound } from "component/Splash";
 import PrivateRoute from "util/PrivateRoute";
 import { run_check_webp_feature } from "util/WebPCheck";
@@ -125,6 +126,7 @@ function App() {
             }}
           />
         </WrapToaster>
+        <Modal />
         <View id="View">
           <Switch>
             <Route exact path="/" component={Splash} />

@@ -68,11 +68,19 @@ const CustomSelect = styled(Select)`
 
       &.Select__option--is-focused {
         background-color: ${(props) => props.theme.color.purple};
+
+        &:hover {
+          background-color: ${(props) => props.theme.color.purple};
+        }
       }
     }
 
     &.Select__option--is-focused {
       background-color: transparent;
+
+      &:hover {
+        background-color: ${(props) => props.theme.color.grey};
+      }
     }
   }
 
