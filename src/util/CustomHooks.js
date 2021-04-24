@@ -4,7 +4,7 @@ import { storage } from "util/Firebase";
 import toast from "react-hot-toast";
 import { useState as GlobalState } from "@hookstate/core";
 
-import { Instance } from "util/States";
+import { DataInstance, SDInstance } from "util/States";
 
 const instance = axios.create({
   baseURL: "http://localhost:5006/",
@@ -18,7 +18,7 @@ function useLaporanku(page, sort) {
   const [loading, setLoading] = useState(true);
   const [laporanku, setLaporanku] = useState([]);
 
-  const state = GlobalState(Instance);
+  const state = GlobalState(DataInstance);
   const { token } = state.session.get();
 
   useEffect(() => {
@@ -71,7 +71,7 @@ function usePetugas(page, sort) {
   const [loading, setLoading] = useState(true);
   const [petugas, setPetugas] = useState([]);
 
-  const state = GlobalState(Instance);
+  const state = GlobalState(DataInstance);
   const { token } = state.session.get();
 
   useEffect(() => {
@@ -122,7 +122,7 @@ function useLaporanPublik(page, sort) {
   const [loading, setLoading] = useState(true);
   const [laporanpublik, setLaporanpublik] = useState([]);
 
-  const state = GlobalState(Instance);
+  const state = GlobalState(DataInstance);
   const { token } = state.session.get();
 
   useEffect(() => {
@@ -175,7 +175,7 @@ function useLaporanBaru(page, sort) {
   const [loading, setLoading] = useState(true);
   const [laporanbaru, setLaporanbaru] = useState([]);
 
-  const state = GlobalState(Instance);
+  const state = GlobalState(DataInstance);
   const { token } = state.session.get();
 
   useEffect(() => {
@@ -228,7 +228,7 @@ function useTanggapanku(page, sort) {
   const [loading, setLoading] = useState(true);
   const [tanggapanku, setTanggapanku] = useState([]);
 
-  const state = GlobalState(Instance);
+  const state = GlobalState(DataInstance);
   const { token } = state.session.get();
 
   useEffect(() => {
@@ -281,7 +281,7 @@ function useSemuaTanggapan(page, sort) {
   const [loading, setLoading] = useState(true);
   const [semuaTanggapan, setSemuaTanggapan] = useState([]);
 
-  const state = GlobalState(Instance);
+  const state = GlobalState(DataInstance);
   const { token } = state.session.get();
 
   useEffect(() => {
@@ -329,9 +329,10 @@ function useSemuaTanggapan(page, sort) {
 }
 
 function useDetails() {
-  const state = GlobalState(Instance);
-  const { token } = state.session.get();
-  const sideDetailsPayload = state.sideDetailsPayload.get();
+  const DataState = GlobalState(DataInstance);
+  const SDState = GlobalState(SDInstance);
+  const { token } = DataState.session.get();
+  const sideDetailsPayload = SDState.payload.get();
 
   const [activeDetails, setActiveDetails] = useState({
     id_report: null,
@@ -419,12 +420,7 @@ function useDetails() {
       }
     };
     fetch();
-  }, [
-    backToJSON.id,
-    backToJSON.nik,
-    backToJSON.petugas,
-    token,
-  ]);
+  }, [backToJSON.id, backToJSON.nik, backToJSON.petugas, token]);
 
   return { activeDetails };
 }

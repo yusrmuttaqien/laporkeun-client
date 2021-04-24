@@ -15,13 +15,13 @@ import Tanggapanku from "component/Tanggapanku";
 import SemuaTanggapan from "component/SemuaTanggapan";
 import Petugas from "component/Petugas";
 import Pengaturan from "component/Pengaturan";
-import { Modal } from "component/Modal";
+import { Popup } from "util/Popup";
 import { Splash, NotFound } from "component/Splash";
 import PrivateRoute from "util/PrivateRoute";
 import { run_check_webp_feature } from "util/WebPCheck";
 import { auth } from "util/Firebase";
 import { fetchUserData } from "util/DataFetch";
-import { Instance } from "util/States";
+import { DataInstance } from "util/States";
 
 import BGWebP03 from "asset/mainBG_03.webp";
 import BGProgressive from "asset/mainBG_Progressive.jpg";
@@ -61,7 +61,7 @@ const WrapToaster = styled.div`
   position: absolute;
   top: 0;
   left: 50%;
-  z-index: 1002;
+  z-index: 1004;
 
   height: 100px;
   width: 100px;
@@ -86,7 +86,7 @@ const Presisting = styled.div`
 `;
 
 function App() {
-  const state = GlobalState(Instance);
+  const state = GlobalState(DataInstance);
   // TODO: Handle this
   const [isLoading, setIsLoading] = useState(true);
 
@@ -126,7 +126,7 @@ function App() {
             }}
           />
         </WrapToaster>
-        <Modal />
+        <Popup />
         <View id="View">
           <Switch>
             <Route exact path="/" component={Splash} />

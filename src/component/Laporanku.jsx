@@ -13,7 +13,7 @@ import {
   ReportBody,
   Button,
 } from "style/Components";
-import { Instance } from "util/States";
+import { SDInstance } from "util/States";
 
 const options = [
   { value: "Date DESC", label: "Terbaru" },
@@ -176,7 +176,7 @@ export default function Laporanku() {
   let { pathname } = useLocation();
   pathname = pathname.substring(1);
 
-  const state = GlobalState(Instance);
+  const state = GlobalState(SDInstance);
 
   const [page, setPage] = useState(1);
   const [sort, setSort] = useState("Date DESC");
@@ -193,7 +193,7 @@ export default function Laporanku() {
   };
 
   const handleDetails = (laporan) => {
-    state.sideDetails.set(true);
+    state.stat.set(true);
     // fetch detail report
     // detailReport({ id: laporan.id_report, nik: laporan.NIK });
   };

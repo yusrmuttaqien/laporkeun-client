@@ -2,10 +2,10 @@ import React from "react";
 import { Redirect, Route } from "react-router-dom";
 import { useState as GlobalState } from "@hookstate/core";
 
-import { Instance } from "util/States";
+import { DataInstance } from "util/States";
 
 export default function PrivateRoute({ comp: Component, ...rest }) {
-  const state = GlobalState(Instance);
+  const state = GlobalState(DataInstance);
   const { isLogged, role } = state.session.get();
 
   let destiny = rest.path;

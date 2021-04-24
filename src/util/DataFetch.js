@@ -128,9 +128,20 @@ async function login(cred) {
   }
 }
 
+async function deleteAccount(data) {
+  console.log(data);
+}
+
 async function logout() {
   await auth.signOut();
   return true;
 }
 
-export { regisPengguna, logout, fetchUserData, login, updateProfile };
+export {
+  regisPengguna,
+  logout,
+  fetchUserData,
+  login,
+  updateProfile,
+  deleteAccount,
+};

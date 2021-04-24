@@ -5,7 +5,7 @@ import styled from "styled-components";
 
 import Forms from "./Form";
 import Navigation from "./Navigation";
-import { Instance } from "util/States";
+import { DataInstance } from "util/States";
 import UserStats from "./UserStats";
 
 import LogoDesc from "asset/LogoDesc.svg";
@@ -84,7 +84,7 @@ const LogoContainer = styled.div`
 `;
 
 export default function Navbar(props) {
-  const state = GlobalState(Instance);
+  const state = GlobalState(DataInstance);
   const { isLogged } = state.session.get();
 
   return (

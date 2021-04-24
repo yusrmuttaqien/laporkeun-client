@@ -8,7 +8,7 @@ import { useState as GlobalState } from "@hookstate/core";
 import { Label, Input, Warning } from "style/Components";
 import { SchemaDaftar, SchemaMasuk } from "util/ValidationSchema";
 import { regisPengguna, login } from "util/DataFetch";
-import { Instance } from "util/States";
+import { DataInstance } from "util/States";
 
 const FormWrapper = styled.div`
   display: flex;
@@ -60,7 +60,7 @@ const Form = styled.form`
 `;
 
 function FormMasuk() {
-  const state = GlobalState(Instance);
+  const state = GlobalState(DataInstance);
   const [isLoading, setIsLoading] = useState(false);
 
   const { register, handleSubmit, errors } = useForm({
@@ -103,7 +103,7 @@ function FormMasuk() {
 }
 
 function FormDaftar() {
-  const state = GlobalState(Instance);
+  const state = GlobalState(DataInstance);
   const [isLoading, setIsLoading] = useState(false);
 
   const { register, handleSubmit, errors } = useForm({
@@ -149,6 +149,6 @@ function FormDaftar() {
 }
 
 export default function Forms() {
-  const state = GlobalState(Instance).forms.get();
+  const state = GlobalState(DataInstance).forms.get();
   return state === "Masuk" ? <FormMasuk /> : <FormDaftar />;
 }

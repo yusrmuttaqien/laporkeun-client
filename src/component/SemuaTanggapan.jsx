@@ -13,7 +13,7 @@ import {
   ReportBody,
   Button,
 } from "style/Components";
-import { Instance } from "util/States";
+import { SDInstance } from "util/States";
 
 const options = [
     { value: "Date DESC", label: "Terbaru" },
@@ -171,7 +171,7 @@ export default function SemuaTanggapan(props) {
   const [page, setPage] = useState(1);
   const [sort, setSort] = useState("Date DESC");
 
-  const state = GlobalState(Instance);
+  const state = GlobalState(SDInstance);
 
   const { hasMore, semuaTanggapan } = useSemuaTanggapan(page, sort);
 
@@ -185,7 +185,7 @@ export default function SemuaTanggapan(props) {
   };
 
   const handleDetails = (laporan) => {
-    state.sideDetails.set(true);
+    state.stats.set(true);
     // fetch detail report
     // detailReport({ id: laporan.id_report, nik: laporan.NIK });
   };

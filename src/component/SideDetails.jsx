@@ -11,7 +11,7 @@ import { useState as GlobalState } from "@hookstate/core";
 import { useDetails } from "util/CustomHooks";
 import { Action, Button, Label, TextArea } from "style/Components";
 import { SchemaTanggapan } from "util/ValidationSchema";
-import { Instance } from "util/States";
+import { DataInstance, SDInstance } from "util/States";
 import GeneratesPDF from "util/GeneratePDF";
 
 import DefaultImg from "asset/defaultReport.jpg";
@@ -159,12 +159,13 @@ const ShowResponse = styled.div`
 `;
 
 export default function SideDetails() {
-  const state = GlobalState(Instance);
-  const { role, NIK: NIKSession } = state.session.get();
-  const sideDetailsStat = state.sideDetails.get();
+  const DataState = GlobalState(DataInstance);
+  const SDState = GlobalState(SDInstance);
+  const { role, NIK: NIKSession } = DataState.session.get();
+  const sideDetailsStat = SDState.stats.get();
 
   const sideDetailsStatToggle = () => {
-    state.sideDetails.set((prev) => !prev);
+    // state.sideDetails.set((prev) => !prev);
   };
 
   const { register, handleSubmit, errors } = useForm({

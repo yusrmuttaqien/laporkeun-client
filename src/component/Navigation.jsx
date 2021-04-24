@@ -4,7 +4,7 @@ import { NavLink } from "react-router-dom";
 import styled from "styled-components";
 import { useState as GlobalState } from "@hookstate/core";
 
-import { Instance } from "util/States";
+import { DataInstance } from "util/States";
 
 const NavWrapper = styled.div`
   align-self: flex-end;
@@ -51,7 +51,7 @@ const NavWrapper = styled.div`
 `;
 
 export default function Navigation() {
-  const state = GlobalState(Instance);
+  const state = GlobalState(DataInstance);
   const { role } = state.session.get();
 
   return (

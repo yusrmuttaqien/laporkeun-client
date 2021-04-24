@@ -14,9 +14,10 @@ import {
   Input,
   Warning,
 } from "style/Components";
-import { Instance } from "util/States";
+import { TriggerPopup } from "util/Popup";
+import { DataInstance } from "util/States";
 import { SchemaSetting } from "util/ValidationSchema";
-import { updateProfile } from "util/DataFetch";
+import { updateProfile, deleteAccount } from "util/DataFetch";
 
 import defaultUser from "asset/defaultUser.svg";
 
@@ -99,7 +100,7 @@ export default function Pengaturan() {
   let { pathname } = useLocation();
   pathname = pathname.substring(1);
 
-  const state = GlobalState(Instance);
+  const state = GlobalState(DataInstance);
   const { pic, name, telp } = state.session.get();
 
   const [filename, setFileName] = useState("");
@@ -131,7 +132,15 @@ export default function Pengaturan() {
     });
   };
 
-  const onDelete = () => {};
+  const onDelete = () => {
+    TriggerPopup({
+      mode: "notify",
+      content: "Anda yakin ingin menghapus akun?",
+      txtYes: "Ya",
+      txtNo: "Tidak jadi",
+      cbYes: deleteAccount,
+    });
+  };
 
   return (
     <ReportWrapper>
@@ -139,7 +148,7 @@ export default function Pengaturan() {
         <div className="reportHeader">
           <h1 title={pathname}>{pathname}</h1>
           <section>
-            <CustomButton02>Hapus akun</CustomButton02>
+            <CustomButton02 onClick={onDelete}>Hapus akun</CustomButton02>
             <CustomButton02 type="submit" form="changeSetting">
               Simpan
             </CustomButton02>
