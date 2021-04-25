@@ -101,7 +101,7 @@ export default function Pengaturan() {
   pathname = pathname.substring(1);
 
   const state = GlobalState(DataInstance);
-  const { pic, name, telp } = state.session.get();
+  const { pic, name, telp, picURL } = state.session.get();
 
   const [filename, setFileName] = useState("");
   const [aspectRatio, setAspectRatio] = useState();
@@ -123,11 +123,8 @@ export default function Pengaturan() {
   const onSubmit = (data) => {
     const sessionData = { pic, name, telp };
     toast.promise(updateProfile({ data, sessionData }), {
-      loading: "Tunggu sebentar kawan :)",
-      success: (msg) => {
-        // history.go(0);
-        return msg;
-      },
+      loading: "Tunggu sebentar kawan",
+      success: (msg) => msg,
       error: (err) => err && err.toString(),
     });
   };
@@ -160,7 +157,7 @@ export default function Pengaturan() {
           onSubmit={handleSubmit(onSubmit)}
         >
           <section>
-            <img src={pic ? pic : defaultUser} alt="" />
+            <img src={picURL ? picURL : defaultUser} alt="" />
             <CustomButton
               type="button"
               title={

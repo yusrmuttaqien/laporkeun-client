@@ -3,6 +3,7 @@ import { Toaster } from "react-hot-toast";
 import { Route, BrowserRouter as Router, Switch } from "react-router-dom";
 import { useEffect, useCallback, useState } from "react";
 import rfs from "rfsjs";
+import { useState as GlobalState } from "@hookstate/core";
 
 import Navbar from "component/Navbar";
 import BuatLaporan from "component/BuatLaporan";
@@ -21,6 +22,7 @@ import PrivateRoute from "util/PrivateRoute";
 import { run_check_webp_feature } from "util/WebPCheck";
 import { auth } from "util/Firebase";
 import { fetchUserData } from "util/DataFetch";
+import { DataInstance } from "util/States";
 
 import BGWebP03 from "asset/mainBG_03.webp";
 import BGProgressive from "asset/mainBG_Progressive.jpg";
@@ -86,25 +88,36 @@ const Presisting = styled.div`
 
 function App() {
   // TODO: Handle this
+  const state = GlobalState(DataInstance);
+  const { isLogged } = state.session.get();
+  // TODO: Handle this
   const [isLoading, setIsLoading] = useState(true);
 
   // check login status
+  // TODO: Handle this
   const callGetDetails = useCallback(async (user) => {
     await fetchUserData(user.uid);
     setIsLoading(false);
   }, []);
 
+  // TODO: Handle this
   useEffect(() => {
     const unsubs = auth.onAuthStateChanged((user) => {
       if (user) {
-        callGetDetails(user);
+        if (isLogged) {
+          setIsLoading(false);
+          console.log("usePresist", user);
+        } else {
+          console.log("useFetch", user);
+          callGetDetails(user);
+        }
       } else {
         setIsLoading(false);
       }
     });
 
     return unsubs;
-  }, [callGetDetails]);
+  }, [callGetDetails, isLogged]);
 
   return isLoading ? (
     <Presisting>Mengambil state</Presisting>

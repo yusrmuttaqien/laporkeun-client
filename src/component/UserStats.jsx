@@ -74,7 +74,7 @@ const CloseSession = styled.p`
 
 export default function UserStats() {
   const state = GlobalState(DataInstance);
-  const { role, name, NIK, pic } = state.session.get();
+  const { role, name, NIK, picURL } = state.session.get();
 
   const history = useHistory();
 
@@ -87,7 +87,7 @@ export default function UserStats() {
   return (
     <StatsWrapper>
       <UserDetail>
-        <img src={pic ? pic : defaultUser} alt="userProfile" />
+        <img src={picURL ? picURL : defaultUser} alt="userProfile" />
         <Details>
           <h1
             title={`${name}${

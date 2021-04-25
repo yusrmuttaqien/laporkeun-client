@@ -1,6 +1,7 @@
-import { database, auth } from "util/Firebase";
 import md5 from "md5";
+import toast from "react-hot-toast";
 
+import { database, auth, storage } from "util/Firebase";
 import {
   GlobalStateSession,
   GlobalStateSD,
@@ -55,7 +56,7 @@ function checkWithSession(data, sessionData) {
     toChange.name = name;
   }
 
-  if (telp !== currTelp) {
+  if (telp !== currTelp && telp !== "") {
     toChange.telp = telp;
   }
 
@@ -88,8 +89,8 @@ async function md5Compare(data, mode = "registered") {
 
 // NOTE: Main Function
 async function fetchUserData(uid) {
-  console.log(uid);
   const userId = await md5Compare(uid, "users");
+  const storageProfile = storage.ref("/profile");
   var details = {};
 
   await database
@@ -100,12 +101,15 @@ async function fetchUserData(uid) {
       details = doc.data();
       details.isLogged = true;
       details.NIK = details.nik;
-      // TODO: Handle users picURL
-      GlobalStateSession().setSession(details);
+      details.uid = uid;
     })
     //  TODO: Handle this, using linked toast perhaps?
     .catch((err) => console.log(err));
 
+  if (details.pic) {
+    details.picURL = await storageProfile.child(details.pic).getDownloadURL();
+  }
+  GlobalStateSession().setSession(details);
   return 0;
 }
 
@@ -148,7 +152,88 @@ async function regisPengguna(cred) {
 
 async function updateProfile(update) {
   const { data, sessionData } = update;
-  const dataChange = await checkWithSession(data, sessionData);
+  const storageProfile = storage.ref("/profile");
+  const databaseProfile = database.collection("users");
+  const currUID = GlobalStateSession().getUID();
+  const hashedCurrUID = await md5Compare(currUID, "users");
+  const currPic = GlobalStateSession().getPic();
+  var passChange,
+    emailChange,
+    dataChange = await checkWithSession(data, sessionData);
+
+  // Nothing changes
+  if (Object.keys(dataChange).length === 0) {
+    return Promise.resolve("Tidak ada yang diubah :)");
+  }
+
+  // Alter password change if available
+  if (dataChange.kataSandi) {
+    passChange = dataChange.kataSandi;
+    delete dataChange.kataSandi;
+  }
+
+  // Check if image changes
+  if (dataChange.pic) {
+    // Check there is old image
+    if (currPic) {
+      // Delete old pic
+      await storageProfile
+        .child(currPic)
+        .delete()
+        .then(() => toast.success("Foto lama terhapus"))
+        .catch((err) => {
+          return Promise.reject(`Firebase err: ${err.code}`);
+        });
+    }
+
+    // Set new name
+    var newName = `${hashedCurrUID}.${dataChange.pic.type.split("/")[1]}`;
+
+    // Upload new image
+    await storageProfile
+      .child(newName)
+      .put(dataChange.pic)
+      .then(() => toast.success("Foto baru terunggah"))
+      .catch((err) => {
+        return Promise.reject(`Firebase err: ${err.code}`);
+      });
+
+    // Change file to filename
+    dataChange.pic = newName;
+  }
+
+  // Update user details
+  await databaseProfile
+    .doc(hashedCurrUID)
+    .update(dataChange)
+    .then(() => toast.success("Detail akun berhasil diubah"))
+    .catch((err) => {
+      return Promise.reject(`Firebase err: ${err.code}`);
+    });
+
+  // NOTE: Wwatchout this code, it's janky
+  // Update email & password if available
+  if (dataChange.name) {
+    emailChange = dataChange.name.toLowerCase() + "@laporkeun.com";
+    await auth.currentUser
+      .updateEmail(emailChange)
+      .then(() => toast.success("Nama berhasil diubah"))
+      .catch((err) => {
+        return Promise.reject(`Firebase err: ${err.code}`);
+      });
+  }
+
+  if (passChange) {
+    await auth.currentUser
+      .updatePassword(passChange)
+      .then(() => toast.success("Kata sandi berhasil diubah"))
+      .catch((err) => {
+        return Promise.reject(`Firebase err: ${err.code}`);
+      });
+  }
+
+  await fetchUserData(currUID);
+  return Promise.resolve("Akun berhasil diperbarui");
 }
 
 async function login(cred) {

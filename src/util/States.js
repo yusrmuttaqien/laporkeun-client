@@ -1,4 +1,5 @@
 import { createState } from "@hookstate/core";
+import { Persistence } from "@hookstate/persistence";
 
 // NOTE: Helper
 const SessionTemplate = {
@@ -9,6 +10,7 @@ const SessionTemplate = {
   pic: null,
   picURL: null,
   telp: null,
+  uid: null,
 };
 
 const PopupTemplate = {
@@ -36,6 +38,9 @@ const PPWrapper = (s) => ({
 
 const DataWrapper = (s) => ({
   setSession: (sesObj) => s.session.set(sesObj),
+  getIsLogged: () => s.session.isLogged.get(),
+  getUID: () => s.session.uid.get(),
+  getPic: () => s.session.pic.get(),
 });
 
 const SDWrapper = (s) => ({
@@ -52,6 +57,7 @@ const DataState = {
     pic: null,
     picURL: null,
     telp: null,
+    uid: null,
   },
   forms: "Masuk",
 };
@@ -74,6 +80,9 @@ const PopupState = {
 const DataInstance = createState(DataState);
 const SDInstance = createState(SideDetailState);
 const PPInstance = createState(PopupState);
+
+// NOTE: Set persistance
+DataInstance.attach(Persistence("main-session"));
 
 // NOTE: Non-component state
 const GlobalStatePopup = () => PPWrapper(PPInstance);
