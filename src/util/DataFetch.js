@@ -1,4 +1,12 @@
 import { database, auth } from "util/Firebase";
+import md5 from "md5";
+
+import {
+  GlobalStateSession,
+  GlobalStateSD,
+  SDTemplate,
+  SessionTemplate,
+} from "util/States";
 
 // NOTE: Helper Function
 function userNewTemplate(cred) {
@@ -14,24 +22,25 @@ function userNewTemplate(cred) {
   };
 }
 
-async function checkNIK(NIK) {
+async function checkIsRegistered(toCompare) {
   var isExist = {};
   await database
-    .collection("users")
-    .where("nik", "==", NIK)
+    .collection("registered")
+    .where("string", "==", toCompare)
     .get()
     .then((querySnapshot) => {
       isExist.stat = false;
       querySnapshot.forEach((doc) => {
         // check if NIK exist
         if (doc.data()) {
-          isExist.stat = true;
+          isExist.stat = "NIK sudah terdaftar";
           isExist.data = doc.data();
         }
       });
     })
     .catch((error) => {
-      isExist.stat = "Kesalahan pengecekan NIK";
+      console.log(error);
+      isExist.stat = "Kesalahan pengecekan NIK (Firestore)";
     });
 
   return isExist;
@@ -61,50 +70,76 @@ function checkWithSession(data, sessionData) {
   return toChange;
 }
 
+async function md5Compare(data, mode = "registered") {
+  var hash;
+
+  if (mode === "registered") {
+    hash = data + process.env.REACT_APP_HOT_KEY;
+    hash = await md5(hash);
+  }
+
+  if (mode === "users") {
+    hash = data + process.env.REACT_APP_SIGNATURE;
+    hash = await md5(hash);
+  }
+
+  return hash;
+}
+
 // NOTE: Main Function
-async function fetchUserData(email) {
+async function fetchUserData(uid) {
+  console.log(uid);
+  const userId = await md5Compare(uid, "users");
   var details = {};
 
   await database
     .collection("users")
-    .doc(email)
+    .doc(userId)
     .get()
     .then((doc) => {
       details = doc.data();
       details.isLogged = true;
       details.NIK = details.nik;
       // TODO: Handle users picURL
+      GlobalStateSession().setSession(details);
     })
-    //  TODO: Handle this
+    //  TODO: Handle this, using linked toast perhaps?
     .catch((err) => console.log(err));
 
-  return details;
+  return 0;
 }
 
 async function regisPengguna(cred) {
   const { name, NIK, kataSandi } = cred;
   const usrCred = userNewTemplate({ NIK, name });
-  var fakeEmail = name + "@laporkeun.com";
+  const toCompare = await md5Compare(NIK);
+  var userId,
+    fakeEmail = name + "@laporkeun.com";
   fakeEmail = fakeEmail.toLowerCase();
 
   //   Check NIK
-  const isExist = await checkNIK(NIK);
+  const isExist = await checkIsRegistered(toCompare);
   if (isExist.stat) {
-    return Promise.reject("NIK sudah terdaftar");
+    return Promise.reject(isExist.stat);
   } else if (isExist.stat === "Kesalahan pengecekan NIK") {
     return Promise.reject(isExist);
   }
 
   //   Create account & check name
   try {
-    await auth.createUserWithEmailAndPassword(fakeEmail, kataSandi);
+    const UserDetails = await auth.createUserWithEmailAndPassword(
+      fakeEmail,
+      kataSandi
+    );
+    userId = await md5Compare(UserDetails.user.uid, "users");
   } catch (err) {
     return Promise.reject(`Firebase err: ${err.code}`);
   }
 
-  //   Create account details
+  //   Create account details & registered
   try {
-    await database.collection("users").doc(fakeEmail).set(usrCred);
+    await database.collection("users").doc(userId).set(usrCred);
+    await database.collection("registered").add({ string: toCompare });
     return Promise.resolve(`Akun ${name} berhasil dibuat`);
   } catch (err) {
     return Promise.reject(`Firebase err: ${err.code}`);
@@ -133,8 +168,10 @@ async function deleteAccount(data) {
 }
 
 async function logout() {
+  await GlobalStateSD().setSD(SDTemplate);
+  await GlobalStateSession().setSession(SessionTemplate);
   await auth.signOut();
-  return true;
+  return 0;
 }
 
 export {

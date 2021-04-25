@@ -4,7 +4,7 @@ import { toast } from "react-hot-toast";
 import { useState as GlobalState } from "@hookstate/core";
 import { useHistory } from "react-router-dom";
 
-import { DataInstance, SessionTemplate } from "util/States";
+import { DataInstance } from "util/States";
 import { logout } from "util/DataFetch";
 
 import defaultUser from "./../asset/defaultUser.svg";
@@ -80,8 +80,6 @@ export default function UserStats() {
 
   const exitApp = async () => {
     await logout();
-    await state.session.set(SessionTemplate);
-    await state.sideDetails.set(false);
     history.push("/");
     toast.success("Anda berhasil keluar");
   };

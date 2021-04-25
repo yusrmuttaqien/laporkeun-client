@@ -2,7 +2,6 @@ import styled from "styled-components";
 import { Toaster } from "react-hot-toast";
 import { Route, BrowserRouter as Router, Switch } from "react-router-dom";
 import { useEffect, useCallback, useState } from "react";
-import { useState as GlobalState } from "@hookstate/core";
 import rfs from "rfsjs";
 
 import Navbar from "component/Navbar";
@@ -15,13 +14,13 @@ import Tanggapanku from "component/Tanggapanku";
 import SemuaTanggapan from "component/SemuaTanggapan";
 import Petugas from "component/Petugas";
 import Pengaturan from "component/Pengaturan";
+import Test from "component/Test";
 import { Popup } from "util/Popup";
 import { Splash, NotFound } from "component/Splash";
 import PrivateRoute from "util/PrivateRoute";
 import { run_check_webp_feature } from "util/WebPCheck";
 import { auth } from "util/Firebase";
 import { fetchUserData } from "util/DataFetch";
-import { DataInstance } from "util/States";
 
 import BGWebP03 from "asset/mainBG_03.webp";
 import BGProgressive from "asset/mainBG_Progressive.jpg";
@@ -86,19 +85,14 @@ const Presisting = styled.div`
 `;
 
 function App() {
-  const state = GlobalState(DataInstance);
   // TODO: Handle this
   const [isLoading, setIsLoading] = useState(true);
 
   // check login status
-  const callGetDetails = useCallback(
-    async (user) => {
-      var details = await fetchUserData(user.email);
-      await state.session.set(details);
-      setIsLoading(false);
-    },
-    [state.session]
-  );
+  const callGetDetails = useCallback(async (user) => {
+    await fetchUserData(user.uid);
+    setIsLoading(false);
+  }, []);
 
   useEffect(() => {
     const unsubs = auth.onAuthStateChanged((user) => {
@@ -138,6 +132,7 @@ function App() {
             <PrivateRoute path="/semuatanggapan" comp={SemuaTanggapan} />
             <PrivateRoute path="/petugas" comp={Petugas} />
             <PrivateRoute path="/pengaturan" comp={Pengaturan} />
+            <Route path="/test" component={Test} />
             <Route component={NotFound} />
           </Switch>
         </View>

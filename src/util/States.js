@@ -1,4 +1,4 @@
-import { createState, useState } from "@hookstate/core";
+import { createState } from "@hookstate/core";
 
 // NOTE: Helper
 const SessionTemplate = {
@@ -16,7 +16,13 @@ const PopupTemplate = {
   message: null,
   mode: "notify",
   txtYes: "Ok",
-  txtNo: "Cancel" 
+  txtNo: "Cancel",
+};
+
+const SDTemplate = {
+  stats: false,
+  payload: { id: null, nik: null, petugas: null },
+  newResponseByIDReport: null,
 };
 
 const PPWrapper = (s) => ({
@@ -26,6 +32,14 @@ const PPWrapper = (s) => ({
   setCallback: (cb) => s.callback.set(cb),
   settxtYes: (txt) => s.txtYes.set(txt),
   settxtNo: (txt) => s.txtNo.set(txt),
+});
+
+const DataWrapper = (s) => ({
+  setSession: (sesObj) => s.session.set(sesObj),
+});
+
+const SDWrapper = (s) => ({
+  setSD: (SDObj) => s.set(SDObj),
 });
 
 // NOTE: State
@@ -53,7 +67,7 @@ const PopupState = {
   message: null,
   mode: "notify",
   txtYes: "Ok",
-  txtNo: "Cancel" 
+  txtNo: "Cancel",
 };
 
 // NOTE: Initialize state
@@ -63,12 +77,17 @@ const PPInstance = createState(PopupState);
 
 // NOTE: Non-component state
 const GlobalStatePopup = () => PPWrapper(PPInstance);
+const GlobalStateSession = () => DataWrapper(DataInstance);
+const GlobalStateSD = () => SDWrapper(SDInstance);
 
 export {
   SessionTemplate,
   PopupTemplate,
+  SDTemplate,
   DataInstance,
   SDInstance,
   PPInstance,
   GlobalStatePopup,
+  GlobalStateSession,
+  GlobalStateSD,
 };
