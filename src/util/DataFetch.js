@@ -1,7 +1,7 @@
 import md5 from "md5";
 import toast from "react-hot-toast";
 
-import { database, auth, storage } from "util/Firebase";
+import Firebase, { database, auth, storage } from "util/Firebase";
 import {
   GlobalStateSession,
   GlobalStateSD,
@@ -87,6 +87,16 @@ async function md5Compare(data, mode = "registered") {
   return hash;
 }
 
+async function reAuthenticate(key) {
+  const currFakeEmailPrefix = GlobalStateSession().getName();
+  const credential = Firebase.auth.EmailAuthProvider.credential(
+    currFakeEmailPrefix.toLowerCase() + "@laporkeun.com",
+    key
+  );
+
+  return await auth.currentUser.reauthenticateWithCredential(credential);
+}
+
 // NOTE: Main Function
 async function fetchUserData(uid) {
   const userId = await md5Compare(uid, "users");
@@ -151,12 +161,20 @@ async function regisPengguna(cred) {
 }
 
 async function updateProfile(update) {
-  const { data, sessionData } = update;
-  const storageProfile = storage.ref("/profile");
-  const databaseProfile = database.collection("users");
+  const { data, sessionData, key } = update;
+
+  // User reauthenticate
+  try {
+    await reAuthenticate(key);
+  } catch (err) {
+    return Promise.reject(`Firebase err: ${err.code}`);
+  }
+
   const currUID = GlobalStateSession().getUID();
   const hashedCurrUID = await md5Compare(currUID, "users");
   const currPic = GlobalStateSession().getPic();
+  const storageProfile = storage.ref("/profile");
+  const databaseProfile = database.collection("users");
   var passChange,
     emailChange,
     dataChange = await checkWithSession(data, sessionData);
@@ -202,16 +220,6 @@ async function updateProfile(update) {
     dataChange.pic = newName;
   }
 
-  // Update user details
-  await databaseProfile
-    .doc(hashedCurrUID)
-    .update(dataChange)
-    .then(() => toast.success("Detail akun berhasil diubah"))
-    .catch((err) => {
-      return Promise.reject(`Firebase err: ${err.code}`);
-    });
-
-  // NOTE: Wwatchout this code, it's janky
   // Update email & password if available
   if (dataChange.name) {
     emailChange = dataChange.name.toLowerCase() + "@laporkeun.com";
@@ -231,6 +239,15 @@ async function updateProfile(update) {
         return Promise.reject(`Firebase err: ${err.code}`);
       });
   }
+
+  // Update user details
+  await databaseProfile
+    .doc(hashedCurrUID)
+    .update(dataChange)
+    .then(() => toast.success("Detail akun berhasil diubah"))
+    .catch((err) => {
+      return Promise.reject(`Firebase err: ${err.code}`);
+    });
 
   await fetchUserData(currUID);
   return Promise.resolve("Akun berhasil diperbarui");

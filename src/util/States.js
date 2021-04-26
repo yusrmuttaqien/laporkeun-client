@@ -16,9 +16,10 @@ const SessionTemplate = {
 const PopupTemplate = {
   stats: false,
   message: null,
-  mode: "notify",
-  txtYes: "Ok",
-  txtNo: "Cancel",
+  form: false,
+  txtYes: null,
+  txtNo: null,
+  txtLabel: null,
 };
 
 const SDTemplate = {
@@ -29,7 +30,8 @@ const SDTemplate = {
 
 const PPWrapper = (s) => ({
   setMsg: (msg) => s.message.set(msg),
-  setMode: (mode) => s.mode.set(mode),
+  setForm: (form) => s.form.set(form),
+  setLabel: (label) => s.txtLabel.set(label),
   setPopup: (stats) => s.stats.set(stats),
   setCallback: (cb) => s.callback.set(cb),
   settxtYes: (txt) => s.txtYes.set(txt),
@@ -41,6 +43,7 @@ const DataWrapper = (s) => ({
   getIsLogged: () => s.session.isLogged.get(),
   getUID: () => s.session.uid.get(),
   getPic: () => s.session.pic.get(),
+  getName: () => s.session.name.get(),
 });
 
 const SDWrapper = (s) => ({
@@ -71,9 +74,10 @@ const SideDetailState = {
 const PopupState = {
   stats: false,
   message: null,
-  mode: "notify",
-  txtYes: "Ok",
-  txtNo: "Cancel",
+  form: false,
+  txtYes: null,
+  txtNo: null,
+  txtLabel: null,
 };
 
 // NOTE: Initialize state

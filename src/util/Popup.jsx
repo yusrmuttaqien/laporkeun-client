@@ -2,9 +2,12 @@ import React from "react";
 import styled from "styled-components";
 import rfs from "rfsjs";
 import { useState as GlobalState } from "@hookstate/core";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useForm } from "react-hook-form";
 
 import { GlobalStatePopup, PPInstance, PopupTemplate } from "util/States";
-import { Button } from "style/Components";
+import { Button, Label, Input, Warning } from "style/Components";
+import { SchemaPopup } from "util/ValidationSchema";
 
 const PopupWrapper = styled.div`
   display: flex;
@@ -15,6 +18,7 @@ const PopupWrapper = styled.div`
   left: 50%;
   ${rfs("20rem", "min-width")};
   ${rfs("10rem", "min-height")};
+  padding: 1.5em 0 0.5em;
 
   transform: translateX(-50%);
   color: ${(props) => props.theme.color.white};
@@ -29,10 +33,20 @@ const Content = styled.div`
   display: inherit;
   align-items: center;
   justify-content: center;
+  flex-direction: column;
   flex: 1;
 
   width: 100%;
   padding: 0 1em;
+`;
+
+const FormWrapper = styled.form`
+  display: inherit;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+
+  margin-top: 1em;
 `;
 
 const Action = styled.div`
@@ -69,7 +83,11 @@ var callbackYes, callbackNo;
 
 function Popup() {
   const state = GlobalState(PPInstance);
-  const { mode, message, stats, txtYes, txtNo } = state.get();
+  const { form, message, stats, txtYes, txtNo, txtLabel } = state.get();
+
+  const { register, handleSubmit, errors } = useForm({
+    resolver: yupResolver(SchemaPopup),
+  });
 
   const defaultCb = () => {
     return null;
@@ -115,9 +133,18 @@ function Popup() {
     <>
       <Overlay onClick={handleBlur} />
       <PopupWrapper id="ydhm-popup" tabIndex="0">
-        <Content>{message}</Content>
+        <Content>
+          {message}
+          {form && (
+            <FormWrapper id="confirm" onSubmit={handleSubmit(handleYes)}>
+              <Label htmlFor="input">{txtLabel}</Label>
+              <Input type="text" name="input" id="input" ref={register} />
+              <Warning>{errors.input?.message}</Warning>
+            </FormWrapper>
+          )}
+        </Content>
         <Action>
-          <CustomButton02 type="submit" form="confirm" onClick={handleYes}>
+          <CustomButton02 type="submit" form="confirm">
             {txtYes}
           </CustomButton02>
           <CustomButton02 onClick={handleNo}>{txtNo}</CustomButton02>
@@ -128,12 +155,13 @@ function Popup() {
 }
 
 async function TriggerPopup({
-  mode = "notify",
+  form,
   content = "I'm default, add new content please",
   cbYes,
   cbNo,
-  txtYes,
-  txtNo,
+  txtYes = "Ok",
+  txtNo = "Cancel",
+  txtLabel = "Add a label",
 }) {
   const handleFocus = () => {
     document.getElementById("ydhm-popup").focus();
@@ -147,16 +175,11 @@ async function TriggerPopup({
     callbackNo = cbNo;
   }
 
-  if (txtYes) {
-    GlobalStatePopup().settxtYes(txtYes);
-  }
-
-  if (txtNo) {
-    GlobalStatePopup().settxtNo(txtNo);
-  }
-
+  GlobalStatePopup().settxtYes(txtYes);
+  GlobalStatePopup().settxtNo(txtNo);
+  GlobalStatePopup().setLabel(txtLabel);
   GlobalStatePopup().setMsg(content);
-  GlobalStatePopup().setMode(mode);
+  GlobalStatePopup().setForm(form);
   await GlobalStatePopup().setPopup(true);
   handleFocus();
 }

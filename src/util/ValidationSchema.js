@@ -162,6 +162,10 @@ const SchemaSetting = yup.object().shape({
     }),
 });
 
+const SchemaPopup = yup.object().shape({
+  input: yup.string().required("Kolom wajib diisi"),
+});
+
 export {
   SchemaDaftar,
   SchemaMasuk,
@@ -169,4 +173,5 @@ export {
   SchemaTanggapan,
   SchemaDaftarPetugas,
   SchemaSetting,
+  SchemaPopup
 };

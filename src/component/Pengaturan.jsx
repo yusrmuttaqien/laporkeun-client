@@ -121,21 +121,36 @@ export default function Pengaturan() {
   };
 
   const onSubmit = (data) => {
-    const sessionData = { pic, name, telp };
-    toast.promise(updateProfile({ data, sessionData }), {
-      loading: "Tunggu sebentar kawan",
-      success: (msg) => msg,
-      error: (err) => err && err.toString(),
+    const next = (cred) => {
+      const key = cred.userAction.input;
+      const sessionData = { pic, name, telp };
+      toast.promise(updateProfile({ data, sessionData, key }), {
+        loading: "Tunggu sebentar kawan",
+        success: (msg) => msg,
+        error: (err) => err && err.toString(),
+      });
+    };
+
+    TriggerPopup({
+      form: true,
+      content: "Simpan perubahan?",
+      txtYes: "Simpan",
+      txtNo: "Batalkan",
+      txtLabel: "Kata sandi",
+      cbYes: next,
+      cbNo: () => toast.success("Dibatalkan"),
     });
   };
 
   const onDelete = () => {
     TriggerPopup({
-      mode: "notify",
+      form: true,
       content: "Anda yakin ingin menghapus akun?",
       txtYes: "Ya",
       txtNo: "Tidak jadi",
+      txtLabel: "Kata sandi",
       cbYes: deleteAccount,
+      cbNo: () => toast.success("Dibatalkan"),
     });
   };
 
