@@ -44,6 +44,7 @@ const DataWrapper = (s) => ({
   getUID: () => s.session.uid.get(),
   getPic: () => s.session.pic.get(),
   getName: () => s.session.name.get(),
+  getNIK: () => s.session.NIK.get(),
 });
 
 const SDWrapper = (s) => ({

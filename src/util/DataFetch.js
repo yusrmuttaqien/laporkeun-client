@@ -265,8 +265,69 @@ async function login(cred) {
   }
 }
 
-async function deleteAccount(data) {
-  console.log(data);
+async function deleteAccount(key) {
+  const currUID = GlobalStateSession().getUID();
+  const currPic = GlobalStateSession().getPic();
+  const currNIK = GlobalStateSession().getNIK();
+  const hashedCurrUID = await md5Compare(currUID, "users");
+  const toCompare = await md5Compare(currNIK);
+  const storageProfile = storage.ref("/profile");
+  const databaseProfile = database.collection("users");
+  const databaseRegistered = database.collection("registered");
+
+  // User reauthenticate
+  try {
+    await reAuthenticate(key);
+  } catch (err) {
+    return Promise.reject(`Firebase err: ${err.code}`);
+  }
+
+  // Check if there is image
+  if (currPic) {
+    // Delete pic
+    await storageProfile
+      .child(currPic)
+      .delete()
+      .then(() => toast.success("Foto dihapus"))
+      .catch((err) => {
+        return Promise.reject(`Firebase err: ${err.code}`);
+      });
+  }
+
+  // Delete user detail
+  await databaseProfile
+    .doc(hashedCurrUID)
+    .delete()
+    .then(() => toast.success("Detail akun dihapus"))
+    .catch((err) => {
+      return Promise.reject(`Firebase err: ${err.code}`);
+    });
+
+  // Delete registered
+  await databaseRegistered
+    .where("string", "==", toCompare)
+    .get()
+    .then((querySnapshot) => {
+      querySnapshot.forEach((doc) => {
+        doc.ref.delete();
+      });
+    })
+    .catch((err) => {
+      return Promise.reject(`Firebase err: ${err.code}`);
+    });
+
+  // Delete account
+  await auth.currentUser
+    .delete()
+    .then(() => {
+      toast.success("Auth berhasil diputus");
+    })
+    .catch((err) => {
+      return Promise.reject(`Firebase err: ${err.code}`);
+    });
+
+  await logout();
+  return Promise.resolve("Akun berhasil dihapus");
 }
 
 async function logout() {

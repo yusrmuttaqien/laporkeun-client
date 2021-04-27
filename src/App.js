@@ -106,9 +106,9 @@ function App() {
       if (user) {
         if (isLogged) {
           setIsLoading(false);
-          console.log("usePresist", user);
+          // console.log("usePresist", user);
         } else {
-          console.log("useFetch", user);
+          // console.log("useFetch", user);
           callGetDetails(user);
         }
       } else {

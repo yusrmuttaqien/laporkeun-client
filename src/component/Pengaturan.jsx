@@ -143,13 +143,22 @@ export default function Pengaturan() {
   };
 
   const onDelete = () => {
+    const next = (cred) => {
+      const key = cred.userAction.input;
+      toast.promise(deleteAccount(key), {
+        loading: "Tunggu sebentar kawan",
+        success: (msg) => msg,
+        error: (err) => err && err.toString(),
+      });
+    };
+
     TriggerPopup({
       form: true,
       content: "Anda yakin ingin menghapus akun?",
       txtYes: "Ya",
       txtNo: "Tidak jadi",
       txtLabel: "Kata sandi",
-      cbYes: deleteAccount,
+      cbYes: next,
       cbNo: () => toast.success("Dibatalkan"),
     });
   };
