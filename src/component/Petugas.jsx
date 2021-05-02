@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 import styled from "styled-components";
-import { useLocation /*, useHistory*/ } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import Select from "react-select";
 import rfs from "rfsjs";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-// import toast from "react-hot-toast";
+import toast from "react-hot-toast";
 
 import { usePetugas } from "util/CustomHooks";
 import {
@@ -19,6 +19,7 @@ import {
   Warning,
 } from "style/Components";
 import { SchemaDaftarPetugas } from "util/ValidationSchema";
+import { regisPetugas } from "util/DataFetch";
 
 const options = [
   { value: "Date DESC", label: "Terbaru" },
@@ -273,8 +274,6 @@ export default function Petugas() {
     resolver: yupResolver(SchemaDaftarPetugas),
   });
 
-  //   const history = useHistory();
-
   const loadNext = () => {
     setPage(page + 1);
   };
@@ -284,7 +283,6 @@ export default function Petugas() {
     // toast.promise(, {
     //   loading: "Tunggu sebentar kawan :)",
     //   success: (msg) => {
-    //     history.go(0);
     //     return msg;
     //   },
     //   error: (err) => err && err.toString(),
@@ -292,15 +290,13 @@ export default function Petugas() {
   };
 
   const onSubmit = (data) => {
-    //   func regis petugas
-    // toast.promise(, {
-    //   loading: "Tunggu sebentar kawan :)",
-    //   success: (msg) => {
-    //     history.go(0);
-    //     return msg;
-    //   },
-    //   error: (err) => err && err.toString(),
-    // });
+    toast.promise(regisPetugas(data), {
+      loading: "Tunggu sebentar kawan :)",
+      success: (msg) => {
+        return msg;
+      },
+      error: (err) => err && err.toString(),
+    });
   };
 
   const handleChange = (value) => {
@@ -380,7 +376,7 @@ export default function Petugas() {
               <Input type="text" name="name" id="name" ref={register} />
               <Warning>{errors.name?.message}</Warning>
               <Label htmlFor="telp">Nomor telp</Label>
-              <Input type="number" name="telp" id="telp" ref={register} />
+              <Input type="text" name="telp" id="telp" ref={register} />
               <Warning>{errors.telp?.message}</Warning>
               <Label htmlFor="kataSandi">Kata sandi</Label>
               <Input

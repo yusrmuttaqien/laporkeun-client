@@ -77,17 +77,25 @@ const SchemaTanggapan = yup.object().shape({
 
 const SchemaDaftarPetugas = yup.object().shape({
   telp: yup
-    .number()
-    .required("Nomor wajib diisi")
-    .test("len", "Nomor minimal 10 digit", (val) => val.toString().length >= 10)
-    .test(
-      "lenmin",
-      "Nomor maksimal 15 digit",
-      (val) => val.toString().length <= 15
-    )
-    .typeError("Nomor harus berupa angka")
-    .positive("Nomor berupa bilangan positif")
-    .integer("Nomor berupa bilangan bulat"),
+    .string()
+    .test("benumber", "Telepon berupa angka", (val) => {
+      if (val !== "" && !/^\d+$/.test(val)) {
+        return false;
+      } else {
+        return true;
+      }
+    })
+    .test("length", "Telepon antara 12 - 15 angka", (val) => {
+      if (val !== "") {
+        if (val.length >= 12 && val.length <= 15) {
+          return true;
+        } else {
+          return false;
+        }
+      } else {
+        return true;
+      }
+    }),
   name: yup
     .string()
     .required("Nama wajib diisi")
@@ -173,5 +181,5 @@ export {
   SchemaTanggapan,
   SchemaDaftarPetugas,
   SchemaSetting,
-  SchemaPopup
+  SchemaPopup,
 };

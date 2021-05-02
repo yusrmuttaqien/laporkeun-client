@@ -1,9 +1,7 @@
 import styled from "styled-components";
 import { Toaster } from "react-hot-toast";
 import { Route, BrowserRouter as Router, Switch } from "react-router-dom";
-import { useEffect, useCallback, useState } from "react";
-import rfs from "rfsjs";
-import { useState as GlobalState } from "@hookstate/core";
+import { useEffect } from "react";
 
 import Navbar from "component/Navbar";
 import BuatLaporan from "component/BuatLaporan";
@@ -16,13 +14,12 @@ import SemuaTanggapan from "component/SemuaTanggapan";
 import Petugas from "component/Petugas";
 import Pengaturan from "component/Pengaturan";
 import Test from "component/Test";
+import { Loading } from "util/Loading";
 import { Popup } from "util/Popup";
 import { Splash, NotFound } from "component/Splash";
 import PrivateRoute from "util/PrivateRoute";
 import { run_check_webp_feature } from "util/WebPCheck";
-import { auth } from "util/Firebase";
-import { fetchUserData } from "util/DataFetch";
-import { DataInstance } from "util/States";
+import { authCheck } from "util/DataFetch";
 
 import BGWebP03 from "asset/mainBG_03.webp";
 import BGProgressive from "asset/mainBG_Progressive.jpg";
@@ -70,58 +67,12 @@ const WrapToaster = styled.div`
   pointer-events: none;
 `;
 
-const Presisting = styled.div`
-  background-color: ${(props) => props.theme.color.dark};
-  color: ${(props) => props.theme.color.white};
-  font-weight: ${(props) => props.theme.value.font.medium};
-  ${rfs("2em", "font-size")}
-
-  height: 100vh;
-  min-height: 640px; // TODO: Fix for mobile devices
-  width: 100vw;
-  max-width: 100%;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-`;
-
 function App() {
-  // TODO: Handle this
-  const state = GlobalState(DataInstance);
-  const { isLogged } = state.session.get();
-  // TODO: Handle this
-  const [isLoading, setIsLoading] = useState(true);
-
-  // check login status
-  // TODO: Handle this
-  const callGetDetails = useCallback(async (user) => {
-    await fetchUserData(user.uid);
-    setIsLoading(false);
+  useEffect(() => {
+    authCheck();
   }, []);
 
-  // TODO: Handle this
-  useEffect(() => {
-    const unsubs = auth.onAuthStateChanged((user) => {
-      if (user) {
-        if (isLogged) {
-          setIsLoading(false);
-          // console.log("usePresist", user);
-        } else {
-          // console.log("useFetch", user);
-          callGetDetails(user);
-        }
-      } else {
-        setIsLoading(false);
-      }
-    });
-
-    return unsubs;
-  }, [callGetDetails, isLogged]);
-
-  return isLoading ? (
-    <Presisting>Mengambil state</Presisting>
-  ) : (
+  return (
     <AppWrapper id="AppWraper">
       <Router>
         <Navbar />
@@ -134,6 +85,7 @@ function App() {
           />
         </WrapToaster>
         <Popup />
+        <Loading />
         <View id="View">
           <Switch>
             <Route exact path="/" component={Splash} />

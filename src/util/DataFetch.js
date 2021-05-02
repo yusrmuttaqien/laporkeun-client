@@ -1,7 +1,13 @@
 import md5 from "md5";
 import toast from "react-hot-toast";
 
-import Firebase, { database, auth, storage } from "util/Firebase";
+import Firebase, {
+  database,
+  auth,
+  storage,
+  authSecondary,
+} from "util/Firebase";
+import { TriggerLoading } from "util/Loading";
 import {
   GlobalStateSession,
   GlobalStateSD,
@@ -18,6 +24,19 @@ function userNewTemplate(cred) {
     pic: null,
     role: "pengguna",
     telp: null,
+    acc_date: new Date().toISOString().split("T")[0],
+    name,
+  };
+}
+
+function petugasNewTemplate(cred) {
+  const { telp, name } = cred;
+
+  return {
+    nik: "0000000000000000",
+    pic: null,
+    role: "petugas",
+    telp: telp,
     acc_date: new Date().toISOString().split("T")[0],
     name,
   };
@@ -98,6 +117,24 @@ async function reAuthenticate(key) {
 }
 
 // NOTE: Main Function
+async function authCheck() {
+  TriggerLoading({ stats: true, message: "Memeriksa state" });
+  const isLogged = GlobalStateSession().getIsLogged();
+
+  await auth.onAuthStateChanged(async (user) => {
+    if (user) {
+      if (isLogged) {
+        TriggerLoading({ stats: false });
+      } else {
+        await fetchUserData(user.uid);
+        TriggerLoading({ stats: false });
+      }
+    } else {
+      TriggerLoading({ stats: false });
+    }
+  });
+}
+
 async function fetchUserData(uid) {
   const userId = await md5Compare(uid, "users");
   const storageProfile = storage.ref("/profile");
@@ -154,6 +191,34 @@ async function regisPengguna(cred) {
   try {
     await database.collection("users").doc(userId).set(usrCred);
     await database.collection("registered").add({ string: toCompare });
+    return Promise.resolve(`Akun ${name} berhasil dibuat`);
+  } catch (err) {
+    return Promise.reject(`Firebase err: ${err.code}`);
+  }
+}
+
+async function regisPetugas(cred) {
+  const { name, telp, kataSandi } = cred;
+  const usrCred = petugasNewTemplate({ telp, name });
+  var userId,
+    fakeEmail = name + "@laporkeun.com";
+  fakeEmail = fakeEmail.toLowerCase();
+
+  //   Create account & check name
+  try {
+    const UserDetails = await authSecondary.createUserWithEmailAndPassword(
+      fakeEmail,
+      kataSandi
+    );
+    userId = await md5Compare(UserDetails.user.uid, "users");
+  } catch (err) {
+    return Promise.reject(`Firebase err: ${err.code}`);
+  }
+
+  //   Create account details & registered
+  try {
+    await database.collection("users").doc(userId).set(usrCred);
+    await authSecondary.signOut();
     return Promise.resolve(`Akun ${name} berhasil dibuat`);
   } catch (err) {
     return Promise.reject(`Firebase err: ${err.code}`);
@@ -258,7 +323,8 @@ async function login(cred) {
   const fakeEmail = name.toLowerCase() + "@laporkeun.com";
 
   try {
-    await auth.signInWithEmailAndPassword(fakeEmail, kataSandi);
+    const acc = await auth.signInWithEmailAndPassword(fakeEmail, kataSandi);
+    console.log(acc);
     return Promise.resolve(`Selamat datang, ${name}`);
   } catch (err) {
     return Promise.reject(`Firebase err: ${err.code}`);
@@ -330,15 +396,19 @@ async function deleteAccount(key) {
   return Promise.resolve("Akun berhasil dihapus");
 }
 
+// NOTE: Watchout this code below
 async function logout() {
-  await GlobalStateSD().setSD(SDTemplate);
-  await GlobalStateSession().setSession(SessionTemplate);
   await auth.signOut();
+  await GlobalStateSession().setSession(SessionTemplate);
+  await GlobalStateSD().setSD(SDTemplate);
+  await GlobalStateSession().setMasuk();
   return 0;
 }
 
 export {
+  authCheck,
   regisPengguna,
+  regisPetugas,
   logout,
   fetchUserData,
   login,

@@ -101,7 +101,7 @@ export default function Pengaturan() {
   pathname = pathname.substring(1);
 
   const state = GlobalState(DataInstance);
-  const { pic, name, telp, picURL } = state.session.get();
+  const { pic, name, telp, picURL, role } = state.session.get();
 
   const [filename, setFileName] = useState("");
   const [aspectRatio, setAspectRatio] = useState();
@@ -169,7 +169,9 @@ export default function Pengaturan() {
         <div className="reportHeader">
           <h1 title={pathname}>{pathname}</h1>
           <section>
-            <CustomButton02 onClick={onDelete}>Hapus akun</CustomButton02>
+            {role === "pengguna" && (
+              <CustomButton02 onClick={onDelete}>Hapus akun</CustomButton02>
+            )}
             <CustomButton02 type="submit" form="changeSetting">
               Simpan
             </CustomButton02>

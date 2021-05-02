@@ -5,6 +5,7 @@ import toast from "react-hot-toast";
 import { useState as GlobalState } from "@hookstate/core";
 
 import { DataInstance, SDInstance } from "util/States";
+import { database } from "util/Firebase";
 
 const instance = axios.create({
   baseURL: "http://localhost:5006/",

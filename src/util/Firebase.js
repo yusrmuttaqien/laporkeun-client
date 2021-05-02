@@ -12,10 +12,13 @@ const firebaseConfig = {
   appId: process.env.REACT_APP_AID,
 };
 
-firebase.initializeApp(firebaseConfig);
+const main = firebase.initializeApp(firebaseConfig);
+const secondary = firebase.initializeApp(firebaseConfig, "secondary");
 
-const storage = firebase.storage();
-const database = firebase.firestore();
-const auth = firebase.auth();
 
-export { storage, database, auth, firebase as default };
+const storage = main.storage();
+const database = main.firestore();
+const auth = main.auth();
+const authSecondary = secondary.auth();
+
+export { storage, database, auth, authSecondary, firebase as default };

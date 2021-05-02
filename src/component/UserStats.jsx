@@ -74,9 +74,15 @@ const CloseSession = styled.p`
 
 export default function UserStats() {
   const state = GlobalState(DataInstance);
-  const { role, name, NIK, picURL } = state.session.get();
+  const { role, name, NIK, picURL, isLogged } = state.session.get();
 
   const history = useHistory();
+
+  var roleNIK = isLogged
+    ? role !== "pengguna"
+      ? role.charAt(0).toUpperCase() + role.slice(1)
+      : NIK
+    : null;
 
   const exitApp = async () => {
     await logout();
@@ -96,7 +102,7 @@ export default function UserStats() {
           >
             {name}
           </h1>
-          <p title={NIK}>{NIK}</p>
+          <p title={roleNIK}>{roleNIK}</p>
         </Details>
       </UserDetail>
       <CloseSession onClick={exitApp} title="Keluar ?">

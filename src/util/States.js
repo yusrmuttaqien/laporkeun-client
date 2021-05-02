@@ -40,6 +40,7 @@ const PPWrapper = (s) => ({
 
 const DataWrapper = (s) => ({
   setSession: (sesObj) => s.session.set(sesObj),
+  setMasuk: () => s.forms.set("Masuk"),
   getIsLogged: () => s.session.isLogged.get(),
   getUID: () => s.session.uid.get(),
   getPic: () => s.session.pic.get(),
@@ -49,6 +50,12 @@ const DataWrapper = (s) => ({
 
 const SDWrapper = (s) => ({
   setSD: (SDObj) => s.set(SDObj),
+});
+
+const UIWrapper = (s) => ({
+  setForms: (forms) => s.forms.set(forms),
+  setLoading: (loading) => s.loading.stats.set(loading),
+  setLoadingMsg: (msg) => s.loading.message.set(msg),
 });
 
 // NOTE: State
@@ -81,10 +88,16 @@ const PopupState = {
   txtLabel: null,
 };
 
+const UIState = {
+  forms: "Masuk",
+  loading: { stats: true, message: "Memuat" },
+};
+
 // NOTE: Initialize state
 const DataInstance = createState(DataState);
 const SDInstance = createState(SideDetailState);
 const PPInstance = createState(PopupState);
+const UIInstance = createState(UIState);
 
 // NOTE: Set persistance
 DataInstance.attach(Persistence("main-session"));
@@ -93,6 +106,7 @@ DataInstance.attach(Persistence("main-session"));
 const GlobalStatePopup = () => PPWrapper(PPInstance);
 const GlobalStateSession = () => DataWrapper(DataInstance);
 const GlobalStateSD = () => SDWrapper(SDInstance);
+const GlobalStateUI = () => UIWrapper(UIInstance);
 
 export {
   SessionTemplate,
@@ -101,7 +115,9 @@ export {
   DataInstance,
   SDInstance,
   PPInstance,
+  UIInstance,
   GlobalStatePopup,
   GlobalStateSession,
   GlobalStateSD,
+  GlobalStateUI,
 };
