@@ -6,7 +6,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 
 import { GlobalStatePopup, PPInstance, PopupTemplate } from "util/States";
-import { Button, Label, Input, Warning } from "style/Components";
+import { Button, Label, Input, Warning, Form } from "style/Components";
 import { SchemaPopup } from "util/ValidationSchema";
 
 const PopupWrapper = styled.div`
@@ -40,15 +40,6 @@ const Content = styled.div`
   padding: 0 1em;
 `;
 
-const FormWrapper = styled.form`
-  display: inherit;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-
-  margin-top: 1em;
-`;
-
 const Action = styled.div`
   display: inherit;
   align-items: center;
@@ -67,16 +58,6 @@ const Overlay = styled.div`
   bottom: 0;
 
   z-index: 1002;
-`;
-
-const CustomButton02 = styled(Button)`
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-
-  &:nth-child(2) {
-    margin-left: 1em;
-  }
 `;
 
 var callbackYes, callbackNo;
@@ -136,18 +117,24 @@ function Popup() {
         <Content>
           {message}
           {form && (
-            <FormWrapper id="confirm" onSubmit={handleSubmit(handleYes)}>
+            <Form
+              className="forPopup"
+              id="confirm"
+              onSubmit={handleSubmit(handleYes)}
+            >
               <Label htmlFor="input">{txtLabel}</Label>
               <Input type="text" name="input" id="input" ref={register} />
               <Warning>{errors.input?.message}</Warning>
-            </FormWrapper>
+            </Form>
           )}
         </Content>
         <Action>
-          <CustomButton02 type="submit" form="confirm">
+          <Button className="forPopup" type="submit" form="confirm">
             {txtYes}
-          </CustomButton02>
-          <CustomButton02 onClick={handleNo}>{txtNo}</CustomButton02>
+          </Button>
+          <Button className="forPopup" onClick={handleNo}>
+            {txtNo}
+          </Button>
         </Action>
       </PopupWrapper>
     </>

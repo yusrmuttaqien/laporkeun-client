@@ -91,20 +91,7 @@ function usePetugas(page, sort) {
           },
           params: { page: page, limit: PaginationLimit, sort: sort },
         });
-        setPetugas((prevPetugas) => {
-          return [
-            ...prevPetugas,
-            ...response.data.output.map((datas) => {
-              const { report } = datas;
-              return {
-                name_petugas: report.name_petugas,
-                id_petugas: report.id_petugas,
-                date_akun: report.date_akun,
-                telp: report.telp,
-              };
-            }),
-          ];
-        });
+        setPetugas();
         setHasMore(response.data.info.next ? true : false);
         setLoading(false);
       } catch (err) {

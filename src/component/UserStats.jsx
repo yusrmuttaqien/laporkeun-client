@@ -5,7 +5,7 @@ import { useState as GlobalState } from "@hookstate/core";
 import { useHistory } from "react-router-dom";
 
 import { DataInstance } from "util/States";
-import { logout } from "util/DataFetch";
+import { logout } from "util/MainFunctions";
 
 import defaultUser from "./../asset/defaultUser.svg";
 

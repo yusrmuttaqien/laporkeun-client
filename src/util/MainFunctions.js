@@ -59,7 +59,6 @@ async function checkIsRegistered(toCompare) {
       });
     })
     .catch((error) => {
-      console.log(error);
       isExist.stat = "Kesalahan pengecekan NIK (Firestore)";
     });
 
@@ -323,8 +322,7 @@ async function login(cred) {
   const fakeEmail = name.toLowerCase() + "@laporkeun.com";
 
   try {
-    const acc = await auth.signInWithEmailAndPassword(fakeEmail, kataSandi);
-    console.log(acc);
+    await auth.signInWithEmailAndPassword(fakeEmail, kataSandi);
     return Promise.resolve(`Selamat datang, ${name}`);
   } catch (err) {
     return Promise.reject(`Firebase err: ${err.code}`);
@@ -396,7 +394,6 @@ async function deleteAccount(key) {
   return Promise.resolve("Akun berhasil dihapus");
 }
 
-// NOTE: Watchout this code below
 async function logout() {
   await auth.signOut();
   await GlobalStateSession().setSession(SessionTemplate);

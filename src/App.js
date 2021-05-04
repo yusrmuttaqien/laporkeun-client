@@ -19,7 +19,7 @@ import { Popup } from "util/Popup";
 import { Splash, NotFound } from "component/Splash";
 import PrivateRoute from "util/PrivateRoute";
 import { run_check_webp_feature } from "util/WebPCheck";
-import { authCheck } from "util/DataFetch";
+import { authCheck } from "util/MainFunctions";
 
 import BGWebP03 from "asset/mainBG_03.webp";
 import BGProgressive from "asset/mainBG_Progressive.jpg";

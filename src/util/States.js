@@ -102,11 +102,13 @@ const UIInstance = createState(UIState);
 // NOTE: Set persistance
 DataInstance.attach(Persistence("main-session"));
 
-// NOTE: Non-component state
+// NOTE: Non-component state import
 const GlobalStatePopup = () => PPWrapper(PPInstance);
 const GlobalStateSession = () => DataWrapper(DataInstance);
 const GlobalStateSD = () => SDWrapper(SDInstance);
 const GlobalStateUI = () => UIWrapper(UIInstance);
+
+// NOTE: Component state import
 
 export {
   SessionTemplate,

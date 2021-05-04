@@ -7,7 +7,7 @@ import { useState as GlobalState } from "@hookstate/core";
 
 import { Label, Input, Warning } from "style/Components";
 import { SchemaDaftar, SchemaMasuk } from "util/ValidationSchema";
-import { regisPengguna, login } from "util/DataFetch";
+import { regisPengguna, login } from "util/MainFunctions";
 import { DataInstance } from "util/States";
 
 const FormWrapper = styled.div`
