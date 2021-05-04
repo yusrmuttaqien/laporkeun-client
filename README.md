@@ -1,6 +1,6 @@
 # Laporkeun Client
 
-![laporkeun](https://github.com/DrDhemm/laporkeun-client/blob/Performance-Enhancement/src/asset/FullLogo.png?raw=true)
+![laporkeun](src/asset/FullLogo.png)
 
 Aplikasi Client laporkeun!
 
