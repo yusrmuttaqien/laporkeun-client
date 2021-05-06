@@ -112,7 +112,7 @@ const Report = styled.div`
       align-items: center;
 
       button:not(:first-child) {
-        margin-left: 1em;
+        margin-left: 0.5em;
       }
     }
 
@@ -165,6 +165,10 @@ const ReportBody = styled.div`
   &.forPetugasRegis {
     justify-content: center;
   }
+
+  &.forPetugas {
+    padding: 0 0.5em;
+  }
 `;
 
 const Action = styled.div`
@@ -202,6 +206,16 @@ const Button = styled.button`
       margin-left: 1em;
     }
   }
+
+  &.forIcon {
+    display: flex;
+
+    padding: 0.3em 0.4em;
+  }
+
+  &.forEntry {
+    margin: 0.5em 0;
+  }
 `;
 
 const Warning = styled.p`
@@ -217,9 +231,11 @@ const Warning = styled.p`
 `;
 
 const CustomSelect = styled(Select)`
+  width: 200px;
+
+  z-index: 5;
   background-color: transparent;
   outline: none;
-  width: 200px;
 
   .Select__control {
     background-color: transparent;
@@ -253,6 +269,10 @@ const CustomSelect = styled(Select)`
 
     &.Select__option--is-focused {
       background-color: transparent;
+
+      &:hover {
+        background-color: ${(props) => props.theme.color.grey};
+      }
     }
   }
 
@@ -281,6 +301,105 @@ const Form = styled.form`
 
     width: 60%;
   }
+
+  &.forEntry {
+    p {
+      color: ${(props) => props.theme.color.white};
+      font-weight: ${(props) => props.theme.value.font.light};
+      text-align: center;
+      font-size: 0.8rem;
+      text-decoration: underline;
+      cursor: pointer;
+      user-select: none;
+    }
+  }
+`;
+
+const DataList = styled.div`
+  display: flex;
+  justify-content: space-around;
+
+  padding: 0.3em 0.5em;
+  margin-bottom: 0.5em;
+
+  ${Action} {
+    width: 50px;
+  }
+
+  section {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100px;
+    text-align: center;
+  }
+
+  @media only screen and (max-width: 950px) {
+    section {
+      &:nth-child(2) {
+        display: none;
+      }
+    }
+  }
+
+  &.forHeading {
+    background-color: ${(props) => props.theme.color.purple};
+    font-weight: ${(props) => props.theme.value.font.medium};
+    color: ${(props) => props.theme.color.white};
+
+    position: sticky;
+    top: 0;
+    left: 0;
+
+    cursor: default;
+    z-index: 2;
+
+    ${Action} {
+      cursor: default;
+    }
+  }
+
+  &.forBody {
+    position: relative;
+
+    background-color: ${(props) => props.theme.color.white};
+    color: ${(props) => props.theme.color.dark};
+    z-index: 1;
+
+    &.forData {
+      &::before {
+        width: 3px;
+        height: 100%;
+        position: absolute;
+        top: 0;
+        left: 0;
+
+        content: "";
+        background-color: ${(props) => {
+          if (props.stats === "Diterima" || !props.suspended) {
+            return props.theme.color.done;
+          } else {
+            return props.theme.color.waiting;
+          }
+        }};
+      }
+    }
+  }
+`;
+
+const Notify = styled.div`
+  height: 100%;
+  width: 100%;
+  position: relative;
+
+  &::before {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+
+    content: "${(props) => props.message}";
+    transform: translate(-50%, -50%);
+  }
 `;
 
 export {
@@ -295,4 +414,6 @@ export {
   Button,
   Warning,
   CustomSelect,
+  DataList,
+  Notify,
 };

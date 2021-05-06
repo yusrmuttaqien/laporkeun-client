@@ -3,7 +3,7 @@ import React from "react";
 import { useState as GlobalState } from "@hookstate/core";
 import styled from "styled-components";
 
-import Forms from "./Form";
+import Entry from "./Entry";
 import Navigation from "./Navigation";
 import { DataInstance } from "util/States";
 import UserStats from "./UserStats";
@@ -115,7 +115,7 @@ export default function Navbar(props) {
           <UserStats />
         </>
       ) : (
-        <Forms />
+        <Entry />
       )}
     </NavWrapper>
   );

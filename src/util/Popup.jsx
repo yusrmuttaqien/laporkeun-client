@@ -60,7 +60,7 @@ const Overlay = styled.div`
   z-index: 1002;
 `;
 
-var callbackYes, callbackNo;
+var callbackYes, callbackNo, addParam;
 
 function Popup() {
   const state = GlobalState(PPInstance);
@@ -80,11 +80,12 @@ function Popup() {
 
   const handleYes = (userAction) => {
     // Call the user defined callback, if there is
-    callbackYes({ agreement: true, userAction });
+    callbackYes({ agreement: true, userAction, ...addParam });
 
     // Clean up callback
     callbackYes = defaultCb;
     callbackNo = defaultCb;
+    addParam = null;
 
     // Cleanup popup state
     state.set({ ...PopupTemplate });
@@ -92,11 +93,12 @@ function Popup() {
 
   const handleNo = (userAction) => {
     // Call the user defined callback, if there is
-    callbackNo({ agreement: false, userAction });
+    callbackNo({ agreement: false, userAction, ...addParam });
 
     // Clean up callback
     callbackYes = defaultCb;
     callbackNo = defaultCb;
+    addParam = null;
 
     // Cleanup popup state
     state.set({ ...PopupTemplate });
@@ -129,9 +131,15 @@ function Popup() {
           )}
         </Content>
         <Action>
-          <Button className="forPopup" type="submit" form="confirm">
-            {txtYes}
-          </Button>
+          {form ? (
+            <Button className="forPopup" type="submit" form="confirm">
+              {txtYes}
+            </Button>
+          ) : (
+            <Button className="forPopup" onClick={handleYes}>
+              {txtYes}
+            </Button>
+          )}
           <Button className="forPopup" onClick={handleNo}>
             {txtNo}
           </Button>
@@ -149,6 +157,7 @@ async function TriggerPopup({
   txtYes = "Ok",
   txtNo = "Cancel",
   txtLabel = "Add a label",
+  param,
 }) {
   const handleFocus = () => {
     document.getElementById("ydhm-popup").focus();
@@ -160,6 +169,10 @@ async function TriggerPopup({
 
   if (cbNo) {
     callbackNo = cbNo;
+  }
+
+  if (param) {
+    addParam = param;
   }
 
   GlobalStatePopup().settxtYes(txtYes);

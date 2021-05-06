@@ -6,10 +6,9 @@ import { useState as GlobalState } from "@hookstate/core";
 import { GlobalStateUI, UIInstance } from "util/States";
 
 const Presisting = styled.div`
-  background-color: ${(props) => props.theme.color.dark};
-  color: ${(props) => props.theme.color.white};
-  font-weight: ${(props) => props.theme.value.font.medium};
-  ${rfs("2em", "font-size")}
+  display: flex;
+  align-items: center;
+  justify-content: center;
 
   height: 100vh;
   min-height: 640px; // TODO: Fix for mobile devices
@@ -18,11 +17,12 @@ const Presisting = styled.div`
   position: absolute;
   top: 0;
   left: 0;
-  z-index: 1005;
 
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  z-index: 1005;
+  background-color: ${(props) => props.theme.color.dark};
+  color: ${(props) => props.theme.color.white};
+  font-weight: ${(props) => props.theme.value.font.medium};
+  ${rfs("2em", "font-size")}
 `;
 
 function Loading() {

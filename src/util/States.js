@@ -1,7 +1,7 @@
 import { createState } from "@hookstate/core";
 import { Persistence } from "@hookstate/persistence";
 
-// NOTE: Helper
+// NOTE: Template
 const SessionTemplate = {
   isLogged: false,
   role: null,
@@ -28,6 +28,7 @@ const SDTemplate = {
   newResponseByIDReport: null,
 };
 
+// NOTE: Helper
 const PPWrapper = (s) => ({
   setMsg: (msg) => s.message.set(msg),
   setForm: (form) => s.form.set(form),
@@ -53,9 +54,22 @@ const SDWrapper = (s) => ({
 });
 
 const UIWrapper = (s) => ({
-  setForms: (forms) => s.forms.set(forms),
   setLoading: (loading) => s.loading.stats.set(loading),
   setLoadingMsg: (msg) => s.loading.message.set(msg),
+});
+
+const FetchesWrapper = (s) => ({
+  // Global
+  setLoading: (loading) => s.isLoading.set(loading),
+
+  // Petugas
+  getPetugasPayload: () => s.petugas.payload.get(),
+  getPetugasLastFetch: () => s.petugas.lastFetch.get(),
+  getPetugasOrderBy: () => s.petugas.orderBy.get(),
+  setPetugasOrderBy: (order) => s.petugas.orderBy.set(order),
+  setPetugasPayload: (payload) => s.petugas.payload.set(payload),
+  setPetugasLastFetch: (lastfetch) => s.petugas.lastFetch.set(lastfetch),
+  addPetugasPayload: (payload) => s.petugas.payload.merge(payload),
 });
 
 // NOTE: State
@@ -89,8 +103,16 @@ const PopupState = {
 };
 
 const UIState = {
-  forms: "Masuk",
   loading: { stats: true, message: "Memuat" },
+};
+
+const FetchesData = {
+  isLoading: false,
+  petugas: {
+    orderBy: 0,
+    payload: null,
+    lastFetch: 0,
+  },
 };
 
 // NOTE: Initialize state
@@ -98,6 +120,7 @@ const DataInstance = createState(DataState);
 const SDInstance = createState(SideDetailState);
 const PPInstance = createState(PopupState);
 const UIInstance = createState(UIState);
+const FetchesInstance = createState(FetchesData);
 
 // NOTE: Set persistance
 DataInstance.attach(Persistence("main-session"));
@@ -107,6 +130,7 @@ const GlobalStatePopup = () => PPWrapper(PPInstance);
 const GlobalStateSession = () => DataWrapper(DataInstance);
 const GlobalStateSD = () => SDWrapper(SDInstance);
 const GlobalStateUI = () => UIWrapper(UIInstance);
+const GlobalStateFetches = () => FetchesWrapper(FetchesInstance);
 
 // NOTE: Component state import
 
@@ -118,8 +142,10 @@ export {
   SDInstance,
   PPInstance,
   UIInstance,
+  FetchesInstance,
   GlobalStatePopup,
   GlobalStateSession,
   GlobalStateSD,
   GlobalStateUI,
+  GlobalStateFetches,
 };

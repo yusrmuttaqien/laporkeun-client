@@ -15,7 +15,7 @@ import { SchemaDaftarPetugas } from "util/ValidationSchema";
 import { regisPetugas } from "util/MainFunctions";
 
 export default function PetugasRegistrasi() {
-  const { register, handleSubmit, errors } = useForm({
+  const { register, handleSubmit, errors, reset } = useForm({
     resolver: yupResolver(SchemaDaftarPetugas),
   });
 
@@ -23,6 +23,7 @@ export default function PetugasRegistrasi() {
     toast.promise(regisPetugas(data), {
       loading: "Tunggu sebentar kawan",
       success: (msg) => {
+        reset();
         return msg;
       },
       error: (err) => err && err.toString(),

@@ -24,21 +24,22 @@ function userNewTemplate(cred) {
     pic: null,
     role: "pengguna",
     telp: null,
-    acc_date: new Date().toISOString().split("T")[0],
+    acc_date: new Date().toISOString(),
     name,
   };
 }
 
 function petugasNewTemplate(cred) {
-  const { telp, name } = cred;
+  const { telp, name, userId } = cred;
 
   return {
-    nik: "0000000000000000",
+    nik: userId,
     pic: null,
     role: "petugas",
     telp: telp,
-    acc_date: new Date().toISOString().split("T")[0],
+    acc_date: new Date().toISOString(),
     name,
+    suspended: false,
   };
 }
 
@@ -152,6 +153,12 @@ async function fetchUserData(uid) {
     //  TODO: Handle this, using linked toast perhaps?
     .catch((err) => console.log(err));
 
+  if (details.suspended) {
+    await logout();
+    toast.error("Akun ini ditutup");
+    return 1;
+  }
+
   if (details.pic) {
     details.picURL = await storageProfile.child(details.pic).getDownloadURL();
   }
@@ -198,8 +205,8 @@ async function regisPengguna(cred) {
 
 async function regisPetugas(cred) {
   const { name, telp, kataSandi } = cred;
-  const usrCred = petugasNewTemplate({ telp, name });
   var userId,
+    usrCred,
     fakeEmail = name + "@laporkeun.com";
   fakeEmail = fakeEmail.toLowerCase();
 
@@ -210,6 +217,7 @@ async function regisPetugas(cred) {
       kataSandi
     );
     userId = await md5Compare(UserDetails.user.uid, "users");
+    usrCred = await petugasNewTemplate({ telp, name, userId });
   } catch (err) {
     return Promise.reject(`Firebase err: ${err.code}`);
   }
