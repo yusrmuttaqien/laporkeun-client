@@ -1,7 +1,8 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import styled from "styled-components";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
+import composeRefs from "@seznam/compose-react-refs";
 
 import {
   ReportWrapper,
@@ -15,7 +16,7 @@ import {
   TextArea,
 } from "style/Components";
 import { tipeLaporan, lokasi } from "util/Fetches";
-import { Public, NoPublic } from "style/Icons";
+import { Public, NoPublic, Trashbin } from "style/Icons";
 import { SchemaLaporan } from "util/ValidationSchema";
 
 const Preview = styled.div`
@@ -26,6 +27,7 @@ const Preview = styled.div`
 
   width: 100%;
   height: 100%;
+  position: relative;
 
   border: 1px solid ${(props) => props.theme.color.white};
   border-radius: ${(props) => props.theme.value.radius};
@@ -52,9 +54,11 @@ export default function BuatLaporan(props) {
     id: 0,
   });
 
-  const { register, handleSubmit, errors } = useForm({
+  const { register, handleSubmit, errors, reset } = useForm({
     resolver: yupResolver(SchemaLaporan),
   });
+
+  const inputFile = useRef();
 
   const switchVis = () => {
     setIsPublic((prev) => !prev);
@@ -93,17 +97,31 @@ export default function BuatLaporan(props) {
     return 1;
   };
 
-  const handlePic = (e) => {
+  const previewPic = (e) => {
     setIsPic({
       file: URL.createObjectURL(e.target.files[0]),
       name: e.target.files[0].name,
     });
   };
 
+  const deletePic = () => {
+    const e = inputFile.current;
+
+    setIsPic();
+
+    e.value = "";
+
+    if (!/safari/i.test(navigator.userAgent)) {
+      e.type = "";
+      e.type = "file";
+    }
+  };
+
   const handleLaporan = (laporan) => {
     if (!checkSelect()) return 0;
 
-    console.log({ ...laporan, type, location });
+    console.log({ ...laporan, type, location, isPublic });
+    // reset()
   };
 
   return (
@@ -114,7 +132,7 @@ export default function BuatLaporan(props) {
           <div className="multiOption">
             <Button>
               <Label className="forButton" htmlFor="picLaporan">
-                Tambah gambar
+                {isPic ? "Ubah gambar" : "Tambah gambar"}
               </Label>
               <Input
                 type="file"
@@ -122,8 +140,8 @@ export default function BuatLaporan(props) {
                 id="picLaporan"
                 accept="image/x-png,image/gif,image/jpeg"
                 form="lapor"
-                onChange={handlePic}
-                ref={register}
+                onChange={previewPic}
+                ref={composeRefs(register, inputFile)}
               />
             </Button>
             <Button type="submit" form="lapor">
@@ -190,8 +208,18 @@ export default function BuatLaporan(props) {
               <TextArea name="dLaporan" id="dLaporan" ref={register}></TextArea>
             </section>
             <section>
-              <Label>pratinjau gambar</Label>
+              <Label>{errors.picLaporan?.message || "pratinjau gambar"}</Label>
               <Preview>
+                {isPic && (
+                  <Button
+                    className="forBuatLaporPreview"
+                    onClick={deletePic}
+                    type="button"
+                    title="Hapus gambar"
+                  >
+                    <Trashbin className="inButton" />
+                  </Button>
+                )}
                 {isPic && <img src={isPic.file} />}
                 {isPic ? isPic.name : "Klik tambah gambar diatas"}
               </Preview>

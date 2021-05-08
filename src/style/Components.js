@@ -182,7 +182,7 @@ const ReportBody = styled.div`
       &:nth-child(2) {
         flex: 1;
 
-        margin-top: .7em;
+        margin-top: 0.7em;
       }
 
       section {
@@ -252,12 +252,21 @@ const Button = styled.button`
   &.forEntry {
     margin: 0.5em 0;
   }
+
+  &.forBuatLaporPreview {
+    display: flex;
+
+    position: absolute;
+    padding: 0.3em 0.4em;
+    top: .5em;
+    right: .5em;
+  }
 `;
 
 const Warning = styled.p`
   &&& {
     margin-bottom: 0.5em;
-    
+
     color: ${(props) => props.theme.color.blue};
     font-weight: ${(props) => props.theme.value.font.light};
     text-align: left;

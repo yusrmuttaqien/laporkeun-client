@@ -40,22 +40,22 @@ const SchemaMasuk = yup.object().shape({
 const SchemaLaporan = yup.object().shape({
   sLaporan: yup
     .string()
-    .required("Judul wajib diisi")
-    .max(30, "Judul maksimal 30 karakter"),
+    .required("simpulan wajib diisi")
+    .max(30, "simpulan maksimal 30 karakter"),
   dLaporan: yup
     .string()
-    .required("Isi wajib diisi")
-    .max(2000, "Isi maksimal 2000 karakter"),
+    .required("detail wajib diisi")
+    .max(2000, "detail maksimal 2000 karakter"),
   picLaporan: yup
     .mixed()
-    .test("fileType", "Unsupported File Format", (value) => {
+    .test("fileType", "Format gambar tidak didukung", (value) => {
       if (value.length !== 0 && !SUPPORTED_FORMATS.includes(value[0].type)) {
         return false;
       } else {
         return true;
       }
     })
-    .test("fileSize", "File Size is too large", (value) => {
+    .test("fileSize", "Ukuran gambar melebihi 1MB", (value) => {
       if (value.length !== 0 && value[0].size >= FILE_SIZE) {
         return false;
       } else {
@@ -139,7 +139,7 @@ const SchemaSetting = yup.object().shape({
     }),
   pic: yup
     .mixed()
-    .test("fileType", "Format tidak didukung", (value) => {
+    .test("fileType", "Format gambar tidak didukung", (value) => {
       if (value.length !== 0 && !SUPPORTED_FORMATS.includes(value[0].type)) {
         return false;
       } else {
@@ -157,7 +157,7 @@ const SchemaSetting = yup.object().shape({
         }
       }
     )
-    .test("fileSize", "File Size is too large", (value) => {
+    .test("fileSize", "Ukuran gambar melebihi 1MB", (value) => {
       if (value.length !== 0 && value[0].size >= FILE_SIZE) {
         return false;
       } else {
