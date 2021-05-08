@@ -7,6 +7,16 @@ const options = [
   { value: "Date DESC", label: "Terbaru", id: 1 },
   { value: "Date ASC", label: "Terlama", id: 2 },
 ];
+const tipeLaporan = [
+  { value: "Pilih...", label: "Pilih...", isDisabled: true, id: 0 },
+  { value: "Saran", label: "Saran", id: 1 },
+  { value: "Penting", label: "Penting", id: 2 },
+];
+const lokasi = [
+  { value: "Pilih...", label: "Pilih...", isDisabled: true, id: 0 },
+  { value: "Malang", label: "Malang", id: 1 },
+  { value: "Surabaya", label: "Surabaya", id: 2 },
+];
 const PaginationLimit = 10;
 
 // Helper fetch function
@@ -142,4 +152,4 @@ async function FetchPetugas({ action, ext }) {
   GlobalStateFetches().setLoading(false);
 }
 
-export { options, FetchPetugas };
+export { options, FetchPetugas, tipeLaporan, lokasi };

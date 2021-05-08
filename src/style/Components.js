@@ -18,7 +18,7 @@ const Label = styled.label`
 
 const Input = styled.input`
   padding: 0.7em 0.9em;
-  margin-bottom: 1em;
+  margin-bottom: 0.3em;
 
   border: 1px solid ${(props) => props.theme.color.white};
   background-color: transparent;
@@ -49,6 +49,10 @@ const Input = styled.input`
     -moz-appearance: textfield;
   }
 
+  &[type="file"] {
+    display: none;
+  }
+
   &.forFile {
     appearance: none;
     display: none;
@@ -57,7 +61,6 @@ const Input = styled.input`
 
 const TextArea = styled.textarea`
   padding: 0.7em 0.9em;
-  margin-bottom: 1em;
   width: 100%;
   height: 100%;
 
@@ -169,6 +172,39 @@ const ReportBody = styled.div`
   &.forPetugas {
     padding: 0 0.5em;
   }
+
+  &.forBuatLapor {
+    padding-bottom: 1em;
+
+    > div {
+      display: flex;
+
+      &:nth-child(2) {
+        flex: 1;
+
+        margin-top: .7em;
+      }
+
+      section {
+        display: inherit;
+        flex-direction: column;
+        flex: 1;
+
+        &:not(:nth-child(1)) {
+          margin-left: 0.5em;
+        }
+
+        &.forBuatLaporVis {
+          flex: unset;
+          align-items: center;
+          justify-content: flex-end;
+
+          width: 70px;
+          margin-bottom: 8px;
+        }
+      }
+    }
+  }
 `;
 
 const Action = styled.div`
@@ -220,6 +256,8 @@ const Button = styled.button`
 
 const Warning = styled.p`
   &&& {
+    margin-bottom: 0.5em;
+    
     color: ${(props) => props.theme.color.blue};
     font-weight: ${(props) => props.theme.value.font.light};
     text-align: left;
@@ -233,7 +271,7 @@ const Warning = styled.p`
 const CustomSelect = styled(Select)`
   width: 200px;
 
-  z-index: 5;
+  z-index: 10;
   background-color: transparent;
   outline: none;
 
@@ -278,6 +316,15 @@ const CustomSelect = styled(Select)`
 
   @media only screen and (max-width: 950px) {
     width: 140px;
+  }
+
+  &.forBuatLapor {
+    width: unset;
+    margin-bottom: 0.2em;
+
+    .Select__control {
+      padding: 0.07em 0;
+    }
   }
 `;
 

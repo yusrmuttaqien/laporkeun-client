@@ -3,7 +3,7 @@ import * as yup from "yup";
 const FILE_SIZE = 1000000;
 const SUPPORTED_FORMATS = ["image/jpg", "image/jpeg", "image/gif", "image/png"];
 
-// NOTE: Schema .test(), return true for pass, return false for fail
+// Schema .test(), return true for pass, return false for fail
 
 const SchemaDaftar = yup.object().shape({
   NIK: yup
@@ -38,19 +38,15 @@ const SchemaMasuk = yup.object().shape({
 });
 
 const SchemaLaporan = yup.object().shape({
-  judulLaporan: yup
+  sLaporan: yup
     .string()
     .required("Judul wajib diisi")
     .max(30, "Judul maksimal 30 karakter"),
-  loc: yup
-    .string()
-    .required("Lokasi wajib diisi")
-    .max(30, "Lokasi maksimal 30 karakter"),
-  isiLaporan: yup
+  dLaporan: yup
     .string()
     .required("Isi wajib diisi")
     .max(2000, "Isi maksimal 2000 karakter"),
-  pic: yup
+  picLaporan: yup
     .mixed()
     .test("fileType", "Unsupported File Format", (value) => {
       if (value.length !== 0 && !SUPPORTED_FORMATS.includes(value[0].type)) {

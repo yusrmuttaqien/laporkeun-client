@@ -2,172 +2,152 @@ import React, { useState } from "react";
 import styled from "styled-components";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-// import { toast } from "react-hot-toast";
-// import { useHistory } from "react-router-dom";
 
-import { SchemaLaporan } from "util/ValidationSchema";
 import {
-  Label,
-  Input,
-  TextArea,
   ReportWrapper,
   Report,
-  ReportBody,
-  Action,
   Button,
+  ReportBody,
+  Label,
+  Input,
+  CustomSelect,
+  Action,
+  TextArea,
   Warning,
 } from "style/Components";
+import { tipeLaporan, lokasi } from "util/Fetches";
+import { Public, NoPublic } from "style/Icons";
+import { SchemaLaporan } from "util/ValidationSchema";
 
-const ReportHeader = styled.div`
+const Preview = styled.div`
   display: flex;
-  align-items: flex-end;
+  align-items: center;
+  justify-content: center;
 
-  section {
-    display: inherit;
-    flex-direction: column;
-    flex: 1;
+  width: 100%;
+  height: 100%;
 
-    &:nth-child(2) {
-      margin-left: 1em;
-    }
+  border: 1px solid ${(props) => props.theme.color.white};
+  border-radius: ${(props) => props.theme.value.radius};
+  opacity: ${(props) => props.theme.value.opacity};
+  transition: ${(props) => props.theme.value.transition};
+  transition-property: opacity;
+
+  &:hover,
+  &:focus {
+    opacity: 1;
   }
 `;
 
-const ActionCustom = styled(Action)`
-  padding: 0.7em 0em;
-  width: 5em;
-`;
+export default function BuatLaporan(props) {
+  const [isPublic, setIsPublic] = useState(false);
+  const [isPic, setIsPic] = useState();
+  const [type, setType] = useState({});
+  const [location, setLocation] = useState({});
 
-const ReportBodyCustom = styled(ReportBody)`
-  section {
-    display: inherit;
-    justify-content: flex-end;
-
-    padding: 1em 0;
-  }
-`;
-
-const CustomButton = styled(Button)`
-  margin: 0em 0 0.5em;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-
-  &:nth-last-child(1) {
-    margin-left: 1em;
-  }
-`;
-
-const CustomInput = styled.input`
-  display: none;
-`;
-
-const CustomLabel = styled.label`
-  appearance: none;
-  cursor: pointer;
-`;
-
-// NOTE: Deprecated API
-const AlteredReport = Report.withComponent("form");
-
-function BuatLaporan() {
-  const [action, setAction] = useState("Privat");
-  const [filename, setFileName] = useState("");
   const { register, handleSubmit, errors } = useForm({
     resolver: yupResolver(SchemaLaporan),
   });
 
-  const changeAction = () => {
-    setAction(action === "Privat" ? "Publik" : "Privat");
-  };
-  // const history = useHistory();
-
-  const onSubmit = async (data, e) => {
-    // const datas = { ...data, vis: action };
-    // func lapor
-    // toast.promise(, {
-    //   loading: "Tunggu sebentar kawan :)",
-    //   success: (msg) => {
-    //     history.push("/laporanku");
-    //     return msg;
-    //   },
-    //   error: (err) => err && err.toString(),
-    // });
+  const switchVis = () => {
+    setIsPublic((prev) => !prev);
   };
 
-  const getFileName = (e) => {
-    setFileName(e.target.files[0].name);
+  const switchSelect = (action) => {};
+
+  const handlePic = (e) => {};
+
+  const handleLaporan = (laporan) => {
+    console.log(laporan);
   };
 
   return (
     <ReportWrapper>
-      <AlteredReport noValidate onSubmit={handleSubmit(onSubmit)}>
-        <h1>buat laporanmu</h1>
-        <ReportHeader>
-          <section>
-            <Label htmlFor="judulLaporan">
-              judul laporan <Warning>{errors.judulLaporan?.message}</Warning>
-            </Label>
-            <Input
-              type="text"
-              name="judulLaporan"
-              id="judulLaporan"
-              ref={register}
-            />
-          </section>
-          <section>
-            <Label htmlFor="loc">
-              lokasi laporan <Warning>{errors.loc?.message}</Warning>
-            </Label>
-            <Input type="text" name="loc" id="loc" ref={register} />
-          </section>
-          <ActionCustom title="Ubah visibilitas" onClick={changeAction}>
-            <span className="material-icons">
-              {action === "Publik" ? "public" : "public_off"}
-            </span>
-            {action === "Publik" ? "Publik" : "Privat"}
-          </ActionCustom>
-        </ReportHeader>
-        <ReportBodyCustom>
-          <Label htmlFor="isiLaporan">
-            isi laporan <Warning>{errors.isiLaporan?.message}</Warning>
-          </Label>
-          <TextArea name="isiLaporan" id="isiLaporan" ref={register}></TextArea>
-          <section>
-            <CustomButton
-              type="button"
-              title={
-                errors.pic?.message
-                  ? errors.pic?.message
-                  : filename
-                  ? filename
-                  : "Tambahkan gambar"
-              }
-            >
-              <CustomLabel htmlFor="pic">
-                {errors.pic?.message
-                  ? errors.pic?.message
-                  : filename
-                  ? filename
-                  : "Tambahkan gambar"}
-              </CustomLabel>
-              <CustomInput
+      <Report>
+        <div className="reportHeader">
+          <h1 title={props.name}>{props.name}</h1>
+          <div className="multiOption">
+            <Button>
+              <Label className="forButton" htmlFor="picLaporan">
+                Tambah gambar
+              </Label>
+              <Input
                 type="file"
-                name="pic"
-                id="pic"
+                name="picLaporan"
+                id="picLaporan"
                 accept="image/x-png,image/gif,image/jpeg"
+                form="lapor"
                 ref={register}
-                onChange={getFileName}
               />
-            </CustomButton>
-            <CustomButton type="submit" title="Lapor!">
-              Lapor!
-            </CustomButton>
-          </section>
-        </ReportBodyCustom>
-      </AlteredReport>
+            </Button>
+            <Button type="submit" form="lapor">
+              Laporkan
+            </Button>
+          </div>
+        </div>
+        <ReportBody
+          className="forBuatLapor"
+          as="form"
+          id="lapor"
+          onSubmit={handleSubmit(handleLaporan)}
+        >
+          <div>
+            <section>
+              <Label htmlFor="sLaporan">
+                {errors.sLaporan?.message || "singkat laporan"}
+              </Label>
+              <Input type="text" name="sLaporan" id="sLaporan" ref={register} />
+            </section>
+            <section>
+              <Label>{errors.sLaporan?.message || "tipe laporan"}</Label>
+              <CustomSelect
+                options={tipeLaporan}
+                classNamePrefix={"Select"}
+                defaultValue={tipeLaporan[0]}
+                className="forBuatLapor"
+                ref={register}
+              />
+            </section>
+            <section>
+              <Label>{errors.sLaporan?.message || "lokasi"}</Label>
+              <CustomSelect
+                options={lokasi}
+                classNamePrefix={"Select"}
+                defaultValue={lokasi[0]}
+                className="forBuatLapor"
+                ref={register}
+              />
+            </section>
+            <section className="forBuatLaporVis">
+              <Action onClick={switchVis}>
+                {isPublic ? (
+                  <>
+                    <Public className="inAction" />
+                    Publik
+                  </>
+                ) : (
+                  <>
+                    <NoPublic className="inAction" />
+                    Privat
+                  </>
+                )}
+              </Action>
+            </section>
+          </div>
+          <div>
+            <section>
+              <Label htmlFor="dLaporan">
+                {errors.dLaporan?.message || "detail laporan"}
+              </Label>
+              <TextArea name="dLaporan" id="dLaporan" ref={register}></TextArea>
+            </section>
+            <section>
+              <Label>pratinjau gambar</Label>
+              <Preview>Tambah gambar</Preview>
+            </section>
+          </div>
+        </ReportBody>
+      </Report>
     </ReportWrapper>
   );
 }
-
-export default BuatLaporan;
