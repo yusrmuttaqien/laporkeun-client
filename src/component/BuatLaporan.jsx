@@ -13,7 +13,6 @@ import {
   CustomSelect,
   Action,
   TextArea,
-  Warning,
 } from "style/Components";
 import { tipeLaporan, lokasi } from "util/Fetches";
 import { Public, NoPublic } from "style/Icons";
@@ -23,6 +22,7 @@ const Preview = styled.div`
   display: flex;
   align-items: center;
   justify-content: center;
+  flex-direction: column;
 
   width: 100%;
   height: 100%;
@@ -33,6 +33,11 @@ const Preview = styled.div`
   transition: ${(props) => props.theme.value.transition};
   transition-property: opacity;
 
+  img {
+    width: 95%;
+    margin-bottom: 1em;
+  }
+
   &:hover,
   &:focus {
     opacity: 1;
@@ -42,8 +47,10 @@ const Preview = styled.div`
 export default function BuatLaporan(props) {
   const [isPublic, setIsPublic] = useState(false);
   const [isPic, setIsPic] = useState();
-  const [type, setType] = useState({});
-  const [location, setLocation] = useState({});
+  const [type, setType] = useState({ id: 0 });
+  const [location, setLocation] = useState({
+    id: 0,
+  });
 
   const { register, handleSubmit, errors } = useForm({
     resolver: yupResolver(SchemaLaporan),
@@ -53,12 +60,50 @@ export default function BuatLaporan(props) {
     setIsPublic((prev) => !prev);
   };
 
-  const switchSelect = (action) => {};
+  const switchSelect = (action, e) => {
+    switch (action) {
+      case "type":
+        setType({ id: e.id });
+        break;
+      case "location":
+        setLocation({ id: e.id });
+        break;
+      default:
+        break;
+    }
+  };
 
-  const handlePic = (e) => {};
+  const checkSelect = () => {
+    if (type.id === 0 && location.id === 0) {
+      setType({ message: "tipe wajib diisi" });
+      setLocation({ message: "lokasi wajib diisi" });
+      return 0;
+    }
+
+    if (type.id === 0) {
+      setType({ message: "tipe wajib diisi" });
+      return 0;
+    }
+
+    if (location.id === 0) {
+      setLocation({ message: "lokasi wajib diisi" });
+      return 0;
+    }
+
+    return 1;
+  };
+
+  const handlePic = (e) => {
+    setIsPic({
+      file: URL.createObjectURL(e.target.files[0]),
+      name: e.target.files[0].name,
+    });
+  };
 
   const handleLaporan = (laporan) => {
-    console.log(laporan);
+    if (!checkSelect()) return 0;
+
+    console.log({ ...laporan, type, location });
   };
 
   return (
@@ -77,6 +122,7 @@ export default function BuatLaporan(props) {
                 id="picLaporan"
                 accept="image/x-png,image/gif,image/jpeg"
                 form="lapor"
+                onChange={handlePic}
                 ref={register}
               />
             </Button>
@@ -89,7 +135,7 @@ export default function BuatLaporan(props) {
           className="forBuatLapor"
           as="form"
           id="lapor"
-          onSubmit={handleSubmit(handleLaporan)}
+          onSubmit={handleSubmit(handleLaporan, checkSelect)}
         >
           <div>
             <section>
@@ -99,23 +145,25 @@ export default function BuatLaporan(props) {
               <Input type="text" name="sLaporan" id="sLaporan" ref={register} />
             </section>
             <section>
-              <Label>{errors.sLaporan?.message || "tipe laporan"}</Label>
+              <Label>{type.message || "tipe laporan"}</Label>
               <CustomSelect
                 options={tipeLaporan}
                 classNamePrefix={"Select"}
                 defaultValue={tipeLaporan[0]}
                 className="forBuatLapor"
-                ref={register}
+                value={tipeLaporan[type]}
+                onChange={(e) => switchSelect("type", e)}
               />
             </section>
             <section>
-              <Label>{errors.sLaporan?.message || "lokasi"}</Label>
+              <Label>{location.message || "lokasi"}</Label>
               <CustomSelect
                 options={lokasi}
                 classNamePrefix={"Select"}
                 defaultValue={lokasi[0]}
                 className="forBuatLapor"
-                ref={register}
+                value={lokasi[location]}
+                onChange={(e) => switchSelect("location", e)}
               />
             </section>
             <section className="forBuatLaporVis">
@@ -143,7 +191,10 @@ export default function BuatLaporan(props) {
             </section>
             <section>
               <Label>pratinjau gambar</Label>
-              <Preview>Tambah gambar</Preview>
+              <Preview>
+                {isPic && <img src={isPic.file} />}
+                {isPic ? isPic.name : "Klik tambah gambar diatas"}
+              </Preview>
             </section>
           </div>
         </ReportBody>

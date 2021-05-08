@@ -156,14 +156,14 @@ async function fetchUserData(uid) {
   if (details.suspended) {
     await logout();
     toast.error("Akun ini ditutup");
-    return 1;
+    return 0;
   }
 
   if (details.pic) {
     details.picURL = await storageProfile.child(details.pic).getDownloadURL();
   }
   GlobalStateSession().setSession(details);
-  return 0;
+  return 1;
 }
 
 async function regisPengguna(cred) {
@@ -407,7 +407,7 @@ async function logout() {
   await GlobalStateSession().setSession(SessionTemplate);
   await GlobalStateSD().setSD(SDTemplate);
   await GlobalStateSession().setMasuk();
-  return 0;
+  return 1;
 }
 
 export {

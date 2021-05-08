@@ -16,6 +16,8 @@ const lokasi = [
   { value: "Pilih...", label: "Pilih...", isDisabled: true, id: 0 },
   { value: "Malang", label: "Malang", id: 1 },
   { value: "Surabaya", label: "Surabaya", id: 2 },
+  { value: "Solo", label: "Solo", id: 3 },
+  { value: "Banjarmasin", label: "Banjarmasin", id: 4 },
 ];
 const PaginationLimit = 10;
 
