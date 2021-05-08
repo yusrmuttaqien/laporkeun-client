@@ -1,12 +1,12 @@
 import React from "react";
-import { Redirect, Route } from "react-router";
-import { useStoreState } from "easy-peasy";
+import { Redirect, Route } from "react-router-dom";
+import { useState as GlobalState } from "@hookstate/core";
+
+import { DataInstance } from "util/States";
 
 export default function PrivateRoute({ comp: Component, ...rest }) {
-  const { isLogged, role } = useStoreState((state) => ({
-    isLogged: state.session.isLogged,
-    role: state.session.role,
-  }));
+  const state = GlobalState(DataInstance);
+  const { isLogged, role } = state.session.get();
 
   let destiny = rest.path;
 
@@ -49,7 +49,7 @@ export default function PrivateRoute({ comp: Component, ...rest }) {
       {...rest}
       render={(props) => {
         return isLogged && Checker(role, destiny) ? (
-          <Component {...props} sd={rest.sd} />
+          <Component {...props} name={destiny.substring(1)}/>
         ) : (
           <Redirect to="/" />
         );

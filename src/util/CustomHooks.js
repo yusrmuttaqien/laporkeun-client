@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
-import { useStoreState, useStoreActions } from "easy-peasy";
 import axios from "axios";
-import { storage } from "./util/Firebase";
+import { storage } from "util/Firebase";
 import toast from "react-hot-toast";
+import { useState as GlobalState } from "@hookstate/core";
+
+import { DataInstance, SDInstance } from "util/States";
+import { database } from "util/Firebase";
 
 const instance = axios.create({
   baseURL: "http://localhost:5006/",
@@ -16,9 +19,8 @@ function useLaporanku(page, sort) {
   const [loading, setLoading] = useState(true);
   const [laporanku, setLaporanku] = useState([]);
 
-  const { token } = useStoreState((state) => ({
-    token: state.session.token,
-  }));
+  const state = GlobalState(DataInstance);
+  const { token } = state.session.get();
 
   useEffect(() => {
     setLaporanku([]);
@@ -70,9 +72,8 @@ function usePetugas(page, sort) {
   const [loading, setLoading] = useState(true);
   const [petugas, setPetugas] = useState([]);
 
-  const { token } = useStoreState((state) => ({
-    token: state.session.token,
-  }));
+  const state = GlobalState(DataInstance);
+  const { token } = state.session.get();
 
   useEffect(() => {
     setPetugas([]);
@@ -90,20 +91,7 @@ function usePetugas(page, sort) {
           },
           params: { page: page, limit: PaginationLimit, sort: sort },
         });
-        setPetugas((prevPetugas) => {
-          return [
-            ...prevPetugas,
-            ...response.data.output.map((datas) => {
-              const { report } = datas;
-              return {
-                name_petugas: report.name_petugas,
-                id_petugas: report.id_petugas,
-                date_akun: report.date_akun,
-                telp: report.telp,
-              };
-            }),
-          ];
-        });
+        setPetugas();
         setHasMore(response.data.info.next ? true : false);
         setLoading(false);
       } catch (err) {
@@ -122,9 +110,8 @@ function useLaporanPublik(page, sort) {
   const [loading, setLoading] = useState(true);
   const [laporanpublik, setLaporanpublik] = useState([]);
 
-  const { token } = useStoreState((state) => ({
-    token: state.session.token,
-  }));
+  const state = GlobalState(DataInstance);
+  const { token } = state.session.get();
 
   useEffect(() => {
     setLaporanpublik([]);
@@ -176,9 +163,8 @@ function useLaporanBaru(page, sort) {
   const [loading, setLoading] = useState(true);
   const [laporanbaru, setLaporanbaru] = useState([]);
 
-  const { token } = useStoreState((state) => ({
-    token: state.session.token,
-  }));
+  const state = GlobalState(DataInstance);
+  const { token } = state.session.get();
 
   useEffect(() => {
     setLaporanbaru([]);
@@ -230,9 +216,8 @@ function useTanggapanku(page, sort) {
   const [loading, setLoading] = useState(true);
   const [tanggapanku, setTanggapanku] = useState([]);
 
-  const { token } = useStoreState((state) => ({
-    token: state.session.token,
-  }));
+  const state = GlobalState(DataInstance);
+  const { token } = state.session.get();
 
   useEffect(() => {
     setTanggapanku([]);
@@ -284,9 +269,8 @@ function useSemuaTanggapan(page, sort) {
   const [loading, setLoading] = useState(true);
   const [semuaTanggapan, setSemuaTanggapan] = useState([]);
 
-  const { token } = useStoreState((state) => ({
-    token: state.session.token,
-  }));
+  const state = GlobalState(DataInstance);
+  const { token } = state.session.get();
 
   useEffect(() => {
     setSemuaTanggapan([]);
@@ -333,10 +317,11 @@ function useSemuaTanggapan(page, sort) {
 }
 
 function useDetails() {
-  const { sideDetailsPayload, token } = useStoreState((state) => ({
-    sideDetailsPayload: state.sideDetailsPayload,
-    token: state.session.token,
-  }));
+  const DataState = GlobalState(DataInstance);
+  const SDState = GlobalState(SDInstance);
+  const { token } = DataState.session.get();
+  const sideDetailsPayload = SDState.payload.get();
+
   const [activeDetails, setActiveDetails] = useState({
     id_report: null,
     id_petugas: null,
@@ -354,9 +339,6 @@ function useDetails() {
     name_petugas: null,
     loc: null,
   });
-  const { setResponseByIDReport } = useStoreActions((actions) => ({
-    setResponseByIDReport: actions.setResponseByIDReport,
-  }));
 
   var backToJSON = JSON.stringify(sideDetailsPayload, undefined, 2);
   backToJSON = JSON.parse(backToJSON);
@@ -377,7 +359,8 @@ function useDetails() {
             }
             const payload = response.data.output;
             console.log(payload);
-            setResponseByIDReport(payload.id_report);
+            // set response by id report
+            // setResponseByIDReport(payload.id_report);
             setActiveDetails({
               ...payload,
               name_petugas: payload.name_petugas
@@ -406,7 +389,8 @@ function useDetails() {
                 .getDownloadURL();
             }
             const payload = response.data.output;
-            setResponseByIDReport(payload.id_report);
+            // set response by id report
+            // setResponseByIDReport(payload.id_report);
             setActiveDetails({
               ...payload,
               name_petugas: payload.name_petugas
@@ -424,13 +408,7 @@ function useDetails() {
       }
     };
     fetch();
-  }, [
-    backToJSON.id,
-    backToJSON.nik,
-    backToJSON.petugas,
-    token,
-    setResponseByIDReport,
-  ]);
+  }, [backToJSON.id, backToJSON.nik, backToJSON.petugas, token]);
 
   return { activeDetails };
 }

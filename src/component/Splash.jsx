@@ -1,7 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 
-import rfs from "./RFS";
+import rfs from "rfsjs";
 import Opps from "./../asset/Opps.svg";
 
 // TODO: Fix for mobile devices

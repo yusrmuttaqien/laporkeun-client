@@ -1,7 +1,11 @@
 import React from "react";
 import styled from "styled-components";
-import { useStoreState, useStoreActions } from "easy-peasy";
 import { toast } from "react-hot-toast";
+import { useState as GlobalState } from "@hookstate/core";
+import { useHistory } from "react-router-dom";
+
+import { DataInstance } from "util/States";
+import { logout } from "util/MainFunctions";
 
 import defaultUser from "./../asset/defaultUser.svg";
 
@@ -68,27 +72,28 @@ const CloseSession = styled.p`
   letter-spacing: 0.125em;
 `;
 
-export default function UserStats(props) {
-  const { role, name, NIK, pic } = useStoreState((state) => ({
-    role: state.session.role,
-    name: state.session.name,
-    NIK: state.session.NIK,
-    pic: state.session.pic,
-  }));
-  const { keluarApp } = useStoreActions((actions) => ({
-    keluarApp: actions.keluarApp,
-  }));
+export default function UserStats() {
+  const state = GlobalState(DataInstance);
+  const { role, name, NIK, picURL, isLogged } = state.session.get();
+
+  const history = useHistory();
+
+  var roleNIK = isLogged
+    ? role !== "pengguna"
+      ? role.charAt(0).toUpperCase() + role.slice(1)
+      : NIK
+    : null;
 
   const exitApp = async () => {
-    await keluarApp();
-    props.shut(false);
+    await logout();
+    history.push("/");
     toast.success("Anda berhasil keluar");
   };
 
   return (
     <StatsWrapper>
       <UserDetail>
-        <img src={pic ? pic : defaultUser} alt="userProfile" />
+        <img src={picURL ? picURL : defaultUser} alt="userProfile" />
         <Details>
           <h1
             title={`${name}${
@@ -97,10 +102,10 @@ export default function UserStats(props) {
           >
             {name}
           </h1>
-          <p title={NIK}>{NIK}</p>
+          <p title={roleNIK}>{roleNIK}</p>
         </Details>
       </UserDetail>
-      <CloseSession onClick={() => exitApp()} title="Keluar ?">
+      <CloseSession onClick={exitApp} title="Keluar ?">
         Keluar
       </CloseSession>
     </StatsWrapper>

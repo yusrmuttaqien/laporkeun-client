@@ -2,7 +2,9 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
 import styled from "styled-components";
-import { useStoreState } from "easy-peasy";
+import { useState as GlobalState } from "@hookstate/core";
+
+import { DataInstance, SDInstance } from "util/States";
 
 const NavWrapper = styled.div`
   align-self: flex-end;
@@ -48,10 +50,10 @@ const NavWrapper = styled.div`
   }
 `;
 
-function Navigation() {
-  const { role } = useStoreState((state) => ({
-    role: state.session.role,
-  }));
+export default function Navigation() {
+  const state = GlobalState(DataInstance);
+  const SDState = GlobalState(SDInstance);
+  const { role } = state.session.get();
 
   return (
     <NavWrapper>
@@ -107,6 +109,9 @@ function Navigation() {
           <NavLink to="/pengaturan" activeClassName="active">
             pengaturan
           </NavLink>
+        </li>
+        <li>
+          <button onClick={() => SDState.stats.set(prev => !prev)}>Toggle SideDetails</button>
         </li>
       </ul>
     </NavWrapper>
