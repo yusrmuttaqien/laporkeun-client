@@ -15,7 +15,7 @@ import {
   Action,
   TextArea,
 } from "style/Components";
-import { tipeLaporan, lokasi } from "util/Fetches";
+import { tipeLaporan, lokasiProvinsi, lokasiKota } from "util/Fetches";
 import { Public, NoPublic, Trashbin } from "style/Icons";
 import { SchemaLaporan } from "util/ValidationSchema";
 
@@ -50,7 +50,10 @@ export default function BuatLaporan(props) {
   const [isPublic, setIsPublic] = useState(false);
   const [isPic, setIsPic] = useState();
   const [type, setType] = useState({ id: 0 });
-  const [location, setLocation] = useState({
+  const [locationProv, setLocationProv] = useState({
+    id: 0,
+  });
+  const [locationKota, setLocationKota] = useState({
     id: 0,
   });
 
@@ -69,8 +72,11 @@ export default function BuatLaporan(props) {
       case "type":
         setType({ id: e.id });
         break;
-      case "location":
-        setLocation({ id: e.id });
+      case "locationProv":
+        setLocationProv({ id: e.id });
+        break;
+      case "locationKota":
+        setLocationKota({ id: e.id });
         break;
       default:
         break;
@@ -78,19 +84,30 @@ export default function BuatLaporan(props) {
   };
 
   const checkSelect = () => {
-    if (type.id === 0 && location.id === 0) {
-      setType({ message: "tipe wajib diisi" });
-      setLocation({ message: "lokasi wajib diisi" });
+    if (type.id === 0 && locationProv.id === 0) {
+      setType({ id: 0, message: "tipe wajib diisi" });
+      setLocationProv({ id: 0, message: "provinsi wajib diisi" });
+      return 0;
+    }
+
+    if (type.id === 0 && locationKota.id === 0) {
+      setType({ id: 0, message: "tipe wajib diisi" });
+      setLocationKota({ id: 0, message: "kota wajib diisi" });
       return 0;
     }
 
     if (type.id === 0) {
-      setType({ message: "tipe wajib diisi" });
+      setType({ id: 0, message: "tipe wajib diisi" });
       return 0;
     }
 
-    if (location.id === 0) {
-      setLocation({ message: "lokasi wajib diisi" });
+    if (locationProv.id === 0) {
+      setLocationProv({ id: 0, message: "provinsi wajib diisi" });
+      return 0;
+    }
+
+    if (locationKota.id === 0) {
+      setLocationProv({ id: 0, message: "kota wajib diisi" });
       return 0;
     }
 
@@ -120,7 +137,7 @@ export default function BuatLaporan(props) {
   const handleLaporan = (laporan) => {
     if (!checkSelect()) return 0;
 
-    console.log({ ...laporan, type, location, isPublic });
+    console.log({ ...laporan, type, locationProv, locationKota, isPublic });
     // reset()
   };
 
@@ -162,7 +179,7 @@ export default function BuatLaporan(props) {
               </Label>
               <Input type="text" name="sLaporan" id="sLaporan" ref={register} />
             </section>
-            <section>
+            <section className="forBuatLaporType">
               <Label>{type.message || "tipe laporan"}</Label>
               <CustomSelect
                 options={tipeLaporan}
@@ -174,15 +191,32 @@ export default function BuatLaporan(props) {
               />
             </section>
             <section>
-              <Label>{location.message || "lokasi"}</Label>
-              <CustomSelect
-                options={lokasi}
-                classNamePrefix={"Select"}
-                defaultValue={lokasi[0]}
-                className="forBuatLapor"
-                value={lokasi[location]}
-                onChange={(e) => switchSelect("location", e)}
-              />
+              <Label>
+                {locationProv.message || locationKota.message || "lokasi"}
+              </Label>
+              <div className="forBuatLaporNest">
+                <section>
+                  <CustomSelect
+                    options={lokasiProvinsi}
+                    classNamePrefix={"Select"}
+                    defaultValue={lokasiProvinsi[0]}
+                    className="forBuatLapor"
+                    value={lokasiProvinsi[locationProv]}
+                    onChange={(e) => switchSelect("locationProv", e)}
+                  />
+                </section>
+                <section>
+                  <CustomSelect
+                    options={lokasiKota}
+                    classNamePrefix={"Select"}
+                    defaultValue={lokasiKota[0]}
+                    className="forBuatLapor"
+                    value={lokasiKota[locationKota]}
+                    isDisabled={locationProv.id === 0}
+                    onChange={(e) => switchSelect("locationKota", e)}
+                  />
+                </section>
+              </div>
             </section>
             <section className="forBuatLaporVis">
               <Action onClick={switchVis}>
@@ -220,7 +254,7 @@ export default function BuatLaporan(props) {
                     <Trashbin className="inButton" />
                   </Button>
                 )}
-                {isPic && <img src={isPic.file} />}
+                {isPic && <img src={isPic.file} alt="imgPreview" />}
                 {isPic ? isPic.name : "Klik tambah gambar diatas"}
               </Preview>
             </section>

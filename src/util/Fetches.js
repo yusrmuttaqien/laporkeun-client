@@ -8,12 +8,19 @@ const options = [
   { value: "Date ASC", label: "Terlama", id: 2 },
 ];
 const tipeLaporan = [
-  { value: "Pilih...", label: "Pilih...", isDisabled: true, id: 0 },
+  { value: "Pilih tipe...", label: "Pilih tipe...", isDisabled: true, id: 0 },
   { value: "Saran", label: "Saran", id: 1 },
   { value: "Penting", label: "Penting", id: 2 },
 ];
-const lokasi = [
-  { value: "Pilih...", label: "Pilih...", isDisabled: true, id: 0 },
+const lokasiProvinsi = [
+  { value: "Provinsi...", label: "Provinsi...", isDisabled: true, id: 0 },
+  { value: "Jawa Timur", label: "Jawa Timur", id: 1 },
+  { value: "Jawa Barat", label: "Jawa Barat", id: 2 },
+  { value: "DIY", label: "DIY", id: 3 },
+  { value: "DKI Jakarta", label: "DKI Jakarta", id: 4 },
+];
+const lokasiKota = [
+  { value: "Kota...", label: "Kota...", isDisabled: true, id: 0 },
   { value: "Malang", label: "Malang", id: 1 },
   { value: "Surabaya", label: "Surabaya", id: 2 },
   { value: "Solo", label: "Solo", id: 3 },
@@ -154,4 +161,4 @@ async function FetchPetugas({ action, ext }) {
   GlobalStateFetches().setLoading(false);
 }
 
-export { options, FetchPetugas, tipeLaporan, lokasi };
+export { options, FetchPetugas, tipeLaporan, lokasiProvinsi, lokasiKota };

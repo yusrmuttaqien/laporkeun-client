@@ -194,6 +194,14 @@ const ReportBody = styled.div`
           margin-left: 0.5em;
         }
 
+        &.forBuatLaporType {
+          &:nth-child(2) {
+            flex: unset;
+
+            width: 23%;
+          }
+        }
+
         &.forBuatLaporVis {
           flex: unset;
           align-items: center;
@@ -201,6 +209,11 @@ const ReportBody = styled.div`
 
           width: 70px;
           margin-bottom: 8px;
+        }
+
+        .forBuatLaporNest {
+          display: inherit;
+          flex-direction: row;
         }
       }
     }
@@ -258,8 +271,8 @@ const Button = styled.button`
 
     position: absolute;
     padding: 0.3em 0.4em;
-    top: .5em;
-    right: .5em;
+    top: 0.5em;
+    right: 0.5em;
   }
 `;
 
