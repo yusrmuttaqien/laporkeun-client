@@ -119,16 +119,11 @@ async function reAuthenticate(key) {
 // NOTE: Main Function
 async function authCheck() {
   TriggerLoading({ stats: true, message: "Memeriksa state" });
-  const isLogged = GlobalStateSession().getIsLogged();
 
   await auth.onAuthStateChanged(async (user) => {
     if (user) {
-      if (isLogged) {
-        TriggerLoading({ stats: false });
-      } else {
-        await fetchUserData(user.uid);
-        TriggerLoading({ stats: false });
-      }
+      await fetchUserData(user.uid);
+      TriggerLoading({ stats: false });
     } else {
       TriggerLoading({ stats: false });
     }

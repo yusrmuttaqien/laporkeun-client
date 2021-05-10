@@ -207,8 +207,7 @@ const ReportBody = styled.div`
           align-items: center;
           justify-content: flex-end;
 
-          width: 70px;
-          margin-bottom: 8px;
+          width: 4em;
         }
 
         .forBuatLaporNest {
@@ -306,6 +305,10 @@ const CustomSelect = styled(Select)`
       .Select__single-value {
         color: ${(props) => props.theme.color.grey};
       }
+
+      .Select__input {
+        color: ${(props) => props.theme.color.white};
+      }
     }
 
     &:hover {
@@ -328,11 +331,7 @@ const CustomSelect = styled(Select)`
     }
 
     &.Select__option--is-focused {
-      background-color: transparent;
-
-      &:hover {
-        background-color: ${(props) => props.theme.color.grey};
-      }
+      background-color: ${(props) => props.theme.color.grey};
     }
   }
 

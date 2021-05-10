@@ -1,8 +1,9 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import styled from "styled-components";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import composeRefs from "@seznam/compose-react-refs";
+import { useState as GlobalState } from "@hookstate/core";
 
 import {
   ReportWrapper,
@@ -15,9 +16,10 @@ import {
   Action,
   TextArea,
 } from "style/Components";
-import { tipeLaporan, lokasiProvinsi, lokasiKota } from "util/Fetches";
+import { tipeLaporan, FetchBuatLapor } from "util/Fetches";
 import { Public, NoPublic, Trashbin } from "style/Icons";
 import { SchemaLaporan } from "util/ValidationSchema";
+import { LocationInstance } from "util/States";
 
 const Preview = styled.div`
   display: flex;
@@ -47,6 +49,10 @@ const Preview = styled.div`
 `;
 
 export default function BuatLaporan(props) {
+  const state = GlobalState(LocationInstance);
+  const provSelect = state.locationProv.get();
+  const kotaSelect = state.locationKota.get();
+
   const [isPublic, setIsPublic] = useState(false);
   const [isPic, setIsPic] = useState();
   const [type, setType] = useState({ id: 0 });
@@ -73,10 +79,12 @@ export default function BuatLaporan(props) {
         setType({ id: e.id });
         break;
       case "locationProv":
-        setLocationProv({ id: e.id });
+        setLocationProv({ id: e.id_index });
+        setLocationKota({ id: 0 });
+        FetchBuatLapor({ action: "kotaFetch", ext: { id: e.id_value } });
         break;
       case "locationKota":
-        setLocationKota({ id: e.id });
+        setLocationKota({ id: e.id_index });
         break;
       default:
         break;
@@ -107,7 +115,7 @@ export default function BuatLaporan(props) {
     }
 
     if (locationKota.id === 0) {
-      setLocationProv({ id: 0, message: "kota wajib diisi" });
+      setLocationKota({ id: 0, message: "kota wajib diisi" });
       return 0;
     }
 
@@ -141,6 +149,10 @@ export default function BuatLaporan(props) {
     // reset()
   };
 
+  useEffect(() => {
+    FetchBuatLapor({ action: "effectFetch" });
+  }, []);
+
   return (
     <ReportWrapper>
       <Report>
@@ -155,7 +167,7 @@ export default function BuatLaporan(props) {
                 type="file"
                 name="picLaporan"
                 id="picLaporan"
-                accept="image/x-png,image/gif,image/jpeg"
+                accept="image/x-png,image/gif,image/jpeg;capture=camera"
                 form="lapor"
                 onChange={previewPic}
                 ref={composeRefs(register, inputFile)}
@@ -186,7 +198,7 @@ export default function BuatLaporan(props) {
                 classNamePrefix={"Select"}
                 defaultValue={tipeLaporan[0]}
                 className="forBuatLapor"
-                value={tipeLaporan[type]}
+                value={tipeLaporan[type.id]}
                 onChange={(e) => switchSelect("type", e)}
               />
             </section>
@@ -197,21 +209,21 @@ export default function BuatLaporan(props) {
               <div className="forBuatLaporNest">
                 <section>
                   <CustomSelect
-                    options={lokasiProvinsi}
+                    options={provSelect}
                     classNamePrefix={"Select"}
-                    defaultValue={lokasiProvinsi[0]}
+                    defaultValue={provSelect[0]}
                     className="forBuatLapor"
-                    value={lokasiProvinsi[locationProv]}
+                    value={provSelect[locationProv.id]}
                     onChange={(e) => switchSelect("locationProv", e)}
                   />
                 </section>
                 <section>
                   <CustomSelect
-                    options={lokasiKota}
+                    options={kotaSelect}
                     classNamePrefix={"Select"}
-                    defaultValue={lokasiKota[0]}
+                    defaultValue={kotaSelect[0]}
                     className="forBuatLapor"
-                    value={lokasiKota[locationKota]}
+                    value={kotaSelect[locationKota.id]}
                     isDisabled={locationProv.id === 0}
                     onChange={(e) => switchSelect("locationKota", e)}
                   />

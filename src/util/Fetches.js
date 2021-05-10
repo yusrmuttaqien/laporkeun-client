@@ -1,4 +1,6 @@
-import { GlobalStateFetches } from "util/States";
+import axios from "axios";
+
+import { GlobalStateFetches, GlobalStateLocation } from "util/States";
 import { database } from "util/Firebase";
 
 // Global fetch value
@@ -11,20 +13,6 @@ const tipeLaporan = [
   { value: "Pilih tipe...", label: "Pilih tipe...", isDisabled: true, id: 0 },
   { value: "Saran", label: "Saran", id: 1 },
   { value: "Penting", label: "Penting", id: 2 },
-];
-const lokasiProvinsi = [
-  { value: "Provinsi...", label: "Provinsi...", isDisabled: true, id: 0 },
-  { value: "Jawa Timur", label: "Jawa Timur", id: 1 },
-  { value: "Jawa Barat", label: "Jawa Barat", id: 2 },
-  { value: "DIY", label: "DIY", id: 3 },
-  { value: "DKI Jakarta", label: "DKI Jakarta", id: 4 },
-];
-const lokasiKota = [
-  { value: "Kota...", label: "Kota...", isDisabled: true, id: 0 },
-  { value: "Malang", label: "Malang", id: 1 },
-  { value: "Surabaya", label: "Surabaya", id: 2 },
-  { value: "Solo", label: "Solo", id: 3 },
-  { value: "Banjarmasin", label: "Banjarmasin", id: 4 },
 ];
 const PaginationLimit = 10;
 
@@ -76,18 +64,11 @@ async function FetchPetugas({ action, ext }) {
 
   switch (action) {
     case "effectFetch":
-      if (doneFirstFetch) {
-        console.log("not fetching");
-        break;
-      }
+      if (doneFirstFetch) break;
 
-      console.log("fetching");
       FetchPetugas({ action: "resetFetch" });
-
       break;
     case "resetFetch":
-      console.log("resetFetch");
-
       petugases = await databasePetugas.get();
       petugases.docs.forEach((doc) => {
         realData[doc.data().name] = doc.data();
@@ -110,11 +91,8 @@ async function FetchPetugas({ action, ext }) {
           GlobalStateFetches().setPetugasOrderBy(0);
         }
       }
-
       break;
     case "moreFetch":
-      console.log("moreFetch");
-
       petugases = await databasePetugas.startAfter(lastFetch).get();
       petugases.docs.forEach((doc) => {
         realData[doc.data().name] = doc.data();
@@ -133,7 +111,6 @@ async function FetchPetugas({ action, ext }) {
           petugases.docs[petugases.docs.length - 1] || 0
         );
       }
-
       break;
     case "sortFetch":
       realData = await sortBy(doneFirstFetch, ext);
@@ -161,4 +138,112 @@ async function FetchPetugas({ action, ext }) {
   GlobalStateFetches().setLoading(false);
 }
 
-export { options, FetchPetugas, tipeLaporan, lokasiProvinsi, lokasiKota };
+async function FetchBuatLapor({ action, ext }) {
+  const LocationAPI = axios.create({
+    baseURL: "https://dev.farizdotid.com/api/daerahindonesia/",
+  });
+  const isProv = GlobalStateLocation().getLocationProv();
+  const isKota = GlobalStateLocation().getLocationKota();
+  const isKotaPersist = GlobalStateLocation().getLocationKotaPersist();
+
+  var toData = {};
+  var toSelect = [];
+
+  switch (action) {
+    case "effectFetch":
+      if (isProv.length > 1) break;
+
+      FetchBuatLapor({ action: "firstProvFetch" });
+      break;
+    case "firstProvFetch":
+      console.log("fetching prov")
+      const provinces = await LocationAPI.get("/provinsi");
+
+      provinces.data.provinsi.map((data, index) => {
+        toSelect.push({
+          id_value: data.id,
+          id_index: index + 1,
+          label: data.nama,
+          value: data.nama,
+        });
+
+        return 1;
+      });
+
+      GlobalStateLocation().setLocationProvSelect(toSelect);
+      break;
+    case "kotaFetch":
+      // Check is city already persisted
+      if (isKotaPersist) {
+        if (isKotaPersist[ext.id]) {
+          console.log("use persist kota")
+          if (isKota.length === 1) {
+            GlobalStateLocation().setLocationKotaSelectRest(
+              isKotaPersist[ext.id]
+            );
+            break;
+          }
+
+          toSelect = JSON.parse(JSON.stringify(isKotaPersist[ext.id]));
+
+          toSelect.unshift({
+            value: "Kota...",
+            label: "Kota...",
+            isDisabled: true,
+            id: 0,
+          });
+
+          GlobalStateLocation().setLocationKotaSelectZero(toSelect);
+          break;
+        }
+      }
+      console.log("fetching kota")
+
+      const cities = await LocationAPI.get(`/kota?id_provinsi=${ext.id}`);
+
+      // Put iterated data to main object based value id ~ object > array
+      toData = {
+        [ext.id]: cities.data.kota_kabupaten.map((data, index) => {
+          return {
+            id_value: data.id,
+            id_index: index + 1,
+            label: data.nama,
+            value: data.nama,
+          };
+        }),
+      };
+
+      // Iterate for select ~ array
+      cities.data.kota_kabupaten.map((data, index) => {
+        toSelect.push({
+          id_value: data.id,
+          id_index: index + 1,
+          label: data.nama,
+          value: data.nama,
+        });
+
+        return 1;
+      });
+
+      if (isKota.length === 1) {
+        GlobalStateLocation().setLocationKotaSelectRest(toSelect);
+        GlobalStateLocation().setLocationKotaPersist(toData);
+        break;
+      }
+
+      toSelect.unshift({
+        value: "Kota...",
+        label: "Kota...",
+        isDisabled: true,
+        id: 0,
+      });
+
+      GlobalStateLocation().setLocationKotaPersist(toData);
+      GlobalStateLocation().setLocationKotaSelectZero(toSelect);
+      break;
+    default:
+      break;
+  }
+}
+
+export { options, FetchPetugas, tipeLaporan, FetchBuatLapor };

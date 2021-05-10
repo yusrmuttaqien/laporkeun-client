@@ -1,7 +1,7 @@
 import { createState } from "@hookstate/core";
 import { Persistence } from "@hookstate/persistence";
 
-// NOTE: Template
+// Template
 const SessionTemplate = {
   isLogged: false,
   role: null,
@@ -28,7 +28,7 @@ const SDTemplate = {
   newResponseByIDReport: null,
 };
 
-// NOTE: Helper
+// Helper
 const PPWrapper = (s) => ({
   setMsg: (msg) => s.message.set(msg),
   setForm: (form) => s.form.set(form),
@@ -41,7 +41,6 @@ const PPWrapper = (s) => ({
 
 const DataWrapper = (s) => ({
   setSession: (sesObj) => s.session.set(sesObj),
-  setMasuk: () => s.forms.set("Masuk"),
   getIsLogged: () => s.session.isLogged.get(),
   getUID: () => s.session.uid.get(),
   getPic: () => s.session.pic.get(),
@@ -58,6 +57,10 @@ const UIWrapper = (s) => ({
   setLoadingMsg: (msg) => s.loading.message.set(msg),
 });
 
+const LookupWrapper = (s) => ({
+
+})
+
 const FetchesWrapper = (s) => ({
   // Global
   setLoading: (loading) => s.isLoading.set(loading),
@@ -72,7 +75,20 @@ const FetchesWrapper = (s) => ({
   addPetugasPayload: (payload) => s.petugas.payload.merge(payload),
 });
 
-// NOTE: State
+const LocationWrapper = (s) => ({
+  // Province
+  getLocationProv: () => s.locationProv.get(),
+  setLocationProvSelect: (prov) => s.locationProv.merge(prov),
+
+  // City
+  getLocationKota: () => s.locationKota.get(),
+  getLocationKotaPersist: () => s.locationKotaPersist.get(),
+  setLocationKotaPersist: (kota) => s.locationKotaPersist.merge(kota),
+  setLocationKotaSelectRest: (kota) => s.locationKota.merge(kota),
+  setLocationKotaSelectZero: (kota) => s.locationKota.set(kota),
+});
+
+// State
 const DataState = {
   session: {
     isLogged: false,
@@ -84,7 +100,6 @@ const DataState = {
     telp: null,
     uid: null,
   },
-  forms: "Masuk",
 };
 
 const SideDetailState = {
@@ -106,6 +121,13 @@ const UIState = {
   loading: { stats: true, message: "Memuat" },
 };
 
+const LookupState = {
+  session: {
+    isLogged: false,
+    role: null,
+  },
+};
+
 const FetchesData = {
   isLoading: false,
   petugas: {
@@ -115,24 +137,40 @@ const FetchesData = {
   },
 };
 
-// NOTE: Initialize state
+const LocationData = {
+  locationProv: [
+    { value: "Provinsi...", label: "Provinsi...", isDisabled: true, id: 0 },
+  ],
+
+  locationKotaPersist: null,
+
+  locationKota: [
+    { value: "Kota...", label: "Kota...", isDisabled: true, id: 0 },
+  ],
+};
+
+// Initialize state
 const DataInstance = createState(DataState);
 const SDInstance = createState(SideDetailState);
 const PPInstance = createState(PopupState);
 const UIInstance = createState(UIState);
+const LookupInstance = createState(LookupState);
 const FetchesInstance = createState(FetchesData);
+const LocationInstance = createState(LocationData);
 
-// NOTE: Set persistance
-DataInstance.attach(Persistence("main-session"));
+// Set persistance
+LocationInstance.attach(Persistence("location"));
 
-// NOTE: Non-component state import
+// Non-component state import
 const GlobalStatePopup = () => PPWrapper(PPInstance);
 const GlobalStateSession = () => DataWrapper(DataInstance);
 const GlobalStateSD = () => SDWrapper(SDInstance);
 const GlobalStateUI = () => UIWrapper(UIInstance);
+const GlobalStateLookup = () => LookupWrapper(LookupInstance);
 const GlobalStateFetches = () => FetchesWrapper(FetchesInstance);
+const GlobalStateLocation = () => LocationWrapper(LocationInstance);
 
-// NOTE: Component state import
+// Component state import
 
 export {
   SessionTemplate,
@@ -142,10 +180,14 @@ export {
   SDInstance,
   PPInstance,
   UIInstance,
+  LookupInstance,
   FetchesInstance,
+  LocationInstance,
   GlobalStatePopup,
   GlobalStateSession,
   GlobalStateSD,
   GlobalStateUI,
+  GlobalStateLookup,
   GlobalStateFetches,
+  GlobalStateLocation,
 };
