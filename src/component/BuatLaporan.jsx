@@ -142,11 +142,28 @@ export default function BuatLaporan(props) {
     }
   };
 
+  const cleanForm = () => {
+    reset();
+    setIsPic();
+    setType({ id: 0 });
+    setLocationProv({ id: 0 });
+    setLocationKota({ id: 0 });
+  };
+
   const handleLaporan = (laporan) => {
     if (!checkSelect()) return 0;
 
-    console.log({ ...laporan, type, locationProv, locationKota, isPublic });
-    // reset()
+    FetchBuatLapor({
+      action: "checkIMGResize",
+      ext: {
+        ...laporan,
+        type,
+        locationProv,
+        locationKota,
+        isPublic,
+        formReset: cleanForm,
+      },
+    });
   };
 
   useEffect(() => {

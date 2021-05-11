@@ -1,5 +1,5 @@
 import md5 from "md5";
-import toast from "react-hot-toast";
+import { toast } from "react-hot-toast";
 
 import Firebase, {
   database,

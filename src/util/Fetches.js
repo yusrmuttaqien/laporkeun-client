@@ -1,4 +1,7 @@
 import axios from "axios";
+import Resizer from "react-image-file-resizer";
+import Download from "js-file-download";
+import { toast } from "react-hot-toast";
 
 import { GlobalStateFetches, GlobalStateLocation } from "util/States";
 import { database } from "util/Firebase";
@@ -46,6 +49,24 @@ function sortBy(map, sort) {
 
   return newArray;
 }
+
+const compressIMG = (file, height, width) =>
+  new Promise((resolve) => {
+    Resizer.imageFileResizer(
+      file,
+      width,
+      height,
+      "WEBP",
+      50,
+      0,
+      (uri) => {
+        resolve(uri);
+      },
+      "file",
+      width,
+      height
+    );
+  });
 
 // Main fetches
 async function FetchPetugas({ action, ext }) {
@@ -156,7 +177,7 @@ async function FetchBuatLapor({ action, ext }) {
       FetchBuatLapor({ action: "firstProvFetch" });
       break;
     case "firstProvFetch":
-      console.log("fetching prov")
+      console.log("fetching prov");
       const provinces = await LocationAPI.get("/provinsi");
 
       provinces.data.provinsi.map((data, index) => {
@@ -176,7 +197,7 @@ async function FetchBuatLapor({ action, ext }) {
       // Check is city already persisted
       if (isKotaPersist) {
         if (isKotaPersist[ext.id]) {
-          console.log("use persist kota")
+          console.log("use persist kota");
           if (isKota.length === 1) {
             GlobalStateLocation().setLocationKotaSelectRest(
               isKotaPersist[ext.id]
@@ -197,7 +218,7 @@ async function FetchBuatLapor({ action, ext }) {
           break;
         }
       }
-      console.log("fetching kota")
+      console.log("fetching kota");
 
       const cities = await LocationAPI.get(`/kota?id_provinsi=${ext.id}`);
 
@@ -240,6 +261,18 @@ async function FetchBuatLapor({ action, ext }) {
 
       GlobalStateLocation().setLocationKotaPersist(toData);
       GlobalStateLocation().setLocationKotaSelectZero(toSelect);
+      break;
+    case "checkIMGResize":
+      const reader = new Image();
+      reader.onload = async () => {
+        const height = reader.height;
+        const width = reader.width;
+        const resizedIMG = await compressIMG(ext.picLaporan[0], height, width);
+        Download(resizedIMG, "img.webp");
+        ext.formReset();
+        toast.success("Done")
+      };
+      reader.src = window.URL.createObjectURL(ext.picLaporan[0]);
       break;
     default:
       break;

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import toast from "react-hot-toast";
+import { toast } from "react-hot-toast";
 
 import { Label, Input, Warning, Form, Button } from "style/Components";
 import { SchemaDaftar } from "util/ValidationSchema";

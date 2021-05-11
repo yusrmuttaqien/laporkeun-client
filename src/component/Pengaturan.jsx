@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useState as GlobalState } from "@hookstate/core";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
-import toast from "react-hot-toast";
+import { toast } from "react-hot-toast";
 
 import {
   ReportWrapper,
@@ -68,7 +68,7 @@ export default function Pengaturan(props) {
     const next = (cred) => {
       const key = cred.userAction.input;
       toast.promise(deleteAccount(key), {
-        loading: "Tunggu sebentar kawan",
+        loading: "Tunggu sebentar",
         success: (msg) => msg,
         error: (err) => err && err.toString(),
       });
