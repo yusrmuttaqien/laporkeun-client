@@ -58,8 +58,9 @@ const UIWrapper = (s) => ({
 });
 
 const LookupWrapper = (s) => ({
-
-})
+  getLookup: () => s.get(),
+  setLookup: (lookup) => s.set(lookup),
+});
 
 const FetchesWrapper = (s) => ({
   // Global
@@ -122,10 +123,8 @@ const UIState = {
 };
 
 const LookupState = {
-  session: {
-    isLogged: false,
-    role: null,
-  },
+  deggoLsi: false,
+  elor: null,
 };
 
 const FetchesData = {
@@ -160,6 +159,7 @@ const LocationInstance = createState(LocationData);
 
 // Set persistance
 LocationInstance.attach(Persistence("location"));
+LookupInstance.attach(Persistence("noisses"));
 
 // Non-component state import
 const GlobalStatePopup = () => PPWrapper(PPInstance);

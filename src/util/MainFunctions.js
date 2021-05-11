@@ -11,6 +11,7 @@ import { TriggerLoading } from "util/Loading";
 import {
   GlobalStateSession,
   GlobalStateSD,
+  GlobalStateLookup,
   SDTemplate,
   SessionTemplate,
 } from "util/States";
@@ -133,6 +134,7 @@ async function authCheck() {
 async function fetchUserData(uid) {
   const userId = await md5Compare(uid, "users");
   const storageProfile = storage.ref("/profile");
+  const getLookup = JSON.parse(JSON.stringify(GlobalStateLookup().getLookup()));
   var details = {};
 
   await database
@@ -147,6 +149,20 @@ async function fetchUserData(uid) {
     })
     //  TODO: Handle this, using linked toast perhaps?
     .catch((err) => console.log(err));
+
+  // Checking session with lookup state
+  if (getLookup.deggoLsi) {
+    if (getLookup.elor !== details.role) {
+      await logout();
+      toast.error("Data sesi tidak valid");
+      return 0;
+    }
+  } else {
+    GlobalStateLookup().setLookup({
+      deggoLsi: true,
+      elor: details.role,
+    });
+  }
 
   if (details.suspended) {
     await logout();
@@ -401,7 +417,10 @@ async function logout() {
   await auth.signOut();
   await GlobalStateSession().setSession(SessionTemplate);
   await GlobalStateSD().setSD(SDTemplate);
-  await GlobalStateSession().setMasuk();
+  GlobalStateLookup().setLookup({
+    deggoLsi: false,
+    elor: null,
+  });
   return 1;
 }
 
