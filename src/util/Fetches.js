@@ -6,7 +6,7 @@ import {
   GlobalStateLocation,
   GlobalStateSession,
 } from "util/States";
-import { md5Compare } from "util/Helper";
+import { compressIMG, dimensionIMG, md5Compare } from "util/Helper";
 import { database } from "util/Firebase";
 
 // Global fetch value
@@ -70,8 +70,8 @@ async function laporNewTemplate(report) {
     detail: dLaporan,
     type: typeSelect[type.id].value,
     pic: {
-      webp: `${picLaporan}.webp`,
-      jpeg: `${picLaporan}.jpeg`,
+      webp: picLaporan ? `${picLaporan}.webp` : null,
+      jpeg: picLaporan ? `${picLaporan}.jpeg` : null,
     },
     location: {
       prov: GlobalStateLocation().getLocationProv()[locationProv.id].value,
@@ -284,8 +284,34 @@ async function FetchBuatLapor({ action, ext }) {
       GlobalStateLocation().setLocationKotaSelectZero(toSelect);
       break;
     case "submitLaporan":
-      const push = await laporNewTemplate({ ...ext, picLaporan: "henlo" });
-      console.log(push);
+      var imgDimension,
+        imgWEBP,
+        imgJPEG,
+        imgName = null;
+
+      if (ext.picLaporan[0]) {
+        // Image processing
+        imgDimension = await dimensionIMG(ext.picLaporan[0]);
+        imgWEBP = await compressIMG({
+          file: ext.picLaporan[0],
+          ...imgDimension,
+        });
+        imgJPEG = await compressIMG({
+          file: ext.picLaporan[0],
+          ...imgDimension,
+          format: "JPEG",
+        });
+
+        // Image name
+        imgName =
+          (await md5Compare(GlobalStateSession().getUID(), "users")) +
+          new Date().getTime();
+      }
+
+      // Generate details
+      const push = await laporNewTemplate({ ...ext, picLaporan: imgName });
+      
+      ext.formReset();
       break;
     default:
       break;

@@ -1,19 +1,25 @@
 import Resizer from "react-image-file-resizer";
 import md5 from "md5";
 
-const compressIMG = (file, height, width) =>
+const compressIMG = ({
+  file,
+  height,
+  width,
+  format = "WEBP",
+  output = "file",
+}) =>
   new Promise((resolve) => {
     Resizer.imageFileResizer(
       file,
       width,
       height,
-      "WEBP",
+      format,
       50,
       0,
       (uri) => {
         resolve(uri);
       },
-      "file",
+      output,
       width,
       height
     );
