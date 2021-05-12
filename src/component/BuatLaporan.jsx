@@ -16,7 +16,7 @@ import {
   Action,
   TextArea,
 } from "style/Components";
-import { tipeLaporan, FetchBuatLapor } from "util/Fetches";
+import { typeSelect, FetchBuatLapor } from "util/Fetches";
 import { Public, NoPublic, Trashbin } from "style/Icons";
 import { SchemaLaporan } from "util/ValidationSchema";
 import { LocationInstance } from "util/States";
@@ -154,7 +154,7 @@ export default function BuatLaporan(props) {
     if (!checkSelect()) return 0;
 
     FetchBuatLapor({
-      action: "checkIMGResize",
+      action: "submitLaporan",
       ext: {
         ...laporan,
         type,
@@ -211,11 +211,11 @@ export default function BuatLaporan(props) {
             <section className="forBuatLaporType">
               <Label>{type.message || "tipe laporan"}</Label>
               <CustomSelect
-                options={tipeLaporan}
+                options={typeSelect}
                 classNamePrefix={"Select"}
-                defaultValue={tipeLaporan[0]}
+                defaultValue={typeSelect[0]}
                 className="forBuatLapor"
-                value={tipeLaporan[type.id]}
+                value={typeSelect[type.id]}
                 onChange={(e) => switchSelect("type", e)}
               />
             </section>

@@ -1,18 +1,21 @@
 import axios from "axios";
-import Resizer from "react-image-file-resizer";
-import Download from "js-file-download";
 import { toast } from "react-hot-toast";
 
-import { GlobalStateFetches, GlobalStateLocation } from "util/States";
+import {
+  GlobalStateFetches,
+  GlobalStateLocation,
+  GlobalStateSession,
+} from "util/States";
+import { md5Compare } from "util/Helper";
 import { database } from "util/Firebase";
 
 // Global fetch value
-const options = [
+const sortSelect = [
   { value: "Acak", label: "Acak", isDisabled: true, id: 0 },
   { value: "Date DESC", label: "Terbaru", id: 1 },
   { value: "Date ASC", label: "Terlama", id: 2 },
 ];
-const tipeLaporan = [
+const typeSelect = [
   { value: "Pilih tipe...", label: "Pilih tipe...", isDisabled: true, id: 0 },
   { value: "Saran", label: "Saran", id: 1 },
   { value: "Penting", label: "Penting", id: 2 },
@@ -50,23 +53,41 @@ function sortBy(map, sort) {
   return newArray;
 }
 
-const compressIMG = (file, height, width) =>
-  new Promise((resolve) => {
-    Resizer.imageFileResizer(
-      file,
-      width,
-      height,
-      "WEBP",
-      50,
-      0,
-      (uri) => {
-        resolve(uri);
-      },
-      "file",
-      width,
-      height
-    );
-  });
+async function laporNewTemplate(report) {
+  const {
+    dLaporan,
+    isPublic,
+    locationKota,
+    locationProv,
+    picLaporan,
+    sLaporan,
+    type,
+  } = report;
+  const hashedUID = await md5Compare(GlobalStateSession().getUID(), "users");
+
+  return {
+    title: sLaporan,
+    detail: dLaporan,
+    type: typeSelect[type.id].value,
+    pic: {
+      webp: `${picLaporan}.webp`,
+      jpeg: `${picLaporan}.jpeg`,
+    },
+    location: {
+      prov: GlobalStateLocation().getLocationProv()[locationProv.id].value,
+      kota: GlobalStateLocation().getLocationKota()[locationKota.id].value,
+    },
+    lapor_date: new Date().toISOString(),
+    pengguna_uid: hashedUID,
+    pengguna_name: GlobalStateSession().getName(),
+    petugas_uid: null,
+    petugas_name: null,
+    respon_date: null,
+    respon_detail: null,
+    visibility: isPublic ? "Public" : "Private",
+    status: "Menunggu",
+  };
+}
 
 // Main fetches
 async function FetchPetugas({ action, ext }) {
@@ -262,21 +283,13 @@ async function FetchBuatLapor({ action, ext }) {
       GlobalStateLocation().setLocationKotaPersist(toData);
       GlobalStateLocation().setLocationKotaSelectZero(toSelect);
       break;
-    case "checkIMGResize":
-      const reader = new Image();
-      reader.onload = async () => {
-        const height = reader.height;
-        const width = reader.width;
-        const resizedIMG = await compressIMG(ext.picLaporan[0], height, width);
-        Download(resizedIMG, "img.webp");
-        ext.formReset();
-        toast.success("Done")
-      };
-      reader.src = window.URL.createObjectURL(ext.picLaporan[0]);
+    case "submitLaporan":
+      const push = await laporNewTemplate({ ...ext, picLaporan: "henlo" });
+      console.log(push);
       break;
     default:
       break;
   }
 }
 
-export { options, FetchPetugas, tipeLaporan, FetchBuatLapor };
+export { sortSelect, FetchPetugas, typeSelect, FetchBuatLapor };

@@ -1,4 +1,3 @@
-import md5 from "md5";
 import { toast } from "react-hot-toast";
 
 import Firebase, {
@@ -8,6 +7,7 @@ import Firebase, {
   authSecondary,
 } from "util/Firebase";
 import { TriggerLoading } from "util/Loading";
+import { md5Compare } from "util/Helper";
 import {
   GlobalStateSession,
   GlobalStateSD,
@@ -16,7 +16,7 @@ import {
   SessionTemplate,
 } from "util/States";
 
-// NOTE: Helper Function
+// Helper Function
 function userNewTemplate(cred) {
   const { NIK, name } = cred;
 
@@ -91,22 +91,6 @@ function checkWithSession(data, sessionData) {
   return toChange;
 }
 
-async function md5Compare(data, mode = "registered") {
-  var hash;
-
-  if (mode === "registered") {
-    hash = data + process.env.REACT_APP_HOT_KEY;
-    hash = await md5(hash);
-  }
-
-  if (mode === "users") {
-    hash = data + process.env.REACT_APP_SIGNATURE;
-    hash = await md5(hash);
-  }
-
-  return hash;
-}
-
 async function reAuthenticate(key) {
   const currFakeEmailPrefix = GlobalStateSession().getName();
   const credential = Firebase.auth.EmailAuthProvider.credential(
@@ -117,7 +101,7 @@ async function reAuthenticate(key) {
   return await auth.currentUser.reauthenticateWithCredential(credential);
 }
 
-// NOTE: Main Function
+// Main Function
 async function authCheck() {
   TriggerLoading({ stats: true, message: "Memeriksa state" });
 

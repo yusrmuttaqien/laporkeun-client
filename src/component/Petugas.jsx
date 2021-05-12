@@ -13,7 +13,7 @@ import {
 } from "style/Components";
 import { FetchesInstance } from "util/States";
 import { Reload, Lock, UnLock } from "style/Icons";
-import { options, FetchPetugas } from "util/Fetches";
+import { sortSelect, FetchPetugas } from "util/Fetches";
 import { TriggerPopup } from "util/Popup";
 import PetugasRegistrasi from "component/PetugasRegistrasi";
 
@@ -68,10 +68,10 @@ export default function Petugas(props) {
             {!isRegis && (
               <>
                 <CustomSelect
-                  options={options}
+                  options={sortSelect}
                   classNamePrefix={"Select"}
-                  defaultValue={options[orderBy]}
-                  value={options[orderBy]}
+                  defaultValue={sortSelect[orderBy]}
+                  value={sortSelect[orderBy]}
                   onChange={optionChange}
                   isDisabled={payload ? false : true}
                 />

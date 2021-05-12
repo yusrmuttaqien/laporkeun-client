@@ -1,7 +1,7 @@
 // check_webp_feature:
 //   'feature' can be one of 'lossy', 'lossless', 'alpha' or 'animation'.
 //   'callback(feature, isSupported)' will be passed back the detection result (in an asynchronous way!)
-function check_webp_feature(feature, callback) {
+async function check_webp_feature(feature, callback) {
   var kTestImages = {
     lossy: "UklGRiIAAABXRUJQVlA4IBYAAAAwAQCdASoBAAEADsD+JaQAA3AAAAAA",
     lossless: "UklGRhoAAABXRUJQVlA4TA0AAAAvAAAAEAcQERGIiP4HAA==",
@@ -10,21 +10,20 @@ function check_webp_feature(feature, callback) {
     animation:
       "UklGRlIAAABXRUJQVlA4WAoAAAASAAAAAAAAAAAAQU5JTQYAAAD/////AABBTk1GJgAAAAAAAAAAAAAAAAAAAGQAAABWUDhMDQAAAC8AAAAQBxAREYiI/gcA",
   };
-  var img = new Image();
-  img.onload = function () {
-    var result = img.width > 0 && img.height > 0;
-    callback(feature, result);
-  };
-  img.onerror = function () {
-    callback(feature, false);
-  };
-  img.src = "data:image/webp;base64," + kTestImages[feature];
-}
 
-function run_check_webp_feature() {
-  check_webp_feature("lossy", function (feature, isSupported) {
-    return isSupported;
+  return new Promise((resolve, reject) => {
+    var img = new Image();
+    img.onload = () => {
+      var result = img.width > 0 && img.height > 0;
+      // callback(feature, result);
+      resolve(result);
+    };
+    img.onerror = () => {
+      // callback(feature, false);
+      resolve(false);
+    };
+    img.src = "data:image/webp;base64," + kTestImages[feature];
   });
 }
 
-export { run_check_webp_feature };
+export { check_webp_feature };
