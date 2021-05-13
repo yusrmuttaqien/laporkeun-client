@@ -7,7 +7,7 @@ import {
   GlobalStateSession,
 } from "util/States";
 import { compressIMG, dimensionIMG, md5Compare } from "util/Helper";
-import { database } from "util/Firebase";
+import { database, storage } from "util/Firebase";
 
 // Global fetch value
 const sortSelect = [
@@ -84,9 +84,24 @@ async function laporNewTemplate(report) {
     petugas_name: null,
     respon_date: null,
     respon_detail: null,
-    visibility: isPublic ? "Public" : "Private",
+    visibility: isPublic ? "Publik" : "Privat",
     status: "Menunggu",
   };
+}
+
+async function uploadMultiple(payload) {
+  const storageLapor = storage.ref("/laporan");
+
+  for (const param in payload) {
+    await storageLapor
+      .child(payload[param].name)
+      .put(payload[param].file)
+      .catch((err) => {
+        return 0;
+      });
+  }
+
+  return 1;
 }
 
 // Main fetches
@@ -284,6 +299,8 @@ async function FetchBuatLapor({ action, ext }) {
       GlobalStateLocation().setLocationKotaSelectZero(toSelect);
       break;
     case "submitLaporan":
+      const loading = toast.loading("Mengunggah laporan");
+      const databaseLaporan = database.collection("laporan");
       var imgDimension,
         imgWEBP,
         imgJPEG,
@@ -309,8 +326,27 @@ async function FetchBuatLapor({ action, ext }) {
       }
 
       // Generate details
-      const push = await laporNewTemplate({ ...ext, picLaporan: imgName });
-      
+      const dataPush = await laporNewTemplate({ ...ext, picLaporan: imgName });
+      const imgPush = {
+        webp: { name: `${imgName}.webp`, file: imgWEBP },
+        jpeg: { name: `${imgName}.jpeg`, file: imgJPEG },
+      };
+
+      // Upload all
+      try {
+        await databaseLaporan.add(dataPush);
+      } catch (err) {
+        console.log(err);
+        toast.error("Kesalahan unggah laporan");
+        toast.error("Unggah laporan dibatalkan", { id: loading });
+        break;
+      }
+
+      if (!(await uploadMultiple(imgPush))) {
+        toast.error("Kesalahan unggah gambah");
+      }
+
+      toast.success("Laporan berhasil diunggah", { id: loading });
       ext.formReset();
       break;
     default:
@@ -318,4 +354,6 @@ async function FetchBuatLapor({ action, ext }) {
   }
 }
 
-export { sortSelect, FetchPetugas, typeSelect, FetchBuatLapor };
+async function FetchLaporanku({ action, ext }) {}
+
+export { sortSelect, FetchPetugas, typeSelect, FetchBuatLapor, FetchLaporanku };

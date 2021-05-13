@@ -99,7 +99,7 @@ export default function Petugas(props) {
         {isRegis ? (
           <PetugasRegistrasi />
         ) : payload ? (
-          <ReportBody className="forPetugas">
+          <ReportBody className="forDataList">
             <DataList className="forHeading">
               <section>Nama</section>
               <section>Tanggal akun</section>

@@ -103,7 +103,7 @@ async function reAuthenticate(key) {
 
 // Main Function
 async function authCheck() {
-  TriggerLoading({ stats: true, message: "Memeriksa state" });
+  TriggerLoading({ stats: true, message: "Memuat akun" });
 
   await auth.onAuthStateChanged(async (user) => {
     if (user) {

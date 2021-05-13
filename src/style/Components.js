@@ -169,7 +169,7 @@ const ReportBody = styled.div`
     justify-content: center;
   }
 
-  &.forPetugas {
+  &.forDataList {
     padding: 0 0.5em;
   }
 
