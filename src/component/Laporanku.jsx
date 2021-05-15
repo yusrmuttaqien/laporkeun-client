@@ -1,6 +1,5 @@
 import React, { useEffect } from "react";
 import { useState as GlobalState } from "@hookstate/core";
-import { useHistory } from "react-router-dom";
 
 import {
   ReportWrapper,
@@ -13,15 +12,13 @@ import {
   Action,
 } from "style/Components";
 import { FetchesInstance } from "util/States";
-import { Reload } from "style/Icons";
+import { Reload, Info } from "style/Icons";
 import { sortSelect } from "util/Fetches";
 
 export default function Laporanku(props) {
   const state = GlobalState(FetchesInstance);
   const { isLoading } = state.get();
-  const { payload, lastFetch, orderBy } = state.petugas.get();
-
-  const history = useHistory();
+  const { payload, lastFetch, orderBy } = state.laporanku.get();
 
   const optionChange = (option) => {};
 
@@ -58,34 +55,35 @@ export default function Laporanku(props) {
             </Button>
           </div>
         </div>
-        <ReportBody className="forDataList">
-          <DataList className="forHeading">
-            <section>Judul</section>
-            <section>Tanggal lapor</section>
-            <section>Lokasi</section>
-            <section>Tipe</section>
-            <Action>Aksi</Action>
-          </DataList>
-          {/* {Object.entries(payload).map((data, index) => (
-            <DataList
-              className="forBody forData"
-              key={index}
-              suspended={data[1].suspended}
-            >
-              <section>{data[1].name}</section>
-              <section>{data[1].acc_date.split("T")[0]}</section>
-              <section>{data[1].telp || "Tidak tersedia"}</section>
-              <Action
-                title={data[1].suspended ? "Buka petugas" : "Tutup petugas"}
-                onClick={() =>
-                  closeFetch([data[1].name, data[1].nik, data[1].suspended])
-                }
-              >
-                {data[1].suspended ? <UnLock /> : <Lock />}
-              </Action>
+        {payload ? (
+          <ReportBody className="forDataList">
+            <DataList className="forHeading">
+              <section>Judul</section>
+              <section>Tanggal lapor</section>
+              <section>Lokasi</section>
+              <section>Tipe</section>
+              <Action>Aksi</Action>
             </DataList>
-          ))} */}
-        </ReportBody>
+            {Object.entries(payload).map((data, index) => (
+              <DataList
+                className="forBody forData"
+                key={index}
+                suspended={data[1].suspended}
+              >
+                <section>{data[1].name}</section>
+                <section>{data[1].acc_date.split("T")[0]}</section>
+                <section>{data[1].telp || "Tidak tersedia"}</section>
+                <Action
+                  title={data[1].suspended ? "Buka petugas" : "Tutup petugas"}
+                >
+                  <Info />
+                </Action>
+              </DataList>
+            ))}
+          </ReportBody>
+        ) : (
+          <Notify message={isLoading ? "Memuat" : "Tidak ada laporan"} />
+        )}
       </Report>
     </ReportWrapper>
   );

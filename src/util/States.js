@@ -74,6 +74,15 @@ const FetchesWrapper = (s) => ({
   setPetugasPayload: (payload) => s.petugas.payload.set(payload),
   setPetugasLastFetch: (lastfetch) => s.petugas.lastFetch.set(lastfetch),
   addPetugasPayload: (payload) => s.petugas.payload.merge(payload),
+
+  // Laporanku
+  // getPetugasPayload: () => s.petugas.payload.get(),
+  // getPetugasLastFetch: () => s.petugas.lastFetch.get(),
+  // getPetugasOrderBy: () => s.petugas.orderBy.get(),
+  // setPetugasOrderBy: (order) => s.petugas.orderBy.set(order),
+  // setPetugasPayload: (payload) => s.petugas.payload.set(payload),
+  // setPetugasLastFetch: (lastfetch) => s.petugas.lastFetch.set(lastfetch),
+  // addPetugasPayload: (payload) => s.petugas.payload.merge(payload),
 });
 
 const LocationWrapper = (s) => ({
@@ -130,6 +139,11 @@ const LookupState = {
 const FetchesData = {
   isLoading: false,
   petugas: {
+    orderBy: 0,
+    payload: null,
+    lastFetch: 0,
+  },
+  laporanku: {
     orderBy: 0,
     payload: null,
     lastFetch: 0,
