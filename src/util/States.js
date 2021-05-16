@@ -6,11 +6,12 @@ const SessionTemplate = {
   isLogged: false,
   role: null,
   name: null,
-  NIK: null,
+  nik: null,
   pic: null,
   picURL: null,
   telp: null,
   uid: null,
+  hashedUsrUID: null,
 };
 
 const PopupTemplate = {
@@ -45,7 +46,8 @@ const DataWrapper = (s) => ({
   getUID: () => s.session.uid.get(),
   getPic: () => s.session.pic.get(),
   getName: () => s.session.name.get(),
-  getNIK: () => s.session.NIK.get(),
+  getNIK: () => s.session.nik.get(),
+  getUIDUser: () => s.session.hashedUsrUID.get(),
 });
 
 const SDWrapper = (s) => ({
@@ -76,13 +78,13 @@ const FetchesWrapper = (s) => ({
   addPetugasPayload: (payload) => s.petugas.payload.merge(payload),
 
   // Laporanku
-  // getPetugasPayload: () => s.petugas.payload.get(),
-  // getPetugasLastFetch: () => s.petugas.lastFetch.get(),
-  // getPetugasOrderBy: () => s.petugas.orderBy.get(),
-  // setPetugasOrderBy: (order) => s.petugas.orderBy.set(order),
-  // setPetugasPayload: (payload) => s.petugas.payload.set(payload),
-  // setPetugasLastFetch: (lastfetch) => s.petugas.lastFetch.set(lastfetch),
-  // addPetugasPayload: (payload) => s.petugas.payload.merge(payload),
+  getLaporankuPayload: () => s.laporanku.payload.get(),
+  getLaporankuLastFetch: () => s.laporanku.lastFetch.get(),
+  getLaporankuOrderBy: () => s.laporanku.orderBy.get(),
+  setLaporankuOrderBy: (order) => s.laporanku.orderBy.set(order),
+  setLaporankuPayload: (payload) => s.laporanku.payload.set(payload),
+  setLaporankuLastFetch: (lastfetch) => s.laporanku.lastFetch.set(lastfetch),
+  addLaporankuPayload: (payload) => s.laporanku.payload.merge(payload),
 });
 
 const LocationWrapper = (s) => ({
@@ -104,11 +106,12 @@ const DataState = {
     isLogged: false,
     role: null,
     name: null,
-    NIK: null,
+    nik: null,
     pic: null,
     picURL: null,
     telp: null,
     uid: null,
+    hashedUsrUID: null,
   },
 };
 
@@ -172,7 +175,6 @@ const FetchesInstance = createState(FetchesData);
 const LocationInstance = createState(LocationData);
 
 // Set persistance
-LocationInstance.attach(Persistence("location"));
 LookupInstance.attach(Persistence("noisses"));
 
 // Non-component state import

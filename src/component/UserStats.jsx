@@ -74,14 +74,14 @@ const CloseSession = styled.p`
 
 export default function UserStats() {
   const state = GlobalState(DataInstance);
-  const { role, name, NIK, picURL, isLogged } = state.session.get();
+  const { role, name, nik, picURL, isLogged } = state.session.get();
 
   const history = useHistory();
 
   var roleNIK = isLogged
     ? role !== "pengguna"
       ? role.charAt(0).toUpperCase() + role.slice(1)
-      : NIK
+      : nik
     : null;
 
   const exitApp = async () => {

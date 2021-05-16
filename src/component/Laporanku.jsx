@@ -13,7 +13,7 @@ import {
 } from "style/Components";
 import { FetchesInstance } from "util/States";
 import { Reload, Info } from "style/Icons";
-import { sortSelect } from "util/Fetches";
+import { sortSelect, FetchLaporanku } from "util/Fetches";
 
 export default function Laporanku(props) {
   const state = GlobalState(FetchesInstance);
@@ -26,7 +26,9 @@ export default function Laporanku(props) {
 
   const resetFetch = () => {};
 
-  useEffect(() => {}, []);
+  useEffect(() => {
+    FetchLaporanku({ action: "effectFetch" });
+  }, []);
 
   return (
     <ReportWrapper>
@@ -68,11 +70,12 @@ export default function Laporanku(props) {
               <DataList
                 className="forBody forData"
                 key={index}
-                suspended={data[1].suspended}
+                stats={data[1].status}
               >
-                <section>{data[1].name}</section>
-                <section>{data[1].acc_date.split("T")[0]}</section>
-                <section>{data[1].telp || "Tidak tersedia"}</section>
+                <section title={data[1].title}>{data[1].title}</section>
+                <section>{data[1].lapor_date?.split("T")[0]}</section>
+                <section>{data[1].location.prov}</section>
+                <section>{data[1].type}</section>
                 <Action
                   title={data[1].suspended ? "Buka petugas" : "Tutup petugas"}
                 >
@@ -82,7 +85,7 @@ export default function Laporanku(props) {
             ))}
           </ReportBody>
         ) : (
-          <Notify message={isLoading ? "Memuat" : "Tidak ada laporan"} />
+          <Notify message="Tidak ada laporan"/>
         )}
       </Report>
     </ReportWrapper>

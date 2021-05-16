@@ -63,7 +63,7 @@ async function laporNewTemplate(report) {
     sLaporan,
     type,
   } = report;
-  const hashedUID = await md5Compare(GlobalStateSession().getUID(), "users");
+  const hashedUID = GlobalStateSession().getUIDUser();
 
   return {
     title: sLaporan,
@@ -354,6 +354,58 @@ async function FetchBuatLapor({ action, ext }) {
   }
 }
 
-async function FetchLaporanku({ action, ext }) {}
+async function FetchLaporanku({ action, ext }) {
+  const doneFirstFetch = GlobalStateFetches().getLaporankuPayload();
+  const lastFetch = GlobalStateFetches().getLaporankuLastFetch();
+  const orderBy = GlobalStateFetches().getLaporankuOrderBy();
+  const hashedUID = GlobalStateSession().getUIDUser();
+
+  var laporanses,
+    realData = {};
+  const databaseLaporanku = database
+    .collection("laporan")
+    .where("pengguna_uid", "==", hashedUID)
+    .limit(PaginationLimit);
+
+  GlobalStateFetches().setLoading(true);
+
+  switch (action) {
+    case "effectFetch":
+      if (doneFirstFetch) break;
+
+      console.log("logging");
+      FetchLaporanku({ action: "resetFetch" });
+      break;
+    case "resetFetch":
+      laporanses = await databaseLaporanku.get();
+      laporanses.docs.forEach((doc, index) => {
+        realData[doc.id] = doc.data();
+      });
+
+      if (laporanses.empty === true) {
+        GlobalStateFetches().setLaporankuPayload(null);
+        GlobalStateFetches().setLaporankuLastFetch(0);
+
+        if (orderBy !== 0) {
+          GlobalStateFetches().setLaporankuOrderBy(0);
+        }
+      } else {
+        GlobalStateFetches().setLaporankuPayload(realData);
+        GlobalStateFetches().setLaporankuLastFetch(
+          laporanses.docs[laporanses.docs.length - 1] || 0
+        );
+
+        if (orderBy !== 0) {
+          GlobalStateFetches().setLaporankuOrderBy(0);
+        }
+      }
+
+      break;
+    default:
+      break;
+  }
+
+  GlobalStateFetches().setLoading(false);
+}
 
 export { sortSelect, FetchPetugas, typeSelect, FetchBuatLapor, FetchLaporanku };

@@ -18,10 +18,10 @@ import {
 
 // Helper Function
 function userNewTemplate(cred) {
-  const { NIK, name } = cred;
+  const { nik, name } = cred;
 
   return {
-    nik: NIK,
+    nik,
     pic: null,
     role: "pengguna",
     telp: null,
@@ -110,6 +110,7 @@ async function authCheck() {
       await fetchUserData(user.uid);
       TriggerLoading({ stats: false });
     } else {
+      await cleaning();
       TriggerLoading({ stats: false });
     }
   });
@@ -128,8 +129,8 @@ async function fetchUserData(uid) {
     .then((doc) => {
       details = doc.data();
       details.isLogged = true;
-      details.NIK = details.nik;
       details.uid = uid;
+      details.hashedUsrUID = userId;
     })
     //  TODO: Handle this, using linked toast perhaps?
     .catch((err) => console.log(err));
@@ -162,9 +163,9 @@ async function fetchUserData(uid) {
 }
 
 async function regisPengguna(cred) {
-  const { name, NIK, kataSandi } = cred;
-  const usrCred = userNewTemplate({ NIK, name });
-  const toCompare = await md5Compare(NIK);
+  const { name, nik, kataSandi } = cred;
+  const usrCred = userNewTemplate({ nik, name });
+  const toCompare = await md5Compare(nik);
   var userId,
     fakeEmail = name + "@laporkeun.com";
   fakeEmail = fakeEmail.toLowerCase();
@@ -238,7 +239,7 @@ async function updateProfile(update) {
   }
 
   const currUID = GlobalStateSession().getUID();
-  const hashedCurrUID = await md5Compare(currUID, "users");
+  const hashedCurrUID = GlobalStateSession().getUIDUser();
   const currPic = GlobalStateSession().getPic();
   const storageProfile = storage.ref("/profile");
   const databaseProfile = database.collection("users");
@@ -333,10 +334,9 @@ async function login(cred) {
 }
 
 async function deleteAccount(key) {
-  const currUID = GlobalStateSession().getUID();
   const currPic = GlobalStateSession().getPic();
   const currNIK = GlobalStateSession().getNIK();
-  const hashedCurrUID = await md5Compare(currUID, "users");
+  const hashedCurrUID = GlobalStateSession().getUIDUser();
   const toCompare = await md5Compare(currNIK);
   const storageProfile = storage.ref("/profile");
   const databaseProfile = database.collection("users");
@@ -397,14 +397,19 @@ async function deleteAccount(key) {
   return Promise.resolve("Akun berhasil dihapus");
 }
 
-async function logout() {
-  await auth.signOut();
+async function cleaning() {
   await GlobalStateSession().setSession(SessionTemplate);
   await GlobalStateSD().setSD(SDTemplate);
   GlobalStateLookup().setLookup({
     deggoLsi: false,
     elor: null,
   });
+  return 1;
+}
+
+async function logout() {
+  await auth.signOut();
+  await cleaning();
   return 1;
 }
 

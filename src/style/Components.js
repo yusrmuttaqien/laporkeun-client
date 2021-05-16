@@ -444,10 +444,17 @@ const DataList = styled.div`
 
         content: "";
         background-color: ${(props) => {
-          if (props.stats === "Diterima" || !props.suspended) {
-            return props.theme.color.done;
-          } else {
-            return props.theme.color.waiting;
+          switch (props.stats) {
+            case "Diterima":
+            case "notSuspended":
+              return props.theme.color.done;
+            case "Ditolak":
+            case "Suspended":
+              return props.theme.color.reject;
+            case "Menunggu":
+              return props.theme.color.wait;
+            default:
+              return props.theme.color.process;
           }
         }};
       }

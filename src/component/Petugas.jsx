@@ -110,7 +110,7 @@ export default function Petugas(props) {
               <DataList
                 className="forBody forData"
                 key={index}
-                suspended={data[1].suspended}
+                stats={data[1].suspended ? "Suspended" : "notSuspended"}
               >
                 <section>{data[1].name}</section>
                 <section>{data[1].acc_date.split("T")[0]}</section>
@@ -127,7 +127,7 @@ export default function Petugas(props) {
             ))}
           </ReportBody>
         ) : (
-          <Notify message={isLoading ? "Memuat" : "Tidak ada petugas"} />
+          <Notify message="Tidak ada petugas" />
         )}
       </Report>
     </ReportWrapper>
