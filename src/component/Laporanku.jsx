@@ -20,11 +20,17 @@ export default function Laporanku(props) {
   const { isLoading } = state.get();
   const { payload, lastFetch, orderBy } = state.laporanku.get();
 
-  const optionChange = (option) => {};
+  const optionChange = (option) => {
+    FetchLaporanku({ action: "sortFetch", ext: option });
+  };
 
-  const fetchMore = () => {};
+  const fetchMore = () => {
+    FetchLaporanku({ action: "moreFetch" });
+  };
 
-  const resetFetch = () => {};
+  const resetFetch = () => {
+    FetchLaporanku({ action: "resetFetch" });
+  };
 
   useEffect(() => {
     FetchLaporanku({ action: "effectFetch" });
@@ -76,16 +82,14 @@ export default function Laporanku(props) {
                 <section>{data[1].lapor_date?.split("T")[0]}</section>
                 <section>{data[1].location.prov}</section>
                 <section>{data[1].type}</section>
-                <Action
-                  title={data[1].suspended ? "Buka petugas" : "Tutup petugas"}
-                >
+                <Action title="Detail laporan">
                   <Info />
                 </Action>
               </DataList>
             ))}
           </ReportBody>
         ) : (
-          <Notify message="Tidak ada laporan"/>
+          <Notify message="Tidak ada laporan" />
         )}
       </Report>
     </ReportWrapper>

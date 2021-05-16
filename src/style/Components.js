@@ -265,9 +265,11 @@ const Button = styled.button`
     margin: 0.5em 0;
   }
 
-  &.forBuatLaporPreview {
+  &.normalizeForButton {
     display: flex;
+  }
 
+  &.forBuatLaporPreview {
     position: absolute;
     padding: 0.3em 0.4em;
     top: 0.5em;
@@ -477,6 +479,16 @@ const Notify = styled.div`
   }
 `;
 
+const Overlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  z-index: 1002;
+`;
+
 export {
   Label,
   Input,
@@ -491,4 +503,5 @@ export {
   CustomSelect,
   DataList,
   Notify,
+  Overlay
 };

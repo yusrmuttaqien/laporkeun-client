@@ -5,7 +5,6 @@ import { useEffect } from "react";
 
 import Navbar from "component/Navbar";
 import BuatLaporan from "component/BuatLaporan";
-import SideDetails from "component/SideDetails";
 import Laporanku from "component/Laporanku";
 import LaporanPublik from "component/LaporanPublik";
 import LaporanBaru from "component/LaporanBaru";
@@ -13,6 +12,7 @@ import Tanggapanku from "component/Tanggapanku";
 import SemuaTanggapan from "component/SemuaTanggapan";
 import Petugas from "component/Petugas";
 import Pengaturan from "component/Pengaturan";
+import { Details } from "component/Details";
 import Test from "component/Test";
 import { Loading } from "util/Loading";
 import { Popup } from "util/Popup";
@@ -35,7 +35,9 @@ const AppWrapper = styled.div`
   min-width: 760px;
   max-width: 100%;
 
-  background-image: url(${check_webp_feature("lossy") ? BGWebP : BGProgressive});
+  background-image: url(${check_webp_feature("lossy")
+    ? BGWebP
+    : BGProgressive});
   background-size: cover;
 `;
 
@@ -75,7 +77,6 @@ function App() {
     <AppWrapper id="AppWraper">
       <Router>
         <Navbar />
-        <SideDetails />
         <WrapToaster>
           <Toaster
             toastOptions={{
@@ -83,6 +84,7 @@ function App() {
             }}
           />
         </WrapToaster>
+        <Details />
         <Popup />
         <Loading />
         <View id="View">

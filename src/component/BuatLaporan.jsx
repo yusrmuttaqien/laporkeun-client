@@ -275,7 +275,7 @@ export default function BuatLaporan(props) {
               <Preview>
                 {isPic && (
                   <Button
-                    className="forBuatLaporPreview"
+                    className="normalizeForButton forBuatLaporPreview"
                     onClick={deletePic}
                     type="button"
                     title="Hapus gambar"

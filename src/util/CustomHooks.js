@@ -4,7 +4,7 @@ import { storage } from "util/Firebase";
 import toast from "react-hot-toast";
 import { useState as GlobalState } from "@hookstate/core";
 
-import { DataInstance, SDInstance } from "util/States";
+import { DataInstance, DInstance } from "util/States";
 import { database } from "util/Firebase";
 
 const instance = axios.create({
@@ -318,7 +318,7 @@ function useSemuaTanggapan(page, sort) {
 
 function useDetails() {
   const DataState = GlobalState(DataInstance);
-  const SDState = GlobalState(SDInstance);
+  const SDState = GlobalState(DInstance);
   const { token } = DataState.session.get();
   const sideDetailsPayload = SDState.payload.get();
 

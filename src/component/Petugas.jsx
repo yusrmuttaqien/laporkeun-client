@@ -113,7 +113,7 @@ export default function Petugas(props) {
                 stats={data[1].suspended ? "Suspended" : "notSuspended"}
               >
                 <section>{data[1].name}</section>
-                <section>{data[1].acc_date.split("T")[0]}</section>
+                <section>{data[1].acc_date?.split("T")[0]}</section>
                 <section>{data[1].telp || "Tidak tersedia"}</section>
                 <Action
                   title={data[1].suspended ? "Buka petugas" : "Tutup petugas"}

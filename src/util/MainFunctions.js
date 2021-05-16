@@ -10,7 +10,7 @@ import { TriggerLoading } from "util/Loading";
 import { md5Compare } from "util/Helper";
 import {
   GlobalStateSession,
-  GlobalStateSD,
+  GlobalStateD,
   GlobalStateLookup,
   SDTemplate,
   SessionTemplate,
@@ -399,7 +399,7 @@ async function deleteAccount(key) {
 
 async function cleaning() {
   await GlobalStateSession().setSession(SessionTemplate);
-  await GlobalStateSD().setSD(SDTemplate);
+  await GlobalStateD().setSD(SDTemplate);
   GlobalStateLookup().setLookup({
     deggoLsi: false,
     elor: null,

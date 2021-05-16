@@ -24,7 +24,7 @@ export default function Forms() {
 
   return (
     <FormWrapper>
-      <Judul>Daftar dulu gan!</Judul>
+      <Judul>{isRegis ? "Daftar dulu gan!" : "Masuk dulu gan!"}</Judul>
       {isRegis ? (
         <EntryRegis toggle={setIsRegis} />
       ) : (

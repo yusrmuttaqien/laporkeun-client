@@ -30,12 +30,16 @@ function sortBy(map, sort) {
   function dateOldNew(a, b) {
     if (a[1].acc_date < b[1].acc_date) return -1;
     if (a[1].acc_date > b[1].acc_date) return 1;
+    if (a[1].lapor_date < b[1].lapor_date) return -1;
+    if (a[1].lapor_date > b[1].lapor_date) return 1;
     return 0;
   }
 
   function dateNewOld(a, b) {
     if (a[1].acc_date < b[1].acc_date) return 1;
     if (a[1].acc_date > b[1].acc_date) return -1;
+    if (a[1].lapor_date < b[1].lapor_date) return 1;
+    if (a[1].lapor_date > b[1].lapor_date) return -1;
     return 0;
   }
 
@@ -378,7 +382,7 @@ async function FetchLaporanku({ action, ext }) {
       break;
     case "resetFetch":
       laporanses = await databaseLaporanku.get();
-      laporanses.docs.forEach((doc, index) => {
+      laporanses.docs.forEach((doc) => {
         realData[doc.id] = doc.data();
       });
 
@@ -400,6 +404,32 @@ async function FetchLaporanku({ action, ext }) {
         }
       }
 
+      break;
+    case "moreFetch":
+      laporanses = await databaseLaporanku.startAfter(lastFetch).get();
+      laporanses.docs.forEach((doc) => {
+        realData[doc.id] = doc.data();
+      });
+
+      GlobalStateFetches().addLaporankuPayload(realData);
+
+      if (orderBy !== 0) {
+        GlobalStateFetches().setLaporankuOrderBy(0);
+      }
+
+      if (laporanses.empty === true) {
+        GlobalStateFetches().setLaporankuLastFetch(0);
+      } else {
+        GlobalStateFetches().setLaporankuLastFetch(
+          laporanses.docs[laporanses.docs.length - 1] || 0
+        );
+      }
+      break;
+    case "sortFetch":
+      realData = await sortBy(doneFirstFetch, ext);
+
+      GlobalStateFetches().setLaporankuOrderBy(ext.id);
+      GlobalStateFetches().setLaporankuPayload(realData);
       break;
     default:
       break;

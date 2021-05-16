@@ -50,7 +50,7 @@ const DataWrapper = (s) => ({
   getUIDUser: () => s.session.hashedUsrUID.get(),
 });
 
-const SDWrapper = (s) => ({
+const DWrapper = (s) => ({
   setSD: (SDObj) => s.set(SDObj),
 });
 
@@ -115,11 +115,7 @@ const DataState = {
   },
 };
 
-const SideDetailState = {
-  stats: false,
-  payload: { id: null, nik: null, petugas: null },
-  newResponseByIDReport: null,
-};
+const DetailsState = {};
 
 const PopupState = {
   stats: false,
@@ -167,7 +163,7 @@ const LocationData = {
 
 // Initialize state
 const DataInstance = createState(DataState);
-const SDInstance = createState(SideDetailState);
+const DInstance = createState(DetailsState);
 const PPInstance = createState(PopupState);
 const UIInstance = createState(UIState);
 const LookupInstance = createState(LookupState);
@@ -180,7 +176,7 @@ LookupInstance.attach(Persistence("noisses"));
 // Non-component state import
 const GlobalStatePopup = () => PPWrapper(PPInstance);
 const GlobalStateSession = () => DataWrapper(DataInstance);
-const GlobalStateSD = () => SDWrapper(SDInstance);
+const GlobalStateD = () => DWrapper(DInstance);
 const GlobalStateUI = () => UIWrapper(UIInstance);
 const GlobalStateLookup = () => LookupWrapper(LookupInstance);
 const GlobalStateFetches = () => FetchesWrapper(FetchesInstance);
@@ -193,7 +189,7 @@ export {
   PopupTemplate,
   SDTemplate,
   DataInstance,
-  SDInstance,
+  DInstance,
   PPInstance,
   UIInstance,
   LookupInstance,
@@ -201,7 +197,7 @@ export {
   LocationInstance,
   GlobalStatePopup,
   GlobalStateSession,
-  GlobalStateSD,
+  GlobalStateD,
   GlobalStateUI,
   GlobalStateLookup,
   GlobalStateFetches,
