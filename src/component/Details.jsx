@@ -6,6 +6,9 @@ import Content from "component/DetailsContent";
 import { Overlay } from "style/Components";
 
 const DetailsWrapper = styled.div`
+  display: flex;
+  flex-direction: column;
+
   position: absolute;
   top: 0;
   right: 0;

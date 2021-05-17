@@ -17,8 +17,13 @@ import {
   TextArea,
 } from "style/Components";
 import { typeSelect, FetchBuatLapor } from "util/Fetches";
-import { Public, NoPublic, Trashbin } from "style/Icons";
-import { SchemaLaporan } from "util/ValidationSchema";
+import { compressIMG } from "util/Helper";
+import { Public, NoPublic, Trashbin, Warning } from "style/Icons";
+import {
+  SchemaLaporan,
+  SUPPORTED_FORMATS,
+  FILE_SIZE,
+} from "util/ValidationSchema";
 import { LocationInstance } from "util/States";
 
 const Preview = styled.div`
@@ -38,8 +43,13 @@ const Preview = styled.div`
   transition-property: opacity;
 
   img {
-    width: 95%;
-    margin-bottom: 1em;
+    width: 90%;
+    max-height: 295px;
+    object-fit: contain;
+    margin-bottom: 0.5em;
+  }
+
+  .text {
   }
 
   &:hover,
@@ -54,7 +64,7 @@ export default function BuatLaporan(props) {
   const kotaSelect = state.locationKota.get();
 
   const [isPublic, setIsPublic] = useState(false);
-  const [isPic, setIsPic] = useState();
+  const [isPic, setIsPic] = useState({ err: false });
   const [type, setType] = useState({ id: 0 });
   const [locationProv, setLocationProv] = useState({
     id: 0,
@@ -122,9 +132,38 @@ export default function BuatLaporan(props) {
     return 1;
   };
 
-  const previewPic = (e) => {
+  const previewPic = async (e) => {
+    const isValid = SUPPORTED_FORMATS.includes(e.target.files[0].type);
+    const isHuge = e.target.files[0].size > FILE_SIZE;
+
+    if (!isValid) {
+      await setIsPic((prev) => ({
+        err: true,
+        name: `${e.target.files[0].name}, tidak didukung`,
+      }));
+      e.target.value = "";
+      return 0;
+    }
+
+    if (isHuge) {
+      await setIsPic((prev) => ({
+        err: true,
+        name: `${e.target.files[0].name}, terlalu besar`,
+      }));
+      e.target.value = "";
+      return 0;
+    }
+
+    const preview = await compressIMG({
+      file: e.target.files[0],
+      height: 500,
+      format: "JPEG",
+      output: "base64",
+    });
+
     setIsPic({
-      file: URL.createObjectURL(e.target.files[0]),
+      err: false,
+      file: preview,
       name: e.target.files[0].name,
     });
   };
@@ -178,13 +217,13 @@ export default function BuatLaporan(props) {
           <div className="multiOption">
             <Button>
               <Label className="forButton" htmlFor="picLaporan">
-                {isPic ? "Ubah gambar" : "Tambah gambar"}
+                {isPic?.file ? "Ubah gambar" : "Tambah gambar"}
               </Label>
               <Input
                 type="file"
                 name="picLaporan"
                 id="picLaporan"
-                accept="image/x-png,image/gif,image/jpeg;capture=camera"
+                accept="image/png,image/gif,image/jpeg,image/jpg,image/webp;capture=camera"
                 form="lapor"
                 onChange={previewPic}
                 ref={composeRefs(register, inputFile)}
@@ -273,18 +312,27 @@ export default function BuatLaporan(props) {
             <section>
               <Label>{errors.picLaporan?.message || "pratinjau gambar"}</Label>
               <Preview>
-                {isPic && (
-                  <Button
-                    className="normalizeForButton forBuatLaporPreview"
-                    onClick={deletePic}
-                    type="button"
-                    title="Hapus gambar"
-                  >
-                    <Trashbin className="inButton" />
-                  </Button>
+                {isPic?.file && (
+                  <>
+                    <Button
+                      className="normalizeForButton forBuatLaporPreview"
+                      onClick={deletePic}
+                      type="button"
+                      title="Hapus gambar"
+                    >
+                      <Trashbin className="inButton" />
+                    </Button>
+                    <img
+                      src={isPic?.file}
+                      alt="imgPreview"
+                      onError={() => console.log("crap")}
+                    />
+                  </>
                 )}
-                {isPic && <img src={isPic.file} alt="imgPreview" />}
-                {isPic ? isPic.name : "Klik tambah gambar diatas"}
+                {isPic?.err && <Warning className="inAction" />}
+                <div className="text">
+                  {isPic?.name ? isPic?.name : "Klik tambah gambar diatas"}
+                </div>
               </Preview>
             </section>
           </div>

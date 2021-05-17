@@ -84,7 +84,7 @@ function App() {
             }}
           />
         </WrapToaster>
-        <Details />
+        {/* <Details /> */}
         <Popup />
         <Loading />
         <View id="View">

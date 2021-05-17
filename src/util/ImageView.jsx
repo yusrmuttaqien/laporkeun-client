@@ -1,9 +1,7 @@
-import React from 'react'
+import React from "react";
 
-export default function ImageView() {
-    return (
-        <div>
-            
-        </div>
-    )
+export default function ImageView(props) {
+  const { thumbnail, height, width, img } = props;
+
+  return <div></div>;
 }

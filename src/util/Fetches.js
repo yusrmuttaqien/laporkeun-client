@@ -66,6 +66,7 @@ async function laporNewTemplate(report) {
     picLaporan,
     sLaporan,
     type,
+    thumbnail,
   } = report;
   const hashedUID = GlobalStateSession().getUIDUser();
 
@@ -90,6 +91,7 @@ async function laporNewTemplate(report) {
     respon_detail: null,
     visibility: isPublic ? "Publik" : "Privat",
     status: "Menunggu",
+    thumbnail,
   };
 }
 
@@ -308,6 +310,7 @@ async function FetchBuatLapor({ action, ext }) {
       var imgDimension,
         imgWEBP,
         imgJPEG,
+        imgBase64,
         imgName = null;
 
       if (ext.picLaporan[0]) {
@@ -322,6 +325,13 @@ async function FetchBuatLapor({ action, ext }) {
           ...imgDimension,
           format: "JPEG",
         });
+        imgBase64 = await compressIMG({
+          file: ext.picLaporan[0],
+          height: 8,
+          width: 8,
+          format: "JPEG",
+          output: "base64",
+        });
 
         // Image name
         imgName =
@@ -330,7 +340,11 @@ async function FetchBuatLapor({ action, ext }) {
       }
 
       // Generate details
-      const dataPush = await laporNewTemplate({ ...ext, picLaporan: imgName });
+      const dataPush = await laporNewTemplate({
+        ...ext,
+        picLaporan: imgName,
+        thumbnail: imgBase64,
+      });
       const imgPush = {
         webp: { name: `${imgName}.webp`, file: imgWEBP },
         jpeg: { name: `${imgName}.jpeg`, file: imgJPEG },
