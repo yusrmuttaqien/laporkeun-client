@@ -23,11 +23,7 @@ const PopupTemplate = {
   txtLabel: null,
 };
 
-const SDTemplate = {
-  stats: false,
-  payload: { id: null, nik: null, petugas: null },
-  newResponseByIDReport: null,
-};
+const DTemplate = { stats: false, data: null, loading: false };
 
 // Helper
 const PPWrapper = (s) => ({
@@ -51,7 +47,10 @@ const DataWrapper = (s) => ({
 });
 
 const DWrapper = (s) => ({
-  setSD: (SDObj) => s.set(SDObj),
+  setD: (stats) => s.stats.set(stats),
+  setLoading: (loading) => s.loading.set(loading),
+  setData: (data) => s.data.set(data),
+  getD: () => s.stats.get(),
 });
 
 const UIWrapper = (s) => ({
@@ -115,7 +114,7 @@ const DataState = {
   },
 };
 
-const DetailsState = {};
+const DetailsState = { stats: false, data: null, loading: false };
 
 const PopupState = {
   stats: false,
@@ -187,7 +186,7 @@ const GlobalStateLocation = () => LocationWrapper(LocationInstance);
 export {
   SessionTemplate,
   PopupTemplate,
-  SDTemplate,
+  DTemplate,
   DataInstance,
   DInstance,
   PPInstance,

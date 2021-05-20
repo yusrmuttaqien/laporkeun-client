@@ -5,6 +5,7 @@ import {
   GlobalStateFetches,
   GlobalStateLocation,
   GlobalStateSession,
+  GlobalStateD,
 } from "util/States";
 import { compressIMG, dimensionIMG, md5Compare } from "util/Helper";
 import { database, storage } from "util/Firebase";
@@ -391,13 +392,13 @@ async function FetchLaporanku({ action, ext }) {
     case "effectFetch":
       if (doneFirstFetch) break;
 
-      console.log("logging");
       FetchLaporanku({ action: "resetFetch" });
       break;
     case "resetFetch":
       laporanses = await databaseLaporanku.get();
       laporanses.docs.forEach((doc) => {
         realData[doc.id] = doc.data();
+        realData[doc.id] = { ...realData[doc.id], id: doc.id };
       });
 
       if (laporanses.empty === true) {
@@ -423,6 +424,7 @@ async function FetchLaporanku({ action, ext }) {
       laporanses = await databaseLaporanku.startAfter(lastFetch).get();
       laporanses.docs.forEach((doc) => {
         realData[doc.id] = doc.data();
+        realData[doc.id] = { ...realData[doc.id], id: doc.id };
       });
 
       GlobalStateFetches().addLaporankuPayload(realData);
@@ -452,4 +454,20 @@ async function FetchLaporanku({ action, ext }) {
   GlobalStateFetches().setLoading(false);
 }
 
-export { sortSelect, FetchPetugas, typeSelect, FetchBuatLapor, FetchLaporanku };
+async function FetchDetails({ ext }) {
+  const currentDetails = JSON.parse(
+    JSON.stringify(GlobalStateFetches().getLaporankuPayload()[ext])
+  );
+
+  await GlobalStateD().setData(currentDetails);
+  return 1;
+}
+
+export {
+  sortSelect,
+  FetchPetugas,
+  typeSelect,
+  FetchBuatLapor,
+  FetchLaporanku,
+  FetchDetails,
+};

@@ -14,6 +14,7 @@ import {
 import { FetchesInstance } from "util/States";
 import { Reload, Info } from "style/Icons";
 import { sortSelect, FetchLaporanku } from "util/Fetches";
+import { TriggerDetails } from "component/Details";
 
 export default function Laporanku(props) {
   const state = GlobalState(FetchesInstance);
@@ -30,6 +31,10 @@ export default function Laporanku(props) {
 
   const resetFetch = () => {
     FetchLaporanku({ action: "resetFetch" });
+  };
+
+  const showDetails = (id) => {
+    TriggerDetails({ id });
   };
 
   useEffect(() => {
@@ -82,7 +87,10 @@ export default function Laporanku(props) {
                 <section>{data[1].lapor_date?.split("T")[0]}</section>
                 <section>{data[1].location.prov}</section>
                 <section>{data[1].type}</section>
-                <Action title="Detail laporan">
+                <Action
+                  title="Detail laporan"
+                  onClick={() => showDetails(data[1].id)}
+                >
                   <Info />
                 </Action>
               </DataList>

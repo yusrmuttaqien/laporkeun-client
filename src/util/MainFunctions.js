@@ -12,7 +12,7 @@ import {
   GlobalStateSession,
   GlobalStateD,
   GlobalStateLookup,
-  SDTemplate,
+  DTemplate,
   SessionTemplate,
 } from "util/States";
 
@@ -399,7 +399,7 @@ async function deleteAccount(key) {
 
 async function cleaning() {
   await GlobalStateSession().setSession(SessionTemplate);
-  await GlobalStateD().setSD(SDTemplate);
+  await GlobalStateD().setSD(DTemplate);
   GlobalStateLookup().setLookup({
     deggoLsi: false,
     elor: null,

@@ -476,6 +476,7 @@ const Notify = styled.div`
 
     content: "${(props) => props.message}";
     transform: translate(-50%, -50%);
+    text-align: center;
   }
 `;
 
@@ -486,7 +487,9 @@ const Overlay = styled.div`
   right: 0;
   bottom: 0;
 
+  background-color: ${(props) => props.theme.color.darkTransparent};
   z-index: 1002;
+  opacity: .5;
 `;
 
 export {
@@ -503,5 +506,5 @@ export {
   CustomSelect,
   DataList,
   Notify,
-  Overlay
+  Overlay,
 };

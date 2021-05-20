@@ -26,7 +26,7 @@ const Variables = {
     UI: {
       navbarDesktop: "300px",
       navbarDesktopSmall: "200px",
-      Details: "450px",
+      Details: "700px",
     },
     transition: ".3s ease-in-out",
   },

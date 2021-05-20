@@ -1,8 +1,10 @@
 import React from "react";
 import styled from "styled-components";
+import { useState as GlobalState } from "@hookstate/core";
 
 import { Button } from "style/Components";
 import { Exit } from "style/Icons";
+import { DInstance } from "util/States";
 
 const Control = styled.div`
   display: flex;
@@ -26,17 +28,25 @@ const Title = styled.h1`
   font-weight: ${(props) => props.theme.value.font.normal};
 `;
 
-export default function DetailsControl() {
+export default function DetailsControl(props) {
+  const state = GlobalState(DInstance);
+  const { data, loading } = state.get();
+
   return (
     <Control>
-      <Button className="normalizeForButton">
+      <Button className="normalizeForButton" onClick={() => state.stats.set(false)}>
         <Exit className="inButton" />
       </Button>
-      <Title>Ya jadi gitu</Title>
-      <div className="multiOption">
-        <Button>unduh</Button>
-        <Button>hapus</Button>
-      </div>
+      {!loading && (
+        <>
+          <Title>{data?.title}</Title>
+          <div className="multiOption">
+            <Button>unduh</Button>
+            <Button>hapus</Button>
+            <Button>respon</Button>
+          </div>
+        </>
+      )}
     </Control>
   );
 }
