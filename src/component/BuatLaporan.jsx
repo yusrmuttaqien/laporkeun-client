@@ -325,7 +325,6 @@ export default function BuatLaporan(props) {
                     <img
                       src={isPic?.file}
                       alt="imgPreview"
-                      onError={() => console.log("crap")}
                     />
                   </>
                 )}

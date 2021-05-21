@@ -12,6 +12,7 @@ import {
   GlobalStateSession,
   GlobalStateD,
   GlobalStateLookup,
+  GlobalStateUI,
   DTemplate,
   SessionTemplate,
 } from "util/States";
@@ -111,7 +112,9 @@ async function authCheck() {
       TriggerLoading({ stats: false });
     } else {
       await cleaning();
-      TriggerLoading({ stats: false });
+      if (GlobalStateUI().getLoading()) {
+        TriggerLoading({ stats: false });
+      }
     }
   });
 }
@@ -399,7 +402,7 @@ async function deleteAccount(key) {
 
 async function cleaning() {
   await GlobalStateSession().setSession(SessionTemplate);
-  await GlobalStateD().setSD(DTemplate);
+  await GlobalStateD().setResetD(DTemplate);
   GlobalStateLookup().setLookup({
     deggoLsi: false,
     elor: null,

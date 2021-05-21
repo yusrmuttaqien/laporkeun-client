@@ -247,6 +247,14 @@ const Button = styled.button`
     color: ${(props) => props.theme.color.white};
     background-color: ${(props) => props.theme.color.dark};
     cursor: pointer;
+    
+    svg {
+      fill: ${(props) => props.theme.color.white};
+    }
+  }
+
+  &:focus {
+    background-color: ${(props) => props.theme.color.grey};
   }
 
   &.forPopup {
@@ -488,8 +496,8 @@ const Overlay = styled.div`
   bottom: 0;
 
   background-color: ${(props) => props.theme.color.darkTransparent};
-  z-index: 1002;
-  opacity: .5;
+  z-index: ${(props) => props.index};
+  opacity: 0.5;
 `;
 
 export {

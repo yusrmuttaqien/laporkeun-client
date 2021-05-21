@@ -1,6 +1,8 @@
 import Resizer from "react-image-file-resizer";
 import md5 from "md5";
 
+import { GlobalStateSession } from "util/States";
+
 const compressIMG = ({
   file,
   height,
@@ -51,4 +53,15 @@ async function md5Compare(data, mode = "registered") {
   return hash;
 }
 
-export { dimensionIMG, compressIMG, md5Compare };
+function uidAccDateChecker(date, uid) {
+  const currDate = GlobalStateSession().getDate();
+  const currUID = GlobalStateSession().getUIDUser();
+
+  if (currDate < date && currUID === uid) {
+    return true;
+  }
+
+  return false;
+}
+
+export { dimensionIMG, compressIMG, md5Compare, uidAccDateChecker };

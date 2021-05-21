@@ -89,7 +89,7 @@ export default function Laporanku(props) {
                 <section>{data[1].type}</section>
                 <Action
                   title="Detail laporan"
-                  onClick={() => showDetails(data[1].id)}
+                  onClick={showDetails.bind(this, data[1].id)}
                 >
                   <Info />
                 </Action>

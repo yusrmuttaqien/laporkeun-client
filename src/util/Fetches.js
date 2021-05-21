@@ -447,6 +447,9 @@ async function FetchLaporanku({ action, ext }) {
       GlobalStateFetches().setLaporankuOrderBy(ext.id);
       GlobalStateFetches().setLaporankuPayload(realData);
       break;
+    case "deleteFetch":
+      console.log(ext);
+      break;
     default:
       break;
   }

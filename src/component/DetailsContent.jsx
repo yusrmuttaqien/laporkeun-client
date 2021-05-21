@@ -8,6 +8,19 @@ import { Label, TextArea, Notify } from "style/Components";
 import { DInstance } from "util/States";
 import { DetailsPlaceholder } from "style/Images";
 
+const Metadata = styled.p`
+  font-weight: ${(props) => props.theme.value.font.light};
+
+  &.forLocation {
+    margin-bottom: 1em;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    width: 100%;
+  }
+`;
+
 const Content = styled.div`
   display: flex;
   flex-direction: column;
@@ -35,6 +48,26 @@ const Content = styled.div`
       flex: 1;
 
       margin-left: 1em;
+
+      .twoSided {
+        display: inherit;
+        flex-direction: row;
+
+        .title {
+          display: inherit;
+          flex-direction: column;
+          align-items: flex-end;
+
+          ${Metadata} {
+            font-weight: ${(props) => props.theme.value.font.medium};
+          }
+        }
+
+        .content {
+          margin-left: 1em;
+          flex: 1;
+        }
+      }
     }
   }
 
@@ -59,17 +92,6 @@ const Content = styled.div`
   }
 `;
 
-const Metadata = styled.p`
-  font-weight: ${(props) => props.theme.value.font.light};
-
-  &.forLocation {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    width: 100%;
-  }
-`;
-
 export default function DetailsContent() {
   const state = GlobalState(DInstance);
   const { data, loading } = state.get();
@@ -86,11 +108,22 @@ export default function DetailsContent() {
         </section>
         <section className="metaSection">
           <Metadata className="forLocation">{`${data?.location.kota}, ${data?.location.prov}`}</Metadata>
-          <Metadata>Oleh: {data?.pengguna_name} </Metadata>
-          <Metadata>Tipe: {data?.type} </Metadata>
-          <Metadata>Publikasi: {data?.lapor_date.split("T")[0]} </Metadata>
-          <Metadata>Status: {data?.status} </Metadata>
-          <Metadata>Visibilitas: {data?.visibility} </Metadata>
+          <div className="twoSided">
+            <div className="title">
+              <Metadata>Oleh:</Metadata>
+              <Metadata>Tipe:</Metadata>
+              <Metadata>Publikasi:</Metadata>
+              <Metadata>Status:</Metadata>
+              <Metadata>Visibilitas:</Metadata>
+            </div>
+            <div className="content">
+              <Metadata>{data?.pengguna_name} </Metadata>
+              <Metadata>{data?.type} </Metadata>
+              <Metadata>{data?.lapor_date.split("T")[0]} </Metadata>
+              <Metadata>{data?.status} </Metadata>
+              <Metadata>{data?.visibility} </Metadata>
+            </div>
+          </div>
         </section>
       </div>
       <div className="second">

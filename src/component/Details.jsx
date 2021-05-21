@@ -28,8 +28,9 @@ const DetailsWrapper = styled.div`
   transform: ${(props) =>
     props.stats ? "translateX(0%)" : "translateX(100%)"};
   transition: ${(props) => props.theme.value.transition};
-  transition-property: transform;
-  will-change: transition;
+  visibility: ${(props) => (props.stats ? "unset" : "hidden")};
+  transition-property: transform, visibility;
+  will-change: transition, visibility;
 `;
 
 function Details() {
@@ -37,6 +38,10 @@ function Details() {
   const { stats } = state.get();
 
   let history = useHistory();
+
+  const handleBlur = () => {
+    state.stats.set(false);
+  };
 
   useEffect(() => {
     return () => {
@@ -50,8 +55,8 @@ function Details() {
 
   return (
     <>
-      {stats && <Overlay onClick={() => state.stats.set(false)} />}
-      <DetailsWrapper stats={stats}>
+      {stats && <Overlay index="1001" onClick={handleBlur} />}
+      <DetailsWrapper stats={stats} aria-hidden={!stats}>
         <Control />
         <Content />
       </DetailsWrapper>
@@ -61,8 +66,8 @@ function Details() {
 
 async function TriggerDetails({ id }) {
   GlobalStateD().setLoading(true);
+  FetchDetails({ ext: id });
   GlobalStateD().setD(true);
-  await FetchDetails({ ext: id });
   GlobalStateD().setLoading(false);
 }
 

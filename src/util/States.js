@@ -44,10 +44,12 @@ const DataWrapper = (s) => ({
   getName: () => s.session.name.get(),
   getNIK: () => s.session.nik.get(),
   getUIDUser: () => s.session.hashedUsrUID.get(),
+  getDate: () => s.session.acc_date.get(),
 });
 
 const DWrapper = (s) => ({
   setD: (stats) => s.stats.set(stats),
+  setResetD: (stats) => s.set(stats),
   setLoading: (loading) => s.loading.set(loading),
   setData: (data) => s.data.set(data),
   getD: () => s.stats.get(),
@@ -55,6 +57,7 @@ const DWrapper = (s) => ({
 
 const UIWrapper = (s) => ({
   setLoading: (loading) => s.loading.stats.set(loading),
+  getLoading: () => s.loading.stats.get(),
   setLoadingMsg: (msg) => s.loading.message.set(msg),
 });
 

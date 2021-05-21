@@ -104,7 +104,7 @@ function Popup() {
 
   return stats ? (
     <>
-      <Overlay onClick={handleBlur} />
+      <Overlay onClick={handleBlur} index="1002" />
       <PopupWrapper id="ydhm-popup" tabIndex="0">
         <Content>
           {message}

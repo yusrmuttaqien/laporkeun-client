@@ -117,9 +117,11 @@ export default function Petugas(props) {
                 <section>{data[1].telp || "Tidak tersedia"}</section>
                 <Action
                   title={data[1].suspended ? "Buka petugas" : "Tutup petugas"}
-                  onClick={() =>
-                    closeFetch([data[1].name, data[1].nik, data[1].suspended])
-                  }
+                  onClick={closeFetch.bind(this, [
+                    data[1].name,
+                    data[1].nik,
+                    data[1].suspended,
+                  ])}
                 >
                   {data[1].suspended ? <UnLock /> : <Lock />}
                 </Action>

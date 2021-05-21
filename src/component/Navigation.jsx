@@ -41,9 +41,17 @@ const NavWrapper = styled.div`
           background-color: ${(props) => props.theme.color.whiteTransparent};
         }
 
+        &:focus {
+          background-color: ${(props) => props.theme.color.grey};
+        }
+
         &.active {
           color: ${(props) => props.theme.color.dark};
           background-color: ${(props) => props.theme.color.white};
+
+          &:focus {
+            background-color: ${(props) => props.theme.color.grey};
+          }
         }
       }
     }

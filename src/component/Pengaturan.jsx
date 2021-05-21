@@ -60,7 +60,6 @@ export default function Pengaturan(props) {
       txtNo: "Batalkan",
       txtLabel: "Kata sandi",
       cbYes: next,
-      cbNo: () => toast.success("Dibatalkan"),
     });
   };
 
@@ -81,7 +80,6 @@ export default function Pengaturan(props) {
       txtNo: "Tidak jadi",
       txtLabel: "Kata sandi",
       cbYes: next,
-      cbNo: () => toast.success("Dibatalkan"),
     });
   };
 
