@@ -1,4 +1,3 @@
-// NOTE: Hardcoded variable
 import React from "react";
 import { NavLink } from "react-router-dom";
 import styled from "styled-components";
@@ -48,10 +47,6 @@ const NavWrapper = styled.div`
         &.active {
           color: ${(props) => props.theme.color.dark};
           background-color: ${(props) => props.theme.color.white};
-
-          &:focus {
-            background-color: ${(props) => props.theme.color.grey};
-          }
         }
       }
     }

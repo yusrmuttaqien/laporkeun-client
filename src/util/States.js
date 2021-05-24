@@ -1,4 +1,4 @@
-import { createState } from "@hookstate/core";
+import { createState, none } from "@hookstate/core";
 import { Persistence } from "@hookstate/persistence";
 
 // Template
@@ -49,7 +49,7 @@ const DataWrapper = (s) => ({
 
 const DWrapper = (s) => ({
   setD: (stats) => s.stats.set(stats),
-  setResetD: (stats) => s.set(stats),
+  setResetD: () => s.merge(DTemplate),
   setLoading: (loading) => s.loading.set(loading),
   setData: (data) => s.data.set(data),
   getD: () => s.stats.get(),
@@ -87,6 +87,10 @@ const FetchesWrapper = (s) => ({
   setLaporankuPayload: (payload) => s.laporanku.payload.set(payload),
   setLaporankuLastFetch: (lastfetch) => s.laporanku.lastFetch.set(lastfetch),
   addLaporankuPayload: (payload) => s.laporanku.payload.merge(payload),
+  addLaporankuPayloadImgURL: (id, url) => s.laporanku.payload[id].merge(url),
+  deleteLaporanku: (id) => s.laporanku.payload[id].set(none),
+  setResetLaporanku: () =>
+    s.laporanku.set({ orderBy: 0, payload: null, lastFetch: 0 }),
 });
 
 const LocationWrapper = (s) => ({

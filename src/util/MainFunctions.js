@@ -46,7 +46,7 @@ function petugasNewTemplate(cred) {
 }
 
 async function checkIsRegistered(toCompare) {
-  var isExist = {};
+  let isExist = {};
   await database
     .collection("registered")
     .where("string", "==", toCompare)
@@ -123,7 +123,7 @@ async function fetchUserData(uid) {
   const userId = await md5Compare(uid, "users");
   const storageProfile = storage.ref("/profile");
   const getLookup = JSON.parse(JSON.stringify(GlobalStateLookup().getLookup()));
-  var details = {};
+  let details = {};
 
   await database
     .collection("users")
@@ -169,7 +169,7 @@ async function regisPengguna(cred) {
   const { name, nik, kataSandi } = cred;
   const usrCred = userNewTemplate({ nik, name });
   const toCompare = await md5Compare(nik);
-  var userId,
+  let userId,
     fakeEmail = name + "@laporkeun.com";
   fakeEmail = fakeEmail.toLowerCase();
 
@@ -204,7 +204,7 @@ async function regisPengguna(cred) {
 
 async function regisPetugas(cred) {
   const { name, telp, kataSandi } = cred;
-  var userId,
+  let userId,
     usrCred,
     fakeEmail = name + "@laporkeun.com";
   fakeEmail = fakeEmail.toLowerCase();
@@ -246,7 +246,7 @@ async function updateProfile(update) {
   const currPic = GlobalStateSession().getPic();
   const storageProfile = storage.ref("/profile");
   const databaseProfile = database.collection("users");
-  var passChange,
+  let passChange,
     emailChange,
     dataChange = await checkWithSession(data, sessionData);
 
@@ -276,7 +276,7 @@ async function updateProfile(update) {
     }
 
     // Set new name
-    var newName = `${hashedCurrUID}.${dataChange.pic.type.split("/")[1]}`;
+    let newName = `${hashedCurrUID}.${dataChange.pic.type.split("/")[1]}`;
 
     // Upload new image
     await storageProfile

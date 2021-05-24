@@ -2,6 +2,8 @@ import Resizer from "react-image-file-resizer";
 import md5 from "md5";
 
 import { GlobalStateSession } from "util/States";
+import { storage } from "util/Firebase";
+import { check_webp_feature } from "util/WebPCheck";
 
 const compressIMG = ({
   file,
@@ -9,6 +11,7 @@ const compressIMG = ({
   width,
   format = "WEBP",
   output = "file",
+  quality = 50,
 }) =>
   new Promise((resolve) => {
     Resizer.imageFileResizer(
@@ -16,7 +19,7 @@ const compressIMG = ({
       width,
       height,
       format,
-      50,
+      quality,
       0,
       (uri) => {
         resolve(uri);
@@ -38,7 +41,7 @@ function dimensionIMG(img) {
 }
 
 async function md5Compare(data, mode = "registered") {
-  var hash;
+  let hash;
 
   if (mode === "registered") {
     hash = data + process.env.REACT_APP_HOT_KEY;
@@ -64,4 +67,27 @@ function uidAccDateChecker(date, uid) {
   return false;
 }
 
-export { dimensionIMG, compressIMG, md5Compare, uidAccDateChecker };
+async function multiImgURL(obj, mode) {
+  let imgToURL;
+  switch (mode) {
+    case "laporan":
+      if (check_webp_feature("lossy")) {
+        imgToURL = obj.webp;
+      } else {
+        imgToURL = obj.jpeg;
+      }
+
+      imgToURL = await storage.ref("/laporan").child(imgToURL).getDownloadURL();
+      return imgToURL;
+    default:
+      break;
+  }
+}
+
+export {
+  dimensionIMG,
+  compressIMG,
+  md5Compare,
+  uidAccDateChecker,
+  multiImgURL,
+};

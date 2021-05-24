@@ -1,8 +1,8 @@
 // check_webp_feature:
 //   'feature' can be one of 'lossy', 'lossless', 'alpha' or 'animation'.
 //   'callback(feature, isSupported)' will be passed back the detection result (in an asynchronous way!)
-async function check_webp_feature(feature, callback) {
-  var kTestImages = {
+async function check_webp_feature(feature) {
+  let kTestImages = {
     lossy: "UklGRiIAAABXRUJQVlA4IBYAAAAwAQCdASoBAAEADsD+JaQAA3AAAAAA",
     lossless: "UklGRhoAAABXRUJQVlA4TA0AAAAvAAAAEAcQERGIiP4HAA==",
     alpha:
@@ -12,14 +12,12 @@ async function check_webp_feature(feature, callback) {
   };
 
   return new Promise((resolve, reject) => {
-    var img = new Image();
+    let img = new Image();
     img.onload = () => {
-      var result = img.width > 0 && img.height > 0;
-      // callback(feature, result);
+      let result = img.width > 0 && img.height > 0;
       resolve(result);
     };
     img.onerror = () => {
-      // callback(feature, false);
       resolve(false);
     };
     img.src = "data:image/webp;base64," + kTestImages[feature];

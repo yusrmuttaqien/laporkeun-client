@@ -94,16 +94,23 @@ const Content = styled.div`
 
 export default function DetailsContent() {
   const state = GlobalState(DInstance);
-  const { data, loading } = state.get();
+  const { data } = state.get();
 
-  return loading ? (
+  return !data ? (
     <Notify message="Memuat detail" />
   ) : (
     <Content>
       <div className="first">
         <section className="imageSection">
           <Image
-            thumbnail={data?.thumbnail ? data?.thumbnail : DetailsPlaceholder()}
+            thumbnail={data?.thumbnail ? data?.thumbnail : DetailsPlaceholder}
+            img={
+              data?.picURL
+                ? data?.picURL
+                : data?.thumbnail
+                ? data?.thumbnail
+                : DetailsPlaceholder
+            }
           />
         </section>
         <section className="metaSection">

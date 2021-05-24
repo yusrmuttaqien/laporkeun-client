@@ -7,7 +7,12 @@ import {
   GlobalStateSession,
   GlobalStateD,
 } from "util/States";
-import { compressIMG, dimensionIMG, md5Compare } from "util/Helper";
+import {
+  compressIMG,
+  dimensionIMG,
+  md5Compare,
+  multiImgURL,
+} from "util/Helper";
 import { database, storage } from "util/Firebase";
 
 // Global fetch value
@@ -25,7 +30,7 @@ const PaginationLimit = 10;
 
 // Helper fetch function
 function sortBy(map, sort) {
-  var newArray = { ...map };
+  let newArray = { ...map };
   newArray = JSON.parse(JSON.stringify(newArray));
 
   function dateOldNew(a, b) {
@@ -111,13 +116,28 @@ async function uploadMultiple(payload) {
   return 1;
 }
 
+async function deleteMultiple(payload) {
+  const storageLapor = storage.ref("/laporan");
+
+  for (const param in payload) {
+    await storageLapor
+      .child(payload[param])
+      .delete()
+      .catch((err) => {
+        return 0;
+      });
+  }
+
+  return 1;
+}
+
 // Main fetches
 async function FetchPetugas({ action, ext }) {
   const doneFirstFetch = GlobalStateFetches().getPetugasPayload();
   const lastFetch = GlobalStateFetches().getPetugasLastFetch();
   const orderBy = GlobalStateFetches().getPetugasOrderBy();
 
-  var petugases,
+  let petugases,
     realData = {};
   const databasePetugas = database
     .collection("users")
@@ -210,8 +230,8 @@ async function FetchBuatLapor({ action, ext }) {
   const isKota = GlobalStateLocation().getLocationKota();
   const isKotaPersist = GlobalStateLocation().getLocationKotaPersist();
 
-  var toData = {};
-  var toSelect = [];
+  let toData = {};
+  let toSelect = [];
 
   switch (action) {
     case "effectFetch":
@@ -220,7 +240,6 @@ async function FetchBuatLapor({ action, ext }) {
       FetchBuatLapor({ action: "firstProvFetch" });
       break;
     case "firstProvFetch":
-      console.log("fetching prov");
       const provinces = await LocationAPI.get("/provinsi");
 
       provinces.data.provinsi.map((data, index) => {
@@ -240,7 +259,6 @@ async function FetchBuatLapor({ action, ext }) {
       // Check is city already persisted
       if (isKotaPersist) {
         if (isKotaPersist[ext.id]) {
-          console.log("use persist kota");
           if (isKota.length === 1) {
             GlobalStateLocation().setLocationKotaSelectRest(
               isKotaPersist[ext.id]
@@ -261,7 +279,6 @@ async function FetchBuatLapor({ action, ext }) {
           break;
         }
       }
-      console.log("fetching kota");
 
       const cities = await LocationAPI.get(`/kota?id_provinsi=${ext.id}`);
 
@@ -308,7 +325,8 @@ async function FetchBuatLapor({ action, ext }) {
     case "submitLaporan":
       const loading = toast.loading("Mengunggah laporan");
       const databaseLaporan = database.collection("laporan");
-      var imgDimension,
+      let imgDimension,
+        imgWhat,
         imgWEBP,
         imgJPEG,
         imgBase64,
@@ -317,6 +335,11 @@ async function FetchBuatLapor({ action, ext }) {
       if (ext.picLaporan[0]) {
         // Image processing
         imgDimension = await dimensionIMG(ext.picLaporan[0]);
+        imgWhat =
+          imgDimension.width > imgDimension.height
+            ? { height: imgDimension.height % 2 === 0 ? 8 : 9 }
+            : { width: imgDimension.width % 2 === 0 ? 8 : 9 };
+
         imgWEBP = await compressIMG({
           file: ext.picLaporan[0],
           ...imgDimension,
@@ -328,8 +351,8 @@ async function FetchBuatLapor({ action, ext }) {
         });
         imgBase64 = await compressIMG({
           file: ext.picLaporan[0],
-          height: 8,
-          width: 8,
+          ...imgWhat,
+          quality: 50,
           format: "JPEG",
           output: "base64",
         });
@@ -343,8 +366,8 @@ async function FetchBuatLapor({ action, ext }) {
       // Generate details
       const dataPush = await laporNewTemplate({
         ...ext,
-        picLaporan: imgName,
-        thumbnail: imgBase64,
+        picLaporan: imgName || null,
+        thumbnail: imgBase64 || null,
       });
       const imgPush = {
         webp: { name: `${imgName}.webp`, file: imgWEBP },
@@ -355,14 +378,15 @@ async function FetchBuatLapor({ action, ext }) {
       try {
         await databaseLaporan.add(dataPush);
       } catch (err) {
-        console.log(err);
         toast.error("Kesalahan unggah laporan");
         toast.error("Unggah laporan dibatalkan", { id: loading });
         break;
       }
 
-      if (!(await uploadMultiple(imgPush))) {
-        toast.error("Kesalahan unggah gambah");
+      if (imgBase64) {
+        if (!(await uploadMultiple(imgPush))) {
+          toast.error("Kesalahan unggah gambar");
+        }
       }
 
       toast.success("Laporan berhasil diunggah", { id: loading });
@@ -379,7 +403,8 @@ async function FetchLaporanku({ action, ext }) {
   const orderBy = GlobalStateFetches().getLaporankuOrderBy();
   const hashedUID = GlobalStateSession().getUIDUser();
 
-  var laporanses,
+  let laporanses,
+    isEmpty,
     realData = {};
   const databaseLaporanku = database
     .collection("laporan")
@@ -448,7 +473,46 @@ async function FetchLaporanku({ action, ext }) {
       GlobalStateFetches().setLaporankuPayload(realData);
       break;
     case "deleteFetch":
-      console.log(ext);
+      const databaseLaporan = database.collection("laporan").doc(ext);
+      const currentLaporan = JSON.parse(
+        JSON.stringify(GlobalStateFetches().getLaporankuPayload()[ext])
+      );
+      const loading = toast.loading("Menghapus laporan");
+
+      laporanses = await databaseLaporan.get();
+      laporanses = laporanses.data();
+
+      if (laporanses.status !== "Menunggu") {
+        toast.error("Laporan sudah diproses, muat ulang daftar");
+        break;
+      }
+
+      try {
+        await databaseLaporan.delete();
+      } catch (error) {
+        toast.error("Kesalahan hapus laporan");
+        toast.error("Hapus laporan dibatalkan", { id: loading });
+        break;
+      }
+
+      if (currentLaporan.thumbnail) {
+        if (!(await deleteMultiple(currentLaporan.pic))) {
+          toast.error("Kesalahan hapus gambar");
+        }
+      }
+
+      await GlobalStateD().setResetD();
+      await GlobalStateFetches().deleteLaporanku(ext);
+      isEmpty = JSON.parse(
+        JSON.stringify(GlobalStateFetches().getLaporankuPayload())
+      );
+      isEmpty = Object.keys(isEmpty).length === 0;
+
+      if (isEmpty) {
+        GlobalStateFetches().setResetLaporanku();
+      }
+
+      toast.success("Laporan berhasil dihapus", { id: loading });
       break;
     default:
       break;
@@ -458,9 +522,17 @@ async function FetchLaporanku({ action, ext }) {
 }
 
 async function FetchDetails({ ext }) {
-  const currentDetails = JSON.parse(
+  let currentDetails = JSON.parse(
     JSON.stringify(GlobalStateFetches().getLaporankuPayload()[ext])
   );
+
+  if (!currentDetails.picURL && currentDetails.thumbnail) {
+    const url = await multiImgURL(currentDetails.pic, "laporan");
+    currentDetails.picURL = url;
+    GlobalStateFetches().addLaporankuPayloadImgURL(currentDetails.id, {
+      picURL: currentDetails.picURL,
+    });
+  }
 
   await GlobalStateD().setData(currentDetails);
   return 1;

@@ -1,4 +1,3 @@
-// NOTE: Hardcoded variable
 import React from "react";
 import { useState as GlobalState } from "@hookstate/core";
 import styled from "styled-components";

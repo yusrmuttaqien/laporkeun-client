@@ -33,7 +33,7 @@ const Title = styled.h1`
 
 export default function DetailsControl(props) {
   const state = GlobalState(DInstance);
-  const { data, loading } = state.get();
+  const { data } = state.get();
 
   const handleDelete = () => {
     const next = () => {
@@ -48,8 +48,8 @@ export default function DetailsControl(props) {
     });
   };
 
-  const handleBlur = () => {
-    state.stats.set(false);
+  const handleBlur = async () => {
+    await state.stats.set(false);
   };
 
   return (
@@ -57,7 +57,7 @@ export default function DetailsControl(props) {
       <Button className="normalizeForButton" onClick={handleBlur}>
         <Exit className="inButton" />
       </Button>
-      {!loading && (
+      {data && (
         <>
           <Title>{data?.title}</Title>
           <div className="multiOption">

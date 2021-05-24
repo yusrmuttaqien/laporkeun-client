@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "styled-components";
 import { useState as GlobalState } from "@hookstate/core";
 import { useHistory } from "react-router-dom";
@@ -34,6 +34,8 @@ const DetailsWrapper = styled.div`
 `;
 
 function Details() {
+  const [locationKeys, setLocationKeys] = useState([]);
+
   const state = GlobalState(DInstance);
   const { stats } = state.get();
 
@@ -44,14 +46,24 @@ function Details() {
   };
 
   useEffect(() => {
-    return () => {
+    return history.listen((location) => {
       if (stats) {
+        if (history.action === "PUSH") {
+          setLocationKeys([location.key]);
+        }
+
         if (history.action === "POP") {
-          GlobalStateD().setD(false);
+          if (locationKeys[1] === location.key) {
+            setLocationKeys(([_, ...keys]) => keys);
+            GlobalStateD().setResetD();
+          } else {
+            setLocationKeys((keys) => [location.key, ...keys]);
+            GlobalStateD().setResetD();
+          }
         }
       }
-    };
-  }, [history.action, stats]);
+    });
+  }, [locationKeys, history, stats]);
 
   return (
     <>
@@ -65,7 +77,8 @@ function Details() {
 }
 
 async function TriggerDetails({ id }) {
-  GlobalStateD().setLoading(true);
+  await GlobalStateD().setResetD();
+  await GlobalStateD().setLoading(true);
   FetchDetails({ ext: id });
   GlobalStateD().setD(true);
   GlobalStateD().setLoading(false);
