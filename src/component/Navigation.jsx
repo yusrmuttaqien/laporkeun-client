@@ -1,10 +1,9 @@
-// NOTE: Hardcoded variable
 import React from "react";
 import { NavLink } from "react-router-dom";
 import styled from "styled-components";
 import { useState as GlobalState } from "@hookstate/core";
 
-import { DataInstance, SDInstance } from "util/States";
+import { DataInstance } from "util/States";
 
 const NavWrapper = styled.div`
   align-self: flex-end;
@@ -41,6 +40,10 @@ const NavWrapper = styled.div`
           background-color: ${(props) => props.theme.color.whiteTransparent};
         }
 
+        &:focus {
+          background-color: ${(props) => props.theme.color.grey};
+        }
+
         &.active {
           color: ${(props) => props.theme.color.dark};
           background-color: ${(props) => props.theme.color.white};
@@ -52,7 +55,6 @@ const NavWrapper = styled.div`
 
 export default function Navigation() {
   const state = GlobalState(DataInstance);
-  const SDState = GlobalState(SDInstance);
   const { role } = state.session.get();
 
   return (
@@ -109,9 +111,6 @@ export default function Navigation() {
           <NavLink to="/pengaturan" activeClassName="active">
             pengaturan
           </NavLink>
-        </li>
-        <li>
-          <button onClick={() => SDState.stats.set(prev => !prev)}>Toggle SideDetails</button>
         </li>
       </ul>
     </NavWrapper>

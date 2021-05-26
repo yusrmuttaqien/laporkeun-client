@@ -5,7 +5,6 @@ import { useEffect } from "react";
 
 import Navbar from "component/Navbar";
 import BuatLaporan from "component/BuatLaporan";
-import SideDetails from "component/SideDetails";
 import Laporanku from "component/Laporanku";
 import LaporanPublik from "component/LaporanPublik";
 import LaporanBaru from "component/LaporanBaru";
@@ -13,20 +12,22 @@ import Tanggapanku from "component/Tanggapanku";
 import SemuaTanggapan from "component/SemuaTanggapan";
 import Petugas from "component/Petugas";
 import Pengaturan from "component/Pengaturan";
+import { Details } from "component/Details";
 import Test from "component/Test";
 import { Loading } from "util/Loading";
 import { Popup } from "util/Popup";
 import { Splash, NotFound } from "component/Splash";
 import PrivateRoute from "util/PrivateRoute";
-import { run_check_webp_feature } from "util/WebPCheck";
+import { check_webp_feature } from "util/WebPCheck";
 import { authCheck } from "util/MainFunctions";
 
-import BGWebP03 from "asset/mainBG_03.webp";
+import BGWebP from "asset/mainBG_WebP.webp";
 import BGProgressive from "asset/mainBG_Progressive.jpg";
 
 const AppWrapper = styled.div`
-  background-image: url(${run_check_webp_feature ? BGWebP03 : BGProgressive});
-  background-size: cover;
+  display: flex;
+  position: relative;
+  overflow: hidden;
 
   height: 100vh;
   min-height: 640px; // TODO: Fix for mobile devices
@@ -34,18 +35,19 @@ const AppWrapper = styled.div`
   min-width: 760px;
   max-width: 100%;
 
-  display: flex;
-  position: relative;
-  overflow: hidden;
+  background-image: url(${check_webp_feature("lossy")
+    ? BGWebP
+    : BGProgressive});
+  background-size: cover;
 `;
 
 const View = styled.div`
+  flex: 1;
+
   height: inherit;
   min-height: inherit;
   width: auto;
   margin-left: ${(props) => props.theme.value.UI.navbarDesktop};
-
-  flex: 1;
 
   transition: ${(props) => props.theme.value.transition};
   transition-property: margin;
@@ -60,7 +62,6 @@ const WrapToaster = styled.div`
   top: 0;
   left: 50%;
   z-index: 1004;
-
   height: 100px;
   width: 100px;
 
@@ -76,7 +77,6 @@ function App() {
     <AppWrapper id="AppWraper">
       <Router>
         <Navbar />
-        <SideDetails />
         <WrapToaster>
           <Toaster
             toastOptions={{
@@ -84,6 +84,7 @@ function App() {
             }}
           />
         </WrapToaster>
+        <Details />
         <Popup />
         <Loading />
         <View id="View">

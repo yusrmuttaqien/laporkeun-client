@@ -1,8 +1,9 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import styled from "styled-components";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import composeRefs from "@seznam/compose-react-refs";
+import { useState as GlobalState } from "@hookstate/core";
 
 import {
   ReportWrapper,
@@ -15,9 +16,15 @@ import {
   Action,
   TextArea,
 } from "style/Components";
-import { tipeLaporan, lokasi } from "util/Fetches";
-import { Public, NoPublic, Trashbin } from "style/Icons";
-import { SchemaLaporan } from "util/ValidationSchema";
+import { typeSelect, FetchBuatLapor } from "util/Fetches";
+import { compressIMG } from "util/Helper";
+import { Public, NoPublic, Trashbin, Warning } from "style/Icons";
+import {
+  SchemaLaporan,
+  SUPPORTED_FORMATS,
+  FILE_SIZE,
+} from "util/ValidationSchema";
+import { LocationInstance } from "util/States";
 
 const Preview = styled.div`
   display: flex;
@@ -36,8 +43,13 @@ const Preview = styled.div`
   transition-property: opacity;
 
   img {
-    width: 95%;
-    margin-bottom: 1em;
+    width: 90%;
+    max-height: 295px;
+    object-fit: contain;
+    margin-bottom: 0.5em;
+  }
+
+  .text {
   }
 
   &:hover,
@@ -47,10 +59,17 @@ const Preview = styled.div`
 `;
 
 export default function BuatLaporan(props) {
+  const state = GlobalState(LocationInstance);
+  const provSelect = state.locationProv.get();
+  const kotaSelect = state.locationKota.get();
+
   const [isPublic, setIsPublic] = useState(false);
-  const [isPic, setIsPic] = useState();
+  const [isPic, setIsPic] = useState({ err: false });
   const [type, setType] = useState({ id: 0 });
-  const [location, setLocation] = useState({
+  const [locationProv, setLocationProv] = useState({
+    id: 0,
+  });
+  const [locationKota, setLocationKota] = useState({
     id: 0,
   });
 
@@ -69,8 +88,13 @@ export default function BuatLaporan(props) {
       case "type":
         setType({ id: e.id });
         break;
-      case "location":
-        setLocation({ id: e.id });
+      case "locationProv":
+        setLocationProv({ id: e.id_index });
+        setLocationKota({ id: 0 });
+        FetchBuatLapor({ action: "kotaFetch", ext: { id: e.id_value } });
+        break;
+      case "locationKota":
+        setLocationKota({ id: e.id_index });
         break;
       default:
         break;
@@ -78,28 +102,68 @@ export default function BuatLaporan(props) {
   };
 
   const checkSelect = () => {
-    if (type.id === 0 && location.id === 0) {
-      setType({ message: "tipe wajib diisi" });
-      setLocation({ message: "lokasi wajib diisi" });
+    if (type.id === 0 && locationProv.id === 0) {
+      setType({ id: 0, message: "tipe wajib diisi" });
+      setLocationProv({ id: 0, message: "provinsi wajib diisi" });
+      return 0;
+    }
+
+    if (type.id === 0 && locationKota.id === 0) {
+      setType({ id: 0, message: "tipe wajib diisi" });
+      setLocationKota({ id: 0, message: "kota wajib diisi" });
       return 0;
     }
 
     if (type.id === 0) {
-      setType({ message: "tipe wajib diisi" });
+      setType({ id: 0, message: "tipe wajib diisi" });
       return 0;
     }
 
-    if (location.id === 0) {
-      setLocation({ message: "lokasi wajib diisi" });
+    if (locationProv.id === 0) {
+      setLocationProv({ id: 0, message: "provinsi wajib diisi" });
+      return 0;
+    }
+
+    if (locationKota.id === 0) {
+      setLocationKota({ id: 0, message: "kota wajib diisi" });
       return 0;
     }
 
     return 1;
   };
 
-  const previewPic = (e) => {
+  const previewPic = async (e) => {
+    const isValid = SUPPORTED_FORMATS.includes(e.target.files[0].type);
+    const isHuge = e.target.files[0].size > FILE_SIZE;
+
+    if (!isValid) {
+      await setIsPic((prev) => ({
+        err: true,
+        name: `${e.target.files[0].name}, tidak didukung`,
+      }));
+      e.target.value = "";
+      return 0;
+    }
+
+    if (isHuge) {
+      await setIsPic((prev) => ({
+        err: true,
+        name: `${e.target.files[0].name}, terlalu besar`,
+      }));
+      e.target.value = "";
+      return 0;
+    }
+
+    const preview = await compressIMG({
+      file: e.target.files[0],
+      height: 500,
+      format: "JPEG",
+      output: "base64",
+    });
+
     setIsPic({
-      file: URL.createObjectURL(e.target.files[0]),
+      err: false,
+      file: preview,
       name: e.target.files[0].name,
     });
   };
@@ -117,12 +181,33 @@ export default function BuatLaporan(props) {
     }
   };
 
+  const cleanForm = () => {
+    reset();
+    setIsPic();
+    setType({ id: 0 });
+    setLocationProv({ id: 0 });
+    setLocationKota({ id: 0 });
+  };
+
   const handleLaporan = (laporan) => {
     if (!checkSelect()) return 0;
 
-    console.log({ ...laporan, type, location, isPublic });
-    // reset()
+    FetchBuatLapor({
+      action: "submitLaporan",
+      ext: {
+        ...laporan,
+        type,
+        locationProv,
+        locationKota,
+        isPublic,
+        formReset: cleanForm,
+      },
+    });
   };
+
+  useEffect(() => {
+    FetchBuatLapor({ action: "effectFetch" });
+  }, []);
 
   return (
     <ReportWrapper>
@@ -132,13 +217,13 @@ export default function BuatLaporan(props) {
           <div className="multiOption">
             <Button>
               <Label className="forButton" htmlFor="picLaporan">
-                {isPic ? "Ubah gambar" : "Tambah gambar"}
+                {isPic?.file ? "Ubah gambar" : "Tambah gambar"}
               </Label>
               <Input
                 type="file"
                 name="picLaporan"
                 id="picLaporan"
-                accept="image/x-png,image/gif,image/jpeg"
+                accept="image/png,image/gif,image/jpeg,image/jpg,image/webp;capture=camera"
                 form="lapor"
                 onChange={previewPic}
                 ref={composeRefs(register, inputFile)}
@@ -162,27 +247,44 @@ export default function BuatLaporan(props) {
               </Label>
               <Input type="text" name="sLaporan" id="sLaporan" ref={register} />
             </section>
-            <section>
+            <section className="forBuatLaporType">
               <Label>{type.message || "tipe laporan"}</Label>
               <CustomSelect
-                options={tipeLaporan}
+                options={typeSelect}
                 classNamePrefix={"Select"}
-                defaultValue={tipeLaporan[0]}
+                defaultValue={typeSelect[0]}
                 className="forBuatLapor"
-                value={tipeLaporan[type]}
+                value={typeSelect[type.id]}
                 onChange={(e) => switchSelect("type", e)}
               />
             </section>
             <section>
-              <Label>{location.message || "lokasi"}</Label>
-              <CustomSelect
-                options={lokasi}
-                classNamePrefix={"Select"}
-                defaultValue={lokasi[0]}
-                className="forBuatLapor"
-                value={lokasi[location]}
-                onChange={(e) => switchSelect("location", e)}
-              />
+              <Label>
+                {locationProv.message || locationKota.message || "lokasi"}
+              </Label>
+              <div className="forBuatLaporNest">
+                <section>
+                  <CustomSelect
+                    options={provSelect}
+                    classNamePrefix={"Select"}
+                    defaultValue={provSelect[0]}
+                    className="forBuatLapor"
+                    value={provSelect[locationProv.id]}
+                    onChange={(e) => switchSelect("locationProv", e)}
+                  />
+                </section>
+                <section>
+                  <CustomSelect
+                    options={kotaSelect}
+                    classNamePrefix={"Select"}
+                    defaultValue={kotaSelect[0]}
+                    className="forBuatLapor"
+                    value={kotaSelect[locationKota.id]}
+                    isDisabled={locationProv.id === 0}
+                    onChange={(e) => switchSelect("locationKota", e)}
+                  />
+                </section>
+              </div>
             </section>
             <section className="forBuatLaporVis">
               <Action onClick={switchVis}>
@@ -210,18 +312,26 @@ export default function BuatLaporan(props) {
             <section>
               <Label>{errors.picLaporan?.message || "pratinjau gambar"}</Label>
               <Preview>
-                {isPic && (
-                  <Button
-                    className="forBuatLaporPreview"
-                    onClick={deletePic}
-                    type="button"
-                    title="Hapus gambar"
-                  >
-                    <Trashbin className="inButton" />
-                  </Button>
+                {isPic?.file && (
+                  <>
+                    <Button
+                      className="normalizeForButton forBuatLaporPreview"
+                      onClick={deletePic}
+                      type="button"
+                      title="Hapus gambar"
+                    >
+                      <Trashbin className="inButton" />
+                    </Button>
+                    <img
+                      src={isPic?.file}
+                      alt="imgPreview"
+                    />
+                  </>
                 )}
-                {isPic && <img src={isPic.file} />}
-                {isPic ? isPic.name : "Klik tambah gambar diatas"}
+                {isPic?.err && <Warning className="inAction" />}
+                <div className="text">
+                  {isPic?.name ? isPic?.name : "Klik tambah gambar diatas"}
+                </div>
               </Preview>
             </section>
           </div>

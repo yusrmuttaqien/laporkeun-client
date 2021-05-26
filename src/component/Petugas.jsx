@@ -13,7 +13,7 @@ import {
 } from "style/Components";
 import { FetchesInstance } from "util/States";
 import { Reload, Lock, UnLock } from "style/Icons";
-import { options, FetchPetugas } from "util/Fetches";
+import { sortSelect, FetchPetugas } from "util/Fetches";
 import { TriggerPopup } from "util/Popup";
 import PetugasRegistrasi from "component/PetugasRegistrasi";
 
@@ -68,10 +68,10 @@ export default function Petugas(props) {
             {!isRegis && (
               <>
                 <CustomSelect
-                  options={options}
+                  options={sortSelect}
                   classNamePrefix={"Select"}
-                  defaultValue={options[orderBy]}
-                  value={options[orderBy]}
+                  defaultValue={sortSelect[orderBy]}
+                  value={sortSelect[orderBy]}
                   onChange={optionChange}
                   isDisabled={payload ? false : true}
                 />
@@ -99,7 +99,7 @@ export default function Petugas(props) {
         {isRegis ? (
           <PetugasRegistrasi />
         ) : payload ? (
-          <ReportBody className="forPetugas">
+          <ReportBody className="forDataList">
             <DataList className="forHeading">
               <section>Nama</section>
               <section>Tanggal akun</section>
@@ -110,16 +110,18 @@ export default function Petugas(props) {
               <DataList
                 className="forBody forData"
                 key={index}
-                suspended={data[1].suspended}
+                stats={data[1].suspended ? "Suspended" : "notSuspended"}
               >
                 <section>{data[1].name}</section>
-                <section>{data[1].acc_date.split("T")[0]}</section>
+                <section>{data[1].acc_date?.split("T")[0]}</section>
                 <section>{data[1].telp || "Tidak tersedia"}</section>
                 <Action
                   title={data[1].suspended ? "Buka petugas" : "Tutup petugas"}
-                  onClick={() =>
-                    closeFetch([data[1].name, data[1].nik, data[1].suspended])
-                  }
+                  onClick={closeFetch.bind(this, [
+                    data[1].name,
+                    data[1].nik,
+                    data[1].suspended,
+                  ])}
                 >
                   {data[1].suspended ? <UnLock /> : <Lock />}
                 </Action>
@@ -127,7 +129,7 @@ export default function Petugas(props) {
             ))}
           </ReportBody>
         ) : (
-          <Notify message={isLoading ? "Memuat" : "Tidak ada petugas"} />
+          <Notify message="Tidak ada petugas" />
         )}
       </Report>
     </ReportWrapper>

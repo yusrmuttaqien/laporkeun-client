@@ -13,7 +13,7 @@ import {
   ReportBody,
   Button,
 } from "style/Components";
-import { SDInstance } from "util/States";
+import { DInstance } from "util/States";
 
 const options = [
     { value: "Date DESC", label: "Terbaru" },
@@ -171,7 +171,7 @@ export default function SemuaTanggapan(props) {
   const [page, setPage] = useState(1);
   const [sort, setSort] = useState("Date DESC");
 
-  const state = GlobalState(SDInstance);
+  const state = GlobalState(DInstance);
 
   const { hasMore, semuaTanggapan } = useSemuaTanggapan(page, sort);
 

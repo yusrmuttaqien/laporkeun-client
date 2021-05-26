@@ -1,7 +1,12 @@
 import * as yup from "yup";
 
 const FILE_SIZE = 1000000;
-const SUPPORTED_FORMATS = ["image/jpg", "image/jpeg", "image/gif", "image/png"];
+const SUPPORTED_FORMATS = [
+  "image/jpg",
+  "image/jpeg",
+  "image/png",
+  "image/webp",
+];
 
 // Schema .test(), return true for pass, return false for fail
 
@@ -178,4 +183,6 @@ export {
   SchemaDaftarPetugas,
   SchemaSetting,
   SchemaPopup,
+  SUPPORTED_FORMATS,
+  FILE_SIZE,
 };

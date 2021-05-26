@@ -6,7 +6,7 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 
 import { GlobalStatePopup, PPInstance, PopupTemplate } from "util/States";
-import { Button, Label, Input, Warning, Form } from "style/Components";
+import { Button, Label, Input, Warning, Form, Overlay } from "style/Components";
 import { SchemaPopup } from "util/ValidationSchema";
 
 const PopupWrapper = styled.div`
@@ -48,16 +48,6 @@ const Action = styled.div`
   width: 100%;
   height: 55px;
   padding: 0 1em;
-`;
-
-const Overlay = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-
-  z-index: 1002;
 `;
 
 var callbackYes, callbackNo, addParam;
@@ -114,7 +104,7 @@ function Popup() {
 
   return stats ? (
     <>
-      <Overlay onClick={handleBlur} />
+      <Overlay onClick={handleBlur} index="1002" />
       <PopupWrapper id="ydhm-popup" tabIndex="0">
         <Content>
           {message}

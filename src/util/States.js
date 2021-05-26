@@ -1,16 +1,17 @@
-import { createState } from "@hookstate/core";
+import { createState, none } from "@hookstate/core";
 import { Persistence } from "@hookstate/persistence";
 
-// NOTE: Template
+// Template
 const SessionTemplate = {
   isLogged: false,
   role: null,
   name: null,
-  NIK: null,
+  nik: null,
   pic: null,
   picURL: null,
   telp: null,
   uid: null,
+  hashedUsrUID: null,
 };
 
 const PopupTemplate = {
@@ -22,13 +23,9 @@ const PopupTemplate = {
   txtLabel: null,
 };
 
-const SDTemplate = {
-  stats: false,
-  payload: { id: null, nik: null, petugas: null },
-  newResponseByIDReport: null,
-};
+const DTemplate = { stats: false, data: null, loading: false };
 
-// NOTE: Helper
+// Helper
 const PPWrapper = (s) => ({
   setMsg: (msg) => s.message.set(msg),
   setForm: (form) => s.form.set(form),
@@ -41,21 +38,32 @@ const PPWrapper = (s) => ({
 
 const DataWrapper = (s) => ({
   setSession: (sesObj) => s.session.set(sesObj),
-  setMasuk: () => s.forms.set("Masuk"),
   getIsLogged: () => s.session.isLogged.get(),
   getUID: () => s.session.uid.get(),
   getPic: () => s.session.pic.get(),
   getName: () => s.session.name.get(),
-  getNIK: () => s.session.NIK.get(),
+  getNIK: () => s.session.nik.get(),
+  getUIDUser: () => s.session.hashedUsrUID.get(),
+  getDate: () => s.session.acc_date.get(),
 });
 
-const SDWrapper = (s) => ({
-  setSD: (SDObj) => s.set(SDObj),
+const DWrapper = (s) => ({
+  setD: (stats) => s.stats.set(stats),
+  setResetD: () => s.merge(DTemplate),
+  setLoading: (loading) => s.loading.set(loading),
+  setData: (data) => s.data.set(data),
+  getD: () => s.stats.get(),
 });
 
 const UIWrapper = (s) => ({
   setLoading: (loading) => s.loading.stats.set(loading),
+  getLoading: () => s.loading.stats.get(),
   setLoadingMsg: (msg) => s.loading.message.set(msg),
+});
+
+const LookupWrapper = (s) => ({
+  getLookup: () => s.get(),
+  setLookup: (lookup) => s.set(lookup),
 });
 
 const FetchesWrapper = (s) => ({
@@ -70,28 +78,50 @@ const FetchesWrapper = (s) => ({
   setPetugasPayload: (payload) => s.petugas.payload.set(payload),
   setPetugasLastFetch: (lastfetch) => s.petugas.lastFetch.set(lastfetch),
   addPetugasPayload: (payload) => s.petugas.payload.merge(payload),
+
+  // Laporanku
+  getLaporankuPayload: () => s.laporanku.payload.get(),
+  getLaporankuLastFetch: () => s.laporanku.lastFetch.get(),
+  getLaporankuOrderBy: () => s.laporanku.orderBy.get(),
+  setLaporankuOrderBy: (order) => s.laporanku.orderBy.set(order),
+  setLaporankuPayload: (payload) => s.laporanku.payload.set(payload),
+  setLaporankuLastFetch: (lastfetch) => s.laporanku.lastFetch.set(lastfetch),
+  addLaporankuPayload: (payload) => s.laporanku.payload.merge(payload),
+  addLaporankuPayloadImgURL: (id, url) => s.laporanku.payload[id].merge(url),
+  deleteLaporanku: (id) => s.laporanku.payload[id].set(none),
+  setResetLaporanku: () =>
+    s.laporanku.set({ orderBy: 0, payload: null, lastFetch: 0 }),
 });
 
-// NOTE: State
+const LocationWrapper = (s) => ({
+  // Province
+  getLocationProv: () => s.locationProv.get(),
+  setLocationProvSelect: (prov) => s.locationProv.merge(prov),
+
+  // City
+  getLocationKota: () => s.locationKota.get(),
+  getLocationKotaPersist: () => s.locationKotaPersist.get(),
+  setLocationKotaPersist: (kota) => s.locationKotaPersist.merge(kota),
+  setLocationKotaSelectRest: (kota) => s.locationKota.merge(kota),
+  setLocationKotaSelectZero: (kota) => s.locationKota.set(kota),
+});
+
+// State
 const DataState = {
   session: {
     isLogged: false,
     role: null,
     name: null,
-    NIK: null,
+    nik: null,
     pic: null,
     picURL: null,
     telp: null,
     uid: null,
+    hashedUsrUID: null,
   },
-  forms: "Masuk",
 };
 
-const SideDetailState = {
-  stats: false,
-  payload: { id: null, nik: null, petugas: null },
-  newResponseByIDReport: null,
-};
+const DetailsState = { stats: false, data: null, loading: false };
 
 const PopupState = {
   stats: false,
@@ -106,6 +136,11 @@ const UIState = {
   loading: { stats: true, message: "Memuat" },
 };
 
+const LookupState = {
+  deggoLsi: false,
+  elor: null,
+};
+
 const FetchesData = {
   isLoading: false,
   petugas: {
@@ -113,39 +148,64 @@ const FetchesData = {
     payload: null,
     lastFetch: 0,
   },
+  laporanku: {
+    orderBy: 0,
+    payload: null,
+    lastFetch: 0,
+  },
 };
 
-// NOTE: Initialize state
+const LocationData = {
+  locationProv: [
+    { value: "Provinsi...", label: "Provinsi...", isDisabled: true, id: 0 },
+  ],
+
+  locationKotaPersist: null,
+
+  locationKota: [
+    { value: "Kota...", label: "Kota...", isDisabled: true, id: 0 },
+  ],
+};
+
+// Initialize state
 const DataInstance = createState(DataState);
-const SDInstance = createState(SideDetailState);
+const DInstance = createState(DetailsState);
 const PPInstance = createState(PopupState);
 const UIInstance = createState(UIState);
+const LookupInstance = createState(LookupState);
 const FetchesInstance = createState(FetchesData);
+const LocationInstance = createState(LocationData);
 
-// NOTE: Set persistance
-DataInstance.attach(Persistence("main-session"));
+// Set persistance
+LookupInstance.attach(Persistence("noisses"));
 
-// NOTE: Non-component state import
+// Non-component state import
 const GlobalStatePopup = () => PPWrapper(PPInstance);
 const GlobalStateSession = () => DataWrapper(DataInstance);
-const GlobalStateSD = () => SDWrapper(SDInstance);
+const GlobalStateD = () => DWrapper(DInstance);
 const GlobalStateUI = () => UIWrapper(UIInstance);
+const GlobalStateLookup = () => LookupWrapper(LookupInstance);
 const GlobalStateFetches = () => FetchesWrapper(FetchesInstance);
+const GlobalStateLocation = () => LocationWrapper(LocationInstance);
 
-// NOTE: Component state import
+// Component state import
 
 export {
   SessionTemplate,
   PopupTemplate,
-  SDTemplate,
+  DTemplate,
   DataInstance,
-  SDInstance,
+  DInstance,
   PPInstance,
   UIInstance,
+  LookupInstance,
   FetchesInstance,
+  LocationInstance,
   GlobalStatePopup,
   GlobalStateSession,
-  GlobalStateSD,
+  GlobalStateD,
   GlobalStateUI,
+  GlobalStateLookup,
   GlobalStateFetches,
+  GlobalStateLocation,
 };

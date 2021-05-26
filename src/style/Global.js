@@ -9,8 +9,10 @@ const Variables = {
     whiteTransparent: "rgba(227, 227, 227, 0.85)",
     grey: "#868686",
     purple: "#852366",
-    waiting: "#e63b3b",
-    done: "#3be691",
+    reject: "#e63b3b",
+    done: "#58e63b",
+    wait: "#e6e63b",
+    process: "#e6913b",
   },
   value: {
     blur: "15px",
@@ -24,7 +26,7 @@ const Variables = {
     UI: {
       navbarDesktop: "300px",
       navbarDesktopSmall: "200px",
-      sideDetails: "400px",
+      Details: "700px",
     },
     transition: ".3s ease-in-out",
   },
@@ -79,7 +81,4 @@ const GlobalStyle = createGlobalStyle`${css`
   }
 `}`;
 
-export {
-  GlobalStyle,
-  Variables,
-};
+export { GlobalStyle, Variables };

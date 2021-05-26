@@ -2,11 +2,15 @@ import React from "react";
 import { Redirect, Route } from "react-router-dom";
 import { useState as GlobalState } from "@hookstate/core";
 
-import { DataInstance } from "util/States";
+import { LookupInstance, UIInstance } from "util/States";
 
 export default function PrivateRoute({ comp: Component, ...rest }) {
-  const state = GlobalState(DataInstance);
-  const { isLogged, role } = state.session.get();
+  const state = GlobalState(LookupInstance);
+  const stateUI = GlobalState(UIInstance);
+  const {
+    loading: { stats },
+  } = stateUI.get();
+  const { deggoLsi, elor } = state.get();
 
   let destiny = rest.path;
 
@@ -48,8 +52,8 @@ export default function PrivateRoute({ comp: Component, ...rest }) {
     <Route
       {...rest}
       render={(props) => {
-        return isLogged && Checker(role, destiny) ? (
-          <Component {...props} name={destiny.substring(1)}/>
+        return deggoLsi && Checker(elor, destiny) ? (
+          !stats && <Component {...props} name={destiny.substring(1)} />
         ) : (
           <Redirect to="/" />
         );

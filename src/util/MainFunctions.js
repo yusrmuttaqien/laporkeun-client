@@ -1,5 +1,4 @@
-import md5 from "md5";
-import toast from "react-hot-toast";
+import { toast } from "react-hot-toast";
 
 import Firebase, {
   database,
@@ -8,19 +7,22 @@ import Firebase, {
   authSecondary,
 } from "util/Firebase";
 import { TriggerLoading } from "util/Loading";
+import { md5Compare } from "util/Helper";
 import {
   GlobalStateSession,
-  GlobalStateSD,
-  SDTemplate,
+  GlobalStateD,
+  GlobalStateLookup,
+  GlobalStateUI,
+  DTemplate,
   SessionTemplate,
 } from "util/States";
 
-// NOTE: Helper Function
+// Helper Function
 function userNewTemplate(cred) {
-  const { NIK, name } = cred;
+  const { nik, name } = cred;
 
   return {
-    nik: NIK,
+    nik,
     pic: null,
     role: "pengguna",
     telp: null,
@@ -44,7 +46,7 @@ function petugasNewTemplate(cred) {
 }
 
 async function checkIsRegistered(toCompare) {
-  var isExist = {};
+  let isExist = {};
   await database
     .collection("registered")
     .where("string", "==", toCompare)
@@ -90,22 +92,6 @@ function checkWithSession(data, sessionData) {
   return toChange;
 }
 
-async function md5Compare(data, mode = "registered") {
-  var hash;
-
-  if (mode === "registered") {
-    hash = data + process.env.REACT_APP_HOT_KEY;
-    hash = await md5(hash);
-  }
-
-  if (mode === "users") {
-    hash = data + process.env.REACT_APP_SIGNATURE;
-    hash = await md5(hash);
-  }
-
-  return hash;
-}
-
 async function reAuthenticate(key) {
   const currFakeEmailPrefix = GlobalStateSession().getName();
   const credential = Firebase.auth.EmailAuthProvider.credential(
@@ -116,21 +102,19 @@ async function reAuthenticate(key) {
   return await auth.currentUser.reauthenticateWithCredential(credential);
 }
 
-// NOTE: Main Function
+// Main Function
 async function authCheck() {
-  TriggerLoading({ stats: true, message: "Memeriksa state" });
-  const isLogged = GlobalStateSession().getIsLogged();
+  TriggerLoading({ stats: true, message: "Memuat akun" });
 
   await auth.onAuthStateChanged(async (user) => {
     if (user) {
-      if (isLogged) {
-        TriggerLoading({ stats: false });
-      } else {
-        await fetchUserData(user.uid);
+      await fetchUserData(user.uid);
+      TriggerLoading({ stats: false });
+    } else {
+      await cleaning();
+      if (GlobalStateUI().getLoading()) {
         TriggerLoading({ stats: false });
       }
-    } else {
-      TriggerLoading({ stats: false });
     }
   });
 }
@@ -138,7 +122,8 @@ async function authCheck() {
 async function fetchUserData(uid) {
   const userId = await md5Compare(uid, "users");
   const storageProfile = storage.ref("/profile");
-  var details = {};
+  const getLookup = JSON.parse(JSON.stringify(GlobalStateLookup().getLookup()));
+  let details = {};
 
   await database
     .collection("users")
@@ -147,11 +132,25 @@ async function fetchUserData(uid) {
     .then((doc) => {
       details = doc.data();
       details.isLogged = true;
-      details.NIK = details.nik;
       details.uid = uid;
+      details.hashedUsrUID = userId;
     })
     //  TODO: Handle this, using linked toast perhaps?
     .catch((err) => console.log(err));
+
+  // Checking session with lookup state
+  if (getLookup.deggoLsi) {
+    if (getLookup.elor !== details.role) {
+      await logout();
+      toast.error("Data sesi tidak valid");
+      return 0;
+    }
+  } else {
+    GlobalStateLookup().setLookup({
+      deggoLsi: true,
+      elor: details.role,
+    });
+  }
 
   if (details.suspended) {
     await logout();
@@ -167,10 +166,10 @@ async function fetchUserData(uid) {
 }
 
 async function regisPengguna(cred) {
-  const { name, NIK, kataSandi } = cred;
-  const usrCred = userNewTemplate({ NIK, name });
-  const toCompare = await md5Compare(NIK);
-  var userId,
+  const { name, nik, kataSandi } = cred;
+  const usrCred = userNewTemplate({ nik, name });
+  const toCompare = await md5Compare(nik);
+  let userId,
     fakeEmail = name + "@laporkeun.com";
   fakeEmail = fakeEmail.toLowerCase();
 
@@ -205,7 +204,7 @@ async function regisPengguna(cred) {
 
 async function regisPetugas(cred) {
   const { name, telp, kataSandi } = cred;
-  var userId,
+  let userId,
     usrCred,
     fakeEmail = name + "@laporkeun.com";
   fakeEmail = fakeEmail.toLowerCase();
@@ -243,11 +242,11 @@ async function updateProfile(update) {
   }
 
   const currUID = GlobalStateSession().getUID();
-  const hashedCurrUID = await md5Compare(currUID, "users");
+  const hashedCurrUID = GlobalStateSession().getUIDUser();
   const currPic = GlobalStateSession().getPic();
   const storageProfile = storage.ref("/profile");
   const databaseProfile = database.collection("users");
-  var passChange,
+  let passChange,
     emailChange,
     dataChange = await checkWithSession(data, sessionData);
 
@@ -277,7 +276,7 @@ async function updateProfile(update) {
     }
 
     // Set new name
-    var newName = `${hashedCurrUID}.${dataChange.pic.type.split("/")[1]}`;
+    let newName = `${hashedCurrUID}.${dataChange.pic.type.split("/")[1]}`;
 
     // Upload new image
     await storageProfile
@@ -338,10 +337,9 @@ async function login(cred) {
 }
 
 async function deleteAccount(key) {
-  const currUID = GlobalStateSession().getUID();
   const currPic = GlobalStateSession().getPic();
   const currNIK = GlobalStateSession().getNIK();
-  const hashedCurrUID = await md5Compare(currUID, "users");
+  const hashedCurrUID = GlobalStateSession().getUIDUser();
   const toCompare = await md5Compare(currNIK);
   const storageProfile = storage.ref("/profile");
   const databaseProfile = database.collection("users");
@@ -402,11 +400,19 @@ async function deleteAccount(key) {
   return Promise.resolve("Akun berhasil dihapus");
 }
 
+async function cleaning() {
+  await GlobalStateSession().setSession(SessionTemplate);
+  await GlobalStateD().setResetD(DTemplate);
+  GlobalStateLookup().setLookup({
+    deggoLsi: false,
+    elor: null,
+  });
+  return 1;
+}
+
 async function logout() {
   await auth.signOut();
-  await GlobalStateSession().setSession(SessionTemplate);
-  await GlobalStateSD().setSD(SDTemplate);
-  await GlobalStateSession().setMasuk();
+  await cleaning();
   return 1;
 }
 

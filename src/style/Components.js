@@ -169,7 +169,7 @@ const ReportBody = styled.div`
     justify-content: center;
   }
 
-  &.forPetugas {
+  &.forDataList {
     padding: 0 0.5em;
   }
 
@@ -194,13 +194,25 @@ const ReportBody = styled.div`
           margin-left: 0.5em;
         }
 
+        &.forBuatLaporType {
+          &:nth-child(2) {
+            flex: unset;
+
+            width: 23%;
+          }
+        }
+
         &.forBuatLaporVis {
           flex: unset;
           align-items: center;
           justify-content: flex-end;
 
-          width: 70px;
-          margin-bottom: 8px;
+          width: 4em;
+        }
+
+        .forBuatLaporNest {
+          display: inherit;
+          flex-direction: row;
         }
       }
     }
@@ -235,6 +247,14 @@ const Button = styled.button`
     color: ${(props) => props.theme.color.white};
     background-color: ${(props) => props.theme.color.dark};
     cursor: pointer;
+    
+    svg {
+      fill: ${(props) => props.theme.color.white};
+    }
+  }
+
+  &:focus {
+    background-color: ${(props) => props.theme.color.grey};
   }
 
   &.forPopup {
@@ -253,13 +273,15 @@ const Button = styled.button`
     margin: 0.5em 0;
   }
 
-  &.forBuatLaporPreview {
+  &.normalizeForButton {
     display: flex;
+  }
 
+  &.forBuatLaporPreview {
     position: absolute;
     padding: 0.3em 0.4em;
-    top: .5em;
-    right: .5em;
+    top: 0.5em;
+    right: 0.5em;
   }
 `;
 
@@ -293,6 +315,10 @@ const CustomSelect = styled(Select)`
       .Select__single-value {
         color: ${(props) => props.theme.color.grey};
       }
+
+      .Select__input {
+        color: ${(props) => props.theme.color.white};
+      }
     }
 
     &:hover {
@@ -315,11 +341,7 @@ const CustomSelect = styled(Select)`
     }
 
     &.Select__option--is-focused {
-      background-color: transparent;
-
-      &:hover {
-        background-color: ${(props) => props.theme.color.grey};
-      }
+      background-color: ${(props) => props.theme.color.grey};
     }
   }
 
@@ -432,10 +454,17 @@ const DataList = styled.div`
 
         content: "";
         background-color: ${(props) => {
-          if (props.stats === "Diterima" || !props.suspended) {
-            return props.theme.color.done;
-          } else {
-            return props.theme.color.waiting;
+          switch (props.stats) {
+            case "Diterima":
+            case "notSuspended":
+              return props.theme.color.done;
+            case "Ditolak":
+            case "Suspended":
+              return props.theme.color.reject;
+            case "Menunggu":
+              return props.theme.color.wait;
+            default:
+              return props.theme.color.process;
           }
         }};
       }
@@ -455,7 +484,20 @@ const Notify = styled.div`
 
     content: "${(props) => props.message}";
     transform: translate(-50%, -50%);
+    text-align: center;
   }
+`;
+
+const Overlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+
+  background-color: ${(props) => props.theme.color.darkTransparent};
+  z-index: ${(props) => props.index};
+  opacity: 0.5;
 `;
 
 export {
@@ -472,4 +514,5 @@ export {
   CustomSelect,
   DataList,
   Notify,
+  Overlay,
 };
