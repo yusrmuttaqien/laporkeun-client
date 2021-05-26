@@ -23,6 +23,25 @@ const PopupTemplate = {
   txtLabel: null,
 };
 
+const FetchesTemplate = {
+  isLoading: false,
+  petugas: {
+    orderBy: 0,
+    payload: null,
+    lastFetch: 0,
+  },
+  laporanku: {
+    orderBy: 0,
+    payload: null,
+    lastFetch: 0,
+  },
+  laporanPublik: {
+    orderBy: 0,
+    payload: null,
+    lastFetch: 0,
+  },
+};
+
 const DTemplate = { stats: false, data: null, loading: false };
 
 // Helper
@@ -38,6 +57,7 @@ const PPWrapper = (s) => ({
 
 const DataWrapper = (s) => ({
   setSession: (sesObj) => s.session.set(sesObj),
+  setResetSession: () => s.session.set(SessionTemplate),
   getIsLogged: () => s.session.isLogged.get(),
   getUID: () => s.session.uid.get(),
   getPic: () => s.session.pic.get(),
@@ -53,6 +73,7 @@ const DWrapper = (s) => ({
   setLoading: (loading) => s.loading.set(loading),
   setData: (data) => s.data.set(data),
   getD: () => s.stats.get(),
+  getData: () => s.data.get(),
 });
 
 const UIWrapper = (s) => ({
@@ -69,6 +90,7 @@ const LookupWrapper = (s) => ({
 const FetchesWrapper = (s) => ({
   // Global
   setLoading: (loading) => s.isLoading.set(loading),
+  setResetAll: () => s.set(FetchesTemplate),
 
   // Petugas
   getPetugasPayload: () => s.petugas.payload.get(),
@@ -91,6 +113,21 @@ const FetchesWrapper = (s) => ({
   deleteLaporanku: (id) => s.laporanku.payload[id].set(none),
   setResetLaporanku: () =>
     s.laporanku.set({ orderBy: 0, payload: null, lastFetch: 0 }),
+
+  // LaporanPublik
+  getLaporanPublikPayload: () => s.laporanPublik.payload.get(),
+  getLaporanPublikLastFetch: () => s.laporanPublik.lastFetch.get(),
+  getLaporanPublikOrderBy: () => s.laporanPublik.orderBy.get(),
+  setLaporanPublikOrderBy: (order) => s.laporanPublik.orderBy.set(order),
+  setLaporanPublikPayload: (payload) => s.laporanPublik.payload.set(payload),
+  setLaporanPublikLastFetch: (lastfetch) =>
+    s.laporanPublik.lastFetch.set(lastfetch),
+  addLaporanPublikPayload: (payload) => s.laporanPublik.payload.merge(payload),
+  addLaporanPublikPayloadImgURL: (id, url) =>
+    s.laporanPublik.payload[id].merge(url),
+  deleteLaporanPublik: (id) => s.laporanPublik.payload[id].set(none),
+  setResetLaporanPublik: () =>
+    s.laporanPublik.set({ orderBy: 0, payload: null, lastFetch: 0 }),
 });
 
 const LocationWrapper = (s) => ({
@@ -149,6 +186,11 @@ const FetchesData = {
     lastFetch: 0,
   },
   laporanku: {
+    orderBy: 0,
+    payload: null,
+    lastFetch: 0,
+  },
+  laporanPublik: {
     orderBy: 0,
     payload: null,
     lastFetch: 0,

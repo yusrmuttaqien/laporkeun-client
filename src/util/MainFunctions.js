@@ -12,9 +12,8 @@ import {
   GlobalStateSession,
   GlobalStateD,
   GlobalStateLookup,
+  GlobalStateFetches,
   GlobalStateUI,
-  DTemplate,
-  SessionTemplate,
 } from "util/States";
 
 // Helper Function
@@ -136,7 +135,10 @@ async function fetchUserData(uid) {
       details.hashedUsrUID = userId;
     })
     //  TODO: Handle this, using linked toast perhaps?
-    .catch((err) => console.log(err));
+    .catch((err) => {
+      console.log(err);
+      return 0;
+    });
 
   // Checking session with lookup state
   if (getLookup.deggoLsi) {
@@ -166,7 +168,7 @@ async function fetchUserData(uid) {
 }
 
 async function regisPengguna(cred) {
-  const { name, nik, kataSandi } = cred;
+  const { name, NIK: nik, kataSandi } = cred;
   const usrCred = userNewTemplate({ nik, name });
   const toCompare = await md5Compare(nik);
   let userId,
@@ -189,7 +191,7 @@ async function regisPengguna(cred) {
     );
     userId = await md5Compare(UserDetails.user.uid, "users");
   } catch (err) {
-    return Promise.reject(`Firebase err: ${err.code}`);
+    return Promise.reject(`Firebase err: ${err.code} 1`);
   }
 
   //   Create account details & registered
@@ -198,7 +200,7 @@ async function regisPengguna(cred) {
     await database.collection("registered").add({ string: toCompare });
     return Promise.resolve(`Akun ${name} berhasil dibuat`);
   } catch (err) {
-    return Promise.reject(`Firebase err: ${err.code}`);
+    return Promise.reject(`Firebase err: ${err.code} 2`);
   }
 }
 
@@ -401,8 +403,9 @@ async function deleteAccount(key) {
 }
 
 async function cleaning() {
-  await GlobalStateSession().setSession(SessionTemplate);
-  await GlobalStateD().setResetD(DTemplate);
+  await GlobalStateSession().setResetSession();
+  await GlobalStateD().setResetD();
+  await GlobalStateFetches().setResetAll();
   GlobalStateLookup().setLookup({
     deggoLsi: false,
     elor: null,
