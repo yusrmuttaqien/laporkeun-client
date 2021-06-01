@@ -473,17 +473,28 @@ async function FetchLaporanku({ action, ext }) {
       GlobalStateFetches().setLaporankuPayload(realData);
       break;
     case "deleteFetch":
-      const databaseLaporan = database.collection("laporan").doc(ext);
-      const currentLaporan = JSON.parse(
-        JSON.stringify(GlobalStateFetches().getLaporankuPayload()[ext])
-      );
+      const databaseLaporan = database.collection("laporan").doc(ext.id);
+      let currentLaporan;
+
+      if (ext.origin === "laporanPublik") {
+        currentLaporan = JSON.parse(
+          JSON.stringify(GlobalStateFetches().getLaporanPublikPayload()[ext.id])
+        );
+      } else {
+        currentLaporan = JSON.parse(
+          JSON.stringify(GlobalStateFetches().getLaporankuPayload()[ext.id])
+        );
+      }
+
       const loading = toast.loading("Menghapus laporan");
 
       laporanses = await databaseLaporan.get();
       laporanses = laporanses.data();
 
       if (laporanses.status !== "Menunggu") {
-        toast.error("Laporan sudah diproses, muat ulang daftar");
+        toast.error("Laporan sudah diproses, muat ulang daftar", {
+          id: loading,
+        });
         break;
       }
 
@@ -502,14 +513,23 @@ async function FetchLaporanku({ action, ext }) {
       }
 
       await GlobalStateD().setResetD();
-      await GlobalStateFetches().deleteLaporanku(ext);
+      await GlobalStateFetches().deleteLaporanku(ext.id);
+      await GlobalStateFetches().deleteLaporanPublik(ext.id);
+
       isEmpty = JSON.parse(
         JSON.stringify(GlobalStateFetches().getLaporankuPayload())
       );
-      isEmpty = Object.keys(isEmpty).length === 0;
 
-      if (isEmpty) {
+      if (Object.keys(isEmpty).length === 0) {
         GlobalStateFetches().setResetLaporanku();
+      }
+
+      isEmpty = JSON.parse(
+        JSON.stringify(GlobalStateFetches().getLaporanPublikPayload())
+      );
+
+      if (Object.keys(isEmpty).length === 0) {
+        GlobalStateFetches().setResetLaporanPublik();
       }
 
       toast.success("Laporan berhasil dihapus", { id: loading });
@@ -525,10 +545,8 @@ async function FetchLaporanPublik({ action, ext }) {
   const doneFirstFetch = GlobalStateFetches().getLaporanPublikPayload();
   const lastFetch = GlobalStateFetches().getLaporanPublikLastFetch();
   const orderBy = GlobalStateFetches().getLaporanPublikOrderBy();
-  const hashedUID = GlobalStateSession().getUIDUser();
 
   let laporanses,
-    isEmpty,
     realData = {};
   const databaseLaporanPublik = database
     .collection("laporan")

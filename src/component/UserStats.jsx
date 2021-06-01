@@ -36,7 +36,6 @@ const UserDetail = styled.div`
 const Details = styled.div`
   letter-spacing: 0.125em;
   color: ${(props) => props.theme.color.white};
-  /* background-color: green; */
 
   width: 45%;
   overflow: hidden;

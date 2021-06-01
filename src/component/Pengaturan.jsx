@@ -13,11 +13,13 @@ import {
   Warning,
   ReportBody,
   Form,
+  Preview,
 } from "style/Components";
 import { TriggerPopup } from "util/Popup";
 import { DataInstance } from "util/States";
 import { SchemaSetting } from "util/ValidationSchema";
 import { updateProfile, deleteAccount } from "util/MainFunctions";
+import { Trashbin } from "style/Icons";
 
 import defaultUser from "asset/defaultUser.svg";
 
@@ -27,13 +29,14 @@ export default function Pengaturan(props) {
 
   const [filename, setFileName] = useState("");
   const [aspectRatio, setAspectRatio] = useState();
+  const [isPic, setIsPic] = useState({ err: false });
 
   const { register, handleSubmit, errors } = useForm({
     resolver: yupResolver(SchemaSetting),
     context: { aspectRatio },
   });
 
-  const getFileName = (e) => {
+  const previewPic = (e) => {
     setFileName(e.target.files[0].name);
     const reader = new Image();
     reader.onload = async () => {
@@ -92,6 +95,7 @@ export default function Pengaturan(props) {
             {role === "pengguna" && (
               <Button onClick={onDelete}>Hapus akun</Button>
             )}
+            {picURL && <Button>Hapus gambar</Button>}
             <Button type="submit" form="changeSetting">
               Simpan
             </Button>
@@ -99,35 +103,45 @@ export default function Pengaturan(props) {
         </div>
         <ReportBody className="forSettings">
           <section>
-            <img src={picURL ? picURL : defaultUser} alt="" />
-            <Button
-              type="button"
-              title={
-                errors.pic?.message
-                  ? errors.pic?.message
-                  : filename
-                  ? filename
-                  : "Ubah profil"
-              }
-              form="changeSetting"
-            >
-              <Label htmlFor="pic" className="forButton">
-                {errors.pic?.message
-                  ? errors.pic?.message
-                  : filename
-                  ? filename
-                  : "Ubah profil"}
-              </Label>
-              <Input
-                type="file"
-                name="pic"
-                id="pic"
-                accept="image/x-png,image/gif,image/jpeg"
-                className="forFile"
-                ref={register}
-                onChange={getFileName}
-              />
-            </Button>
+            <Preview className="forPengaturan">
+              {isPic?.file && (
+                <>
+                  <Button
+                    className="normalizeForButton forBuatLaporPreview"
+                    type="button"
+                    title="Hapus gambar"
+                  >
+                    <Trashbin className="inButton" />
+                  </Button>
+                  <img src={isPic?.file} alt="imgPreview" />
+                </>
+              )}
+              {isPic?.err && <Warning className="inAction" />}
+              <div className="text">
+                {isPic?.name
+                  ? isPic?.name
+                  : "Klik tombol dibawah untuk ubah gambar"}
+              </div>
+              <Button>
+                <Label htmlFor="pic" className="forButton">
+                  {errors.pic?.message
+                    ? errors.pic?.message
+                    : filename
+                    ? filename
+                    : "Ubah profil"}
+                </Label>
+                <Input
+                  form="changeSetting"
+                  type="file"
+                  name="pic"
+                  id="pic"
+                  accept="image/x-png,image/gif,image/jpeg"
+                  className="forFile"
+                  ref={register}
+                  onChange={previewPic}
+                />
+              </Button>
+            </Preview>
           </section>
           <section>
             <Form

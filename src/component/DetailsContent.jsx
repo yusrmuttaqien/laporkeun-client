@@ -6,7 +6,8 @@ import Image from "util/ImageView";
 import Response from "component/DetailsResponse";
 import { Label, TextArea, Notify } from "style/Components";
 import { DInstance } from "util/States";
-import { DetailsPlaceholder } from "style/Images";
+
+import DetailsPlaceholder from "asset/defaultReport.jpg"
 
 const Metadata = styled.p`
   font-weight: ${(props) => props.theme.value.font.light};
