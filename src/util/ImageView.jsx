@@ -40,6 +40,7 @@ export default function ImageView({ thumbnail, height, width, img }) {
             setLoading(true);
           };
           downloadingImage.src = img;
+          observer.disconnect()
         }
       });
     };

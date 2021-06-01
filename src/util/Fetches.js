@@ -473,17 +473,28 @@ async function FetchLaporanku({ action, ext }) {
       GlobalStateFetches().setLaporankuPayload(realData);
       break;
     case "deleteFetch":
-      const databaseLaporan = database.collection("laporan").doc(ext);
-      const currentLaporan = JSON.parse(
-        JSON.stringify(GlobalStateFetches().getLaporankuPayload()[ext])
-      );
+      const databaseLaporan = database.collection("laporan").doc(ext.id);
+      let currentLaporan;
+
+      if (ext.origin === "laporanPublik") {
+        currentLaporan = JSON.parse(
+          JSON.stringify(GlobalStateFetches().getLaporanPublikPayload()[ext.id])
+        );
+      } else {
+        currentLaporan = JSON.parse(
+          JSON.stringify(GlobalStateFetches().getLaporankuPayload()[ext.id])
+        );
+      }
+
       const loading = toast.loading("Menghapus laporan");
 
       laporanses = await databaseLaporan.get();
       laporanses = laporanses.data();
 
       if (laporanses.status !== "Menunggu") {
-        toast.error("Laporan sudah diproses, muat ulang daftar");
+        toast.error("Laporan sudah diproses, muat ulang daftar", {
+          id: loading,
+        });
         break;
       }
 
@@ -502,14 +513,23 @@ async function FetchLaporanku({ action, ext }) {
       }
 
       await GlobalStateD().setResetD();
-      await GlobalStateFetches().deleteLaporanku(ext);
+      await GlobalStateFetches().deleteLaporanku(ext.id);
+      await GlobalStateFetches().deleteLaporanPublik(ext.id);
+
       isEmpty = JSON.parse(
         JSON.stringify(GlobalStateFetches().getLaporankuPayload())
       );
-      isEmpty = Object.keys(isEmpty).length === 0;
 
-      if (isEmpty) {
+      if (Object.keys(isEmpty).length === 0) {
         GlobalStateFetches().setResetLaporanku();
+      }
+
+      isEmpty = JSON.parse(
+        JSON.stringify(GlobalStateFetches().getLaporanPublikPayload())
+      );
+
+      if (Object.keys(isEmpty).length === 0) {
+        GlobalStateFetches().setResetLaporanPublik();
       }
 
       toast.success("Laporan berhasil dihapus", { id: loading });
@@ -521,19 +541,119 @@ async function FetchLaporanku({ action, ext }) {
   GlobalStateFetches().setLoading(false);
 }
 
-async function FetchDetails({ ext }) {
-  let currentDetails = JSON.parse(
-    JSON.stringify(GlobalStateFetches().getLaporankuPayload()[ext])
-  );
+async function FetchLaporanPublik({ action, ext }) {
+  const doneFirstFetch = GlobalStateFetches().getLaporanPublikPayload();
+  const lastFetch = GlobalStateFetches().getLaporanPublikLastFetch();
+  const orderBy = GlobalStateFetches().getLaporanPublikOrderBy();
 
-  if (!currentDetails.picURL && currentDetails.thumbnail) {
-    const url = await multiImgURL(currentDetails.pic, "laporan");
-    currentDetails.picURL = url;
-    GlobalStateFetches().addLaporankuPayloadImgURL(currentDetails.id, {
-      picURL: currentDetails.picURL,
-    });
+  let laporanses,
+    realData = {};
+  const databaseLaporanPublik = database
+    .collection("laporan")
+    .where("visibility", "==", "Publik")
+    .limit(PaginationLimit);
+
+  GlobalStateFetches().setLoading(true);
+
+  switch (action) {
+    case "effectFetch":
+      if (doneFirstFetch) break;
+
+      FetchLaporanPublik({ action: "resetFetch" });
+      break;
+    case "resetFetch":
+      laporanses = await databaseLaporanPublik.get();
+      laporanses.docs.forEach((doc) => {
+        realData[doc.id] = doc.data();
+        realData[doc.id] = { ...realData[doc.id], id: doc.id };
+      });
+
+      if (laporanses.empty === true) {
+        GlobalStateFetches().setLaporanPublikPayload(null);
+        GlobalStateFetches().setLaporanPublikLastFetch(0);
+
+        if (orderBy !== 0) {
+          GlobalStateFetches().setLaporanPublikOrderBy(0);
+        }
+      } else {
+        GlobalStateFetches().setLaporanPublikPayload(realData);
+        GlobalStateFetches().setLaporanPublikLastFetch(
+          laporanses.docs[laporanses.docs.length - 1] || 0
+        );
+
+        if (orderBy !== 0) {
+          GlobalStateFetches().setLaporanPublikOrderBy(0);
+        }
+      }
+
+      break;
+    case "moreFetch":
+      laporanses = await databaseLaporanPublik.startAfter(lastFetch).get();
+      laporanses.docs.forEach((doc) => {
+        realData[doc.id] = doc.data();
+        realData[doc.id] = { ...realData[doc.id], id: doc.id };
+      });
+
+      GlobalStateFetches().addLaporanPublikPayload(realData);
+
+      if (orderBy !== 0) {
+        GlobalStateFetches().setLaporanPublikOrderBy(0);
+      }
+
+      if (laporanses.empty === true) {
+        GlobalStateFetches().setLaporanPublikLastFetch(0);
+      } else {
+        GlobalStateFetches().setLaporanPublikLastFetch(
+          laporanses.docs[laporanses.docs.length - 1] || 0
+        );
+      }
+      break;
+    case "sortFetch":
+      realData = await sortBy(doneFirstFetch, ext);
+
+      GlobalStateFetches().setLaporanPublikOrderBy(ext.id);
+      GlobalStateFetches().setLaporanPublikPayload(realData);
+      break;
+    default:
+      break;
   }
 
+  GlobalStateFetches().setLoading(false);
+}
+
+async function FetchDetails({ ext, action }) {
+  let currentDetails;
+
+  switch (action) {
+    case "Laporanku":
+      currentDetails = JSON.parse(
+        JSON.stringify(GlobalStateFetches().getLaporankuPayload()[ext])
+      );
+
+      if (!currentDetails.picURL && currentDetails.thumbnail) {
+        const url = await multiImgURL(currentDetails.pic, "laporan");
+        currentDetails.picURL = url;
+        GlobalStateFetches().addLaporankuPayloadImgURL(currentDetails.id, {
+          picURL: currentDetails.picURL,
+        });
+      }
+      break;
+    case "LaporanPublik":
+      currentDetails = JSON.parse(
+        JSON.stringify(GlobalStateFetches().getLaporanPublikPayload()[ext])
+      );
+
+      if (!currentDetails.picURL && currentDetails.thumbnail) {
+        const url = await multiImgURL(currentDetails.pic, "laporan");
+        currentDetails.picURL = url;
+        GlobalStateFetches().addLaporanPublikPayloadImgURL(currentDetails.id, {
+          picURL: currentDetails.picURL,
+        });
+      }
+      break;
+    default:
+      break;
+  }
   await GlobalStateD().setData(currentDetails);
   return 1;
 }
@@ -544,5 +664,6 @@ export {
   typeSelect,
   FetchBuatLapor,
   FetchLaporanku,
+  FetchLaporanPublik,
   FetchDetails,
 };

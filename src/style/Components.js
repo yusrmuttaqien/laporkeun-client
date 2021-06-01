@@ -243,18 +243,19 @@ const Button = styled.button`
   overflow: hidden;
   text-overflow: ellipsis;
 
+  &:focus {
+    background-color: ${(props) => props.theme.color.purple};
+    color: ${(props) => props.theme.color.white};
+  }
+
   &:hover {
     color: ${(props) => props.theme.color.white};
     background-color: ${(props) => props.theme.color.dark};
     cursor: pointer;
-    
+
     svg {
       fill: ${(props) => props.theme.color.white};
     }
-  }
-
-  &:focus {
-    background-color: ${(props) => props.theme.color.grey};
   }
 
   &.forPopup {
@@ -500,6 +501,43 @@ const Overlay = styled.div`
   opacity: 0.5;
 `;
 
+const Preview = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+
+  width: 100%;
+  height: 100%;
+  position: relative;
+
+  &.forBuatLapor {
+    border: 1px solid ${(props) => props.theme.color.white};
+    border-radius: ${(props) => props.theme.value.radius};
+    opacity: ${(props) => props.theme.value.opacity};
+    transition: ${(props) => props.theme.value.transition};
+    transition-property: opacity;
+
+    &:hover,
+    &:focus {
+      opacity: 1;
+    }
+  }
+
+  &.forPengaturan {
+    .text {
+      margin-bottom: 1em;
+    }
+  }
+
+  img {
+    width: 90%;
+    max-height: 295px;
+    object-fit: contain;
+    margin-bottom: 0.5em;
+  }
+`;
+
 export {
   Label,
   Input,
@@ -515,4 +553,5 @@ export {
   DataList,
   Notify,
   Overlay,
+  Preview,
 };

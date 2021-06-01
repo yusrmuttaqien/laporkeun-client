@@ -1,6 +1,7 @@
 import React from "react";
 import { useState as GlobalState } from "@hookstate/core";
 import styled from "styled-components";
+import { useHistory } from "react-router-dom";
 
 import Entry from "./Entry";
 import Navigation from "./Navigation";
@@ -51,6 +52,7 @@ const LogoContainer = styled.div`
   position: relative;
 
   text-align: center;
+  cursor: pointer;
 
   section {
     transition: ${(props) => props.theme.value.transition};
@@ -86,9 +88,15 @@ export default function Navbar(props) {
   const state = GlobalState(DataInstance);
   const { isLogged } = state.session.get();
 
+  const history = useHistory();
+
+  const backToHome = () => {
+    history.push("/");
+  };
+
   return (
     <NavWrapper isLogged={isLogged}>
-      <LogoContainer>
+      <LogoContainer onClick={backToHome}>
         <section>
           <img
             src={LogoDesc}

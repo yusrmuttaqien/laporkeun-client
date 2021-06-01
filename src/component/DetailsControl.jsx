@@ -1,6 +1,7 @@
 import React from "react";
 import styled from "styled-components";
 import { useState as GlobalState } from "@hookstate/core";
+import { useHistory } from "react-router-dom";
 
 import { Button } from "style/Components";
 import { Exit } from "style/Icons";
@@ -35,9 +36,11 @@ export default function DetailsControl(props) {
   const state = GlobalState(DInstance);
   const { data } = state.get();
 
+  let history = useHistory();
+
   const handleDelete = () => {
     const next = () => {
-      FetchLaporanku({ action: "deleteFetch", ext: data?.id });
+      FetchLaporanku({ action: "deleteFetch", ext: {id: data?.id, origin: history.location.pathname.substring(1) } });
     };
 
     TriggerPopup({

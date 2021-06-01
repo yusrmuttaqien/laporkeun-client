@@ -34,7 +34,7 @@ export default function Laporanku(props) {
   };
 
   const showDetails = (id) => {
-    TriggerDetails({ id });
+    TriggerDetails({ id, action: "Laporanku" });
   };
 
   useEffect(() => {

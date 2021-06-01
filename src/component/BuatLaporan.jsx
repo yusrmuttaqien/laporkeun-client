@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from "react";
-import styled from "styled-components";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import composeRefs from "@seznam/compose-react-refs";
@@ -15,6 +14,7 @@ import {
   CustomSelect,
   Action,
   TextArea,
+  Preview,
 } from "style/Components";
 import { typeSelect, FetchBuatLapor } from "util/Fetches";
 import { compressIMG } from "util/Helper";
@@ -25,38 +25,6 @@ import {
   FILE_SIZE,
 } from "util/ValidationSchema";
 import { LocationInstance } from "util/States";
-
-const Preview = styled.div`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-
-  width: 100%;
-  height: 100%;
-  position: relative;
-
-  border: 1px solid ${(props) => props.theme.color.white};
-  border-radius: ${(props) => props.theme.value.radius};
-  opacity: ${(props) => props.theme.value.opacity};
-  transition: ${(props) => props.theme.value.transition};
-  transition-property: opacity;
-
-  img {
-    width: 90%;
-    max-height: 295px;
-    object-fit: contain;
-    margin-bottom: 0.5em;
-  }
-
-  .text {
-  }
-
-  &:hover,
-  &:focus {
-    opacity: 1;
-  }
-`;
 
 export default function BuatLaporan(props) {
   const state = GlobalState(LocationInstance);
@@ -133,39 +101,41 @@ export default function BuatLaporan(props) {
   };
 
   const previewPic = async (e) => {
-    const isValid = SUPPORTED_FORMATS.includes(e.target.files[0].type);
-    const isHuge = e.target.files[0].size > FILE_SIZE;
+    if (e.target.files[0]) {
+      const isValid = SUPPORTED_FORMATS.includes(e.target.files[0].type);
+      const isHuge = e.target.files[0].size > FILE_SIZE;
 
-    if (!isValid) {
-      await setIsPic((prev) => ({
-        err: true,
-        name: `${e.target.files[0].name}, tidak didukung`,
-      }));
-      e.target.value = "";
-      return 0;
+      if (!isValid) {
+        await setIsPic((prev) => ({
+          err: true,
+          name: `${e.target.files[0].name}, tidak didukung`,
+        }));
+        e.target.value = "";
+        return 0;
+      }
+
+      if (isHuge) {
+        await setIsPic((prev) => ({
+          err: true,
+          name: `${e.target.files[0].name}, terlalu besar`,
+        }));
+        e.target.value = "";
+        return 0;
+      }
+
+      const preview = await compressIMG({
+        file: e.target.files[0],
+        height: 500,
+        format: "JPEG",
+        output: "base64",
+      });
+
+      setIsPic({
+        err: false,
+        file: preview,
+        name: e.target.files[0].name,
+      });
     }
-
-    if (isHuge) {
-      await setIsPic((prev) => ({
-        err: true,
-        name: `${e.target.files[0].name}, terlalu besar`,
-      }));
-      e.target.value = "";
-      return 0;
-    }
-
-    const preview = await compressIMG({
-      file: e.target.files[0],
-      height: 500,
-      format: "JPEG",
-      output: "base64",
-    });
-
-    setIsPic({
-      err: false,
-      file: preview,
-      name: e.target.files[0].name,
-    });
   };
 
   const deletePic = () => {
@@ -311,7 +281,7 @@ export default function BuatLaporan(props) {
             </section>
             <section>
               <Label>{errors.picLaporan?.message || "pratinjau gambar"}</Label>
-              <Preview>
+              <Preview className="forBuatLapor">
                 {isPic?.file && (
                   <>
                     <Button
@@ -322,10 +292,7 @@ export default function BuatLaporan(props) {
                     >
                       <Trashbin className="inButton" />
                     </Button>
-                    <img
-                      src={isPic?.file}
-                      alt="imgPreview"
-                    />
+                    <img src={isPic?.file} alt="imgPreview" />
                   </>
                 )}
                 {isPic?.err && <Warning className="inAction" />}
