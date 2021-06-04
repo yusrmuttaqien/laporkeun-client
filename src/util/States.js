@@ -110,7 +110,8 @@ const FetchesWrapper = (s) => ({
   setLaporankuLastFetch: (lastfetch) => s.laporanku.lastFetch.set(lastfetch),
   addLaporankuPayload: (payload) => s.laporanku.payload.merge(payload),
   addLaporankuPayloadImgURL: (id, url) => s.laporanku.payload[id].merge(url),
-  deleteLaporanku: (id) => s.laporanku.payload[id].set(none),
+  deleteLaporanku: (id) =>
+    s.laporanku.payload[id] && s.laporanku.payload[id].set(none),
   setResetLaporanku: () =>
     s.laporanku.set({ orderBy: 0, payload: null, lastFetch: 0 }),
 
@@ -125,7 +126,8 @@ const FetchesWrapper = (s) => ({
   addLaporanPublikPayload: (payload) => s.laporanPublik.payload.merge(payload),
   addLaporanPublikPayloadImgURL: (id, url) =>
     s.laporanPublik.payload[id].merge(url),
-  deleteLaporanPublik: (id) => s.laporanPublik.payload[id].set(none),
+  deleteLaporanPublik: (id) =>
+    s.laporanPublik.payload[id] && s.laporanPublik.payload[id].set(none),
   setResetLaporanPublik: () =>
     s.laporanPublik.set({ orderBy: 0, payload: null, lastFetch: 0 }),
 });

@@ -105,7 +105,7 @@ function Popup() {
   return stats ? (
     <>
       <Overlay onClick={handleBlur} index="1002" />
-      <PopupWrapper id="ydhm-popup" tabIndex="0">
+      <PopupWrapper>
         <Content>
           {message}
           {form && (
@@ -115,7 +115,7 @@ function Popup() {
               onSubmit={handleSubmit(handleYes)}
             >
               <Label htmlFor="input">{txtLabel}</Label>
-              <Input type="text" name="input" id="input" ref={register} />
+              <Input type="text" name="input" id="input-ydhm-popup" ref={register} />
               <Warning>{errors.input?.message}</Warning>
             </Form>
           )}
@@ -150,7 +150,7 @@ async function TriggerPopup({
   param,
 }) {
   const handleFocus = () => {
-    document.getElementById("ydhm-popup").focus();
+    form && document.getElementById("input-ydhm-popup").focus();
   };
 
   if (cbYes) {

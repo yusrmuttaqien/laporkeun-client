@@ -6,6 +6,7 @@ import { useHistory } from "react-router-dom";
 
 import { DataInstance } from "util/States";
 import { logout } from "util/MainFunctions";
+import Image from "util/ImageView";
 
 import defaultUser from "./../asset/defaultUser.svg";
 
@@ -25,12 +26,6 @@ const UserDetail = styled.div`
 
   width: 100%;
   margin-bottom: 1em;
-
-  img {
-    width: 3.5rem;
-    margin-right: 0.6em;
-    border-radius: 50%;
-  }
 `;
 
 const Details = styled.div`
@@ -92,7 +87,13 @@ export default function UserStats() {
   return (
     <StatsWrapper>
       <UserDetail>
-        <img src={picURL ? picURL : defaultUser} alt="userProfile" />
+        <Image
+          thumbnail={defaultUser}
+          img={picURL ? picURL : defaultUser}
+          width="56"
+          height="56"
+          className="forUserStats"
+        />
         <Details>
           <h1
             title={`${name}${

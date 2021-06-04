@@ -8,12 +8,13 @@ import {
   GlobalStateD,
 } from "util/States";
 import {
-  compressIMG,
-  dimensionIMG,
   md5Compare,
   multiImgURL,
+  imgProcessing,
+  uploadMultipleIMG,
+  deleteMultipleIMG,
 } from "util/Helper";
-import { database, storage } from "util/Firebase";
+import { database } from "util/Firebase";
 
 // Global fetch value
 const sortSelect = [
@@ -99,36 +100,6 @@ async function laporNewTemplate(report) {
     status: "Menunggu",
     thumbnail,
   };
-}
-
-async function uploadMultiple(payload) {
-  const storageLapor = storage.ref("/laporan");
-
-  for (const param in payload) {
-    await storageLapor
-      .child(payload[param].name)
-      .put(payload[param].file)
-      .catch((err) => {
-        return 0;
-      });
-  }
-
-  return 1;
-}
-
-async function deleteMultiple(payload) {
-  const storageLapor = storage.ref("/laporan");
-
-  for (const param in payload) {
-    await storageLapor
-      .child(payload[param])
-      .delete()
-      .catch((err) => {
-        return 0;
-      });
-  }
-
-  return 1;
 }
 
 // Main fetches
@@ -325,37 +296,11 @@ async function FetchBuatLapor({ action, ext }) {
     case "submitLaporan":
       const loading = toast.loading("Mengunggah laporan");
       const databaseLaporan = database.collection("laporan");
-      let imgDimension,
-        imgWhat,
-        imgWEBP,
-        imgJPEG,
-        imgBase64,
+      let allIMG,
         imgName = null;
 
       if (ext.picLaporan[0]) {
-        // Image processing
-        imgDimension = await dimensionIMG(ext.picLaporan[0]);
-        imgWhat =
-          imgDimension.width > imgDimension.height
-            ? { height: imgDimension.height % 2 === 0 ? 8 : 9 }
-            : { width: imgDimension.width % 2 === 0 ? 8 : 9 };
-
-        imgWEBP = await compressIMG({
-          file: ext.picLaporan[0],
-          ...imgDimension,
-        });
-        imgJPEG = await compressIMG({
-          file: ext.picLaporan[0],
-          ...imgDimension,
-          format: "JPEG",
-        });
-        imgBase64 = await compressIMG({
-          file: ext.picLaporan[0],
-          ...imgWhat,
-          quality: 50,
-          format: "JPEG",
-          output: "base64",
-        });
+        allIMG = await imgProcessing(ext.picLaporan[0], "buatLapor");
 
         // Image name
         imgName =
@@ -367,12 +312,8 @@ async function FetchBuatLapor({ action, ext }) {
       const dataPush = await laporNewTemplate({
         ...ext,
         picLaporan: imgName || null,
-        thumbnail: imgBase64 || null,
+        thumbnail: allIMG?.imgBase64 || null,
       });
-      const imgPush = {
-        webp: { name: `${imgName}.webp`, file: imgWEBP },
-        jpeg: { name: `${imgName}.jpeg`, file: imgJPEG },
-      };
 
       // Upload all
       try {
@@ -383,8 +324,13 @@ async function FetchBuatLapor({ action, ext }) {
         break;
       }
 
-      if (imgBase64) {
-        if (!(await uploadMultiple(imgPush))) {
+      if (allIMG?.imgBase64) {
+        const imgPush = {
+          webp: { name: `${imgName}.webp`, file: allIMG.imgWEBP },
+          jpeg: { name: `${imgName}.jpeg`, file: allIMG.imgJPEG },
+        };
+
+        if (!(await uploadMultipleIMG(imgPush, "buatLapor"))) {
           toast.error("Kesalahan unggah gambar");
         }
       }
@@ -507,7 +453,7 @@ async function FetchLaporanku({ action, ext }) {
       }
 
       if (currentLaporan.thumbnail) {
-        if (!(await deleteMultiple(currentLaporan.pic))) {
+        if (!(await deleteMultipleIMG(currentLaporan.pic, "deleteLapor"))) {
           toast.error("Kesalahan hapus gambar");
         }
       }
@@ -520,7 +466,7 @@ async function FetchLaporanku({ action, ext }) {
         JSON.stringify(GlobalStateFetches().getLaporankuPayload())
       );
 
-      if (Object.keys(isEmpty).length === 0) {
+      if (!isEmpty || Object.keys(isEmpty).length === 0) {
         GlobalStateFetches().setResetLaporanku();
       }
 
@@ -528,7 +474,7 @@ async function FetchLaporanku({ action, ext }) {
         JSON.stringify(GlobalStateFetches().getLaporanPublikPayload())
       );
 
-      if (Object.keys(isEmpty).length === 0) {
+      if (!isEmpty || Object.keys(isEmpty).length === 0) {
         GlobalStateFetches().setResetLaporanPublik();
       }
 

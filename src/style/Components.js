@@ -284,6 +284,15 @@ const Button = styled.button`
     top: 0.5em;
     right: 0.5em;
   }
+
+  &.forPengaturanPreview {
+    position: absolute;
+    padding: 0.3em 0.4em;
+    top: 18%;
+    left: 79%;
+
+    transform: translate(-50%, -50%);
+  }
 `;
 
 const Warning = styled.p`

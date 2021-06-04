@@ -79,9 +79,144 @@ async function multiImgURL(obj, mode) {
 
       imgToURL = await storage.ref("/laporan").child(imgToURL).getDownloadURL();
       return imgToURL;
+    case "profile":
+      if (check_webp_feature("alpha")) {
+        imgToURL = obj.webp;
+      } else {
+        imgToURL = obj.png;
+      }
+
+      imgToURL = await storage.ref("/profile").child(imgToURL).getDownloadURL();
+      return imgToURL;
     default:
       break;
   }
+}
+
+async function imgProcessing(img, mode) {
+  let imgDimension, imgWhat, imgWEBP, imgJPEG, imgBase64, imgPNG;
+  imgDimension = await dimensionIMG(img);
+
+  switch (mode) {
+    case "buatLapor":
+      imgWhat =
+        imgDimension.width > imgDimension.height
+          ? { height: imgDimension.height % 2 === 0 ? 8 : 9 }
+          : { width: imgDimension.width % 2 === 0 ? 8 : 9 };
+
+      imgWEBP = await compressIMG({
+        file: img,
+        ...imgDimension,
+      });
+      imgJPEG = await compressIMG({
+        file: img,
+        ...imgDimension,
+        format: "JPEG",
+      });
+      imgBase64 = await compressIMG({
+        file: img,
+        ...imgWhat,
+        quality: 50,
+        format: "JPEG",
+        output: "base64",
+      });
+      break;
+    case "profile":
+      imgWEBP = await compressIMG({
+        file: img,
+        ...imgDimension,
+      });
+      imgPNG = await compressIMG({
+        file: img,
+        ...imgDimension,
+        quality: 50,
+        format: "PNG",
+      });
+      break;
+    default:
+      break;
+  }
+
+  return { imgDimension, imgWEBP, imgJPEG, imgBase64, imgPNG };
+}
+
+async function uploadMultipleIMG(payload, mode) {
+  let storageRef;
+
+  const loopUpload = async (payload) => {
+    for (const param in payload) {
+      await storageRef
+        .child(payload[param].name)
+        .put(payload[param].file)
+        .catch((err) => {
+          return 0;
+        });
+    }
+  };
+
+  switch (mode) {
+    case "buatLapor":
+      storageRef = storage.ref("/laporan");
+
+      try {
+        await loopUpload(payload);
+      } catch (err) {
+        return 0;
+      }
+      break;
+    case "profile":
+      storageRef = storage.ref("/profile");
+
+      try {
+        await loopUpload(payload);
+      } catch (err) {
+        return 0;
+      }
+      break;
+    default:
+      break;
+  }
+
+  return 1;
+}
+
+async function deleteMultipleIMG(payload, mode) {
+  let storageRef;
+
+  const loopDelete = async (payload) => {
+    for (const param in payload) {
+      await storageRef
+        .child(payload[param])
+        .delete()
+        .catch((err) => {
+          return 0;
+        });
+    }
+  };
+
+  switch (mode) {
+    case "deleteLapor":
+      storageRef = storage.ref("/laporan");
+      try {
+        await loopDelete(payload);
+      } catch (err) {
+        return 0;
+      }
+      break;
+    case "profile":
+      storageRef = storage.ref("/profile");
+
+      try {
+        await loopDelete(payload);
+      } catch (err) {
+        return 0;
+      }
+      break;
+    default:
+      break;
+  }
+
+  return 1;
 }
 
 export {
@@ -90,4 +225,7 @@ export {
   md5Compare,
   uidAccDateChecker,
   multiImgURL,
+  imgProcessing,
+  uploadMultipleIMG,
+  deleteMultipleIMG,
 };

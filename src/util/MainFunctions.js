@@ -7,7 +7,13 @@ import Firebase, {
   authSecondary,
 } from "util/Firebase";
 import { TriggerLoading } from "util/Loading";
-import { md5Compare } from "util/Helper";
+import {
+  md5Compare,
+  multiImgURL,
+  imgProcessing,
+  uploadMultipleIMG,
+  deleteMultipleIMG,
+} from "util/Helper";
 import {
   GlobalStateSession,
   GlobalStateD,
@@ -120,7 +126,6 @@ async function authCheck() {
 
 async function fetchUserData(uid) {
   const userId = await md5Compare(uid, "users");
-  const storageProfile = storage.ref("/profile");
   const getLookup = JSON.parse(JSON.stringify(GlobalStateLookup().getLookup()));
   let details = {};
 
@@ -161,7 +166,7 @@ async function fetchUserData(uid) {
   }
 
   if (details.pic) {
-    details.picURL = await storageProfile.child(details.pic).getDownloadURL();
+    details.picURL = await multiImgURL(details.pic, "profile");
   }
   GlobalStateSession().setSession(details);
   return 1;
@@ -246,7 +251,6 @@ async function updateProfile(update) {
   const currUID = GlobalStateSession().getUID();
   const hashedCurrUID = GlobalStateSession().getUIDUser();
   const currPic = GlobalStateSession().getPic();
-  const storageProfile = storage.ref("/profile");
   const databaseProfile = database.collection("users");
   let passChange,
     emailChange,
@@ -268,29 +272,39 @@ async function updateProfile(update) {
     // Check there is old image
     if (currPic) {
       // Delete old pic
-      await storageProfile
-        .child(currPic)
-        .delete()
-        .then(() => toast.success("Foto lama terhapus"))
-        .catch((err) => {
-          return Promise.reject(`Firebase err: ${err.code}`);
-        });
+      try {
+        await deleteMultipleIMG(currPic, "profile");
+        toast.success("Foto lama terhapus");
+      } catch (err) {
+        return Promise.reject(`Firebase err: ${err.code}`);
+      }
     }
 
     // Set new name
-    let newName = `${hashedCurrUID}.${dataChange.pic.type.split("/")[1]}`;
+    let allIMG,
+      imgPackage,
+      newName = hashedCurrUID;
+
+    allIMG = await imgProcessing(dataChange.pic, "profile");
+
+    imgPackage = {
+      webp: { name: `${newName}.webp`, file: allIMG.imgWEBP },
+      png: { name: `${newName}.png`, file: allIMG.imgPNG },
+    };
 
     // Upload new image
-    await storageProfile
-      .child(newName)
-      .put(dataChange.pic)
-      .then(() => toast.success("Foto baru terunggah"))
-      .catch((err) => {
-        return Promise.reject(`Firebase err: ${err.code}`);
-      });
+    try {
+      await uploadMultipleIMG(imgPackage, "profile");
+      toast.success("Foto baru terunggah");
+    } catch (err) {
+      return Promise.reject(`Firebase err: ${err.code}`);
+    }
 
     // Change file to filename
-    dataChange.pic = newName;
+    dataChange.pic = {
+      webp: `${newName}.webp`,
+      png: `${newName}.png`,
+    };
   }
 
   // Update email & password if available
@@ -323,7 +337,11 @@ async function updateProfile(update) {
     });
 
   await fetchUserData(currUID);
-  return Promise.resolve("Akun berhasil diperbarui");
+  return Promise.resolve(
+    dataChange.pic
+      ? "Akun berhasil diperbarui, muat ulang halaman"
+      : "Akun berhasil diperbarui"
+  );
 }
 
 async function login(cred) {
@@ -356,14 +374,12 @@ async function deleteAccount(key) {
 
   // Check if there is image
   if (currPic) {
-    // Delete pic
-    await storageProfile
-      .child(currPic)
-      .delete()
-      .then(() => toast.success("Foto dihapus"))
-      .catch((err) => {
-        return Promise.reject(`Firebase err: ${err.code}`);
-      });
+    try {
+      await deleteMultipleIMG(currPic, "profile");
+      toast.success("Foto terhapus");
+    } catch (err) {
+      return Promise.reject(`Firebase err: ${err.code}`);
+    }
   }
 
   // Delete user detail
@@ -402,6 +418,10 @@ async function deleteAccount(key) {
   return Promise.resolve("Akun berhasil dihapus");
 }
 
+async function deleteIMGProfile() {
+  return Promise.resolve("Akun berhasil dihapus");
+}
+
 async function cleaning() {
   await GlobalStateSession().setResetSession();
   await GlobalStateD().setResetD();
@@ -428,4 +448,5 @@ export {
   login,
   updateProfile,
   deleteAccount,
+  deleteIMGProfile,
 };
