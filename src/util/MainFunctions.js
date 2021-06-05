@@ -3,7 +3,6 @@ import { toast } from "react-hot-toast";
 import Firebase, {
   database,
   auth,
-  storage,
   authSecondary,
 } from "util/Firebase";
 import { TriggerLoading } from "util/Loading";
@@ -361,7 +360,6 @@ async function deleteAccount(key) {
   const currNIK = GlobalStateSession().getNIK();
   const hashedCurrUID = GlobalStateSession().getUIDUser();
   const toCompare = await md5Compare(currNIK);
-  const storageProfile = storage.ref("/profile");
   const databaseProfile = database.collection("users");
   const databaseRegistered = database.collection("registered");
 
@@ -419,17 +417,30 @@ async function deleteAccount(key) {
 }
 
 async function deleteIMGProfile() {
-  return Promise.resolve("Akun berhasil dihapus");
+  const currPic = GlobalStateSession().getPic();
+  const hashedCurrUID = GlobalStateSession().getUIDUser();
+  const databaseProfile = database.collection("users");
+  let dataChange = { pic: null };
+
+  try {
+    await deleteMultipleIMG(currPic, "profile");
+    await databaseProfile.doc(hashedCurrUID).update(dataChange);
+
+    return Promise.resolve("Foto terhapus, muat ulang halaman");
+  } catch (err) {
+    return Promise.reject(`Firebase err: ${err.code}`);
+  }
 }
 
 async function cleaning() {
-  await GlobalStateSession().setResetSession();
   await GlobalStateD().setResetD();
   await GlobalStateFetches().setResetAll();
   GlobalStateLookup().setLookup({
     deggoLsi: false,
     elor: null,
   });
+  await GlobalStateSession().setResetSession();
+  
   return 1;
 }
 

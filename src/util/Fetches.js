@@ -567,7 +567,89 @@ async function FetchLaporanPublik({ action, ext }) {
   GlobalStateFetches().setLoading(false);
 }
 
-async function FetchDetails({ ext, action }) {
+async function FetchLaporanBaru({ action, ext }) {
+  const doneFirstFetch = GlobalStateFetches().getLaporanBaruPayload();
+  const lastFetch = GlobalStateFetches().getLaporanBaruLastFetch();
+  const orderBy = GlobalStateFetches().getLaporanBaruOrderBy();
+
+  let laporanses,
+    realData = {};
+  const databaseLaporanBaru = database
+    .collection("laporan")
+    .where("status", "==", "Menunggu")
+    .limit(PaginationLimit);
+
+  GlobalStateFetches().setLoading(true);
+
+  switch (action) {
+    case "effectFetch":
+      if (doneFirstFetch) break;
+
+      FetchLaporanBaru({ action: "resetFetch" });
+      break;
+    case "resetFetch":
+      laporanses = await databaseLaporanBaru.get();
+      laporanses.docs.forEach((doc) => {
+        realData[doc.id] = doc.data();
+        realData[doc.id] = { ...realData[doc.id], id: doc.id };
+      });
+
+      if (laporanses.empty === true) {
+        GlobalStateFetches().setLaporanBaruPayload(null);
+        GlobalStateFetches().setLaporanBaruLastFetch(0);
+
+        if (orderBy !== 0) {
+          GlobalStateFetches().setLaporanBaruOrderBy(0);
+        }
+      } else {
+        GlobalStateFetches().setLaporanBaruPayload(realData);
+        GlobalStateFetches().setLaporanBaruLastFetch(
+          laporanses.docs[laporanses.docs.length - 1] || 0
+        );
+
+        if (orderBy !== 0) {
+          GlobalStateFetches().setLaporanBaruOrderBy(0);
+        }
+      }
+
+      break;
+    case "moreFetch":
+      laporanses = await databaseLaporanBaru.startAfter(lastFetch).get();
+      laporanses.docs.forEach((doc) => {
+        realData[doc.id] = doc.data();
+        realData[doc.id] = { ...realData[doc.id], id: doc.id };
+      });
+
+      GlobalStateFetches().addLaporanBaruPayload(realData);
+
+      if (orderBy !== 0) {
+        GlobalStateFetches().setLaporanBaruOrderBy(0);
+      }
+
+      if (laporanses.empty === true) {
+        GlobalStateFetches().setLaporanBaruLastFetch(0);
+      } else {
+        GlobalStateFetches().setLaporanBaruLastFetch(
+          laporanses.docs[laporanses.docs.length - 1] || 0
+        );
+      }
+      break;
+    case "sortFetch":
+      realData = await sortBy(doneFirstFetch, ext);
+
+      GlobalStateFetches().setLaporanBaruOrderBy(ext.id);
+      GlobalStateFetches().setLaporanBaruPayload(realData);
+      break;
+    case "asDiproses":
+      break;
+    default:
+      break;
+  }
+
+  GlobalStateFetches().setLoading(false);
+}
+
+async function FetchDetails({ action, ext }) {
   let currentDetails;
 
   switch (action) {
@@ -597,9 +679,23 @@ async function FetchDetails({ ext, action }) {
         });
       }
       break;
+    case "LaporanBaru":
+      currentDetails = JSON.parse(
+        JSON.stringify(GlobalStateFetches().getLaporanBaruPayload()[ext])
+      );
+
+      if (!currentDetails.picURL && currentDetails.thumbnail) {
+        const url = await multiImgURL(currentDetails.pic, "laporan");
+        currentDetails.picURL = url;
+        GlobalStateFetches().addLaporanBaruPayloadImgURL(currentDetails.id, {
+          picURL: currentDetails.picURL,
+        });
+      }
+      break;
     default:
       break;
   }
+
   await GlobalStateD().setData(currentDetails);
   return 1;
 }
@@ -612,4 +708,5 @@ export {
   FetchLaporanku,
   FetchLaporanPublik,
   FetchDetails,
+  FetchLaporanBaru,
 };

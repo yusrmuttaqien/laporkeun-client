@@ -1,51 +1,75 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
+import styled from "styled-components";
 import { useState as GlobalState } from "@hookstate/core";
 
-import { Label, TextArea, Notify } from "style/Components";
+import { Label, TextArea, Notify, Button } from "style/Components";
 import { DInstance, DataInstance } from "util/States";
 
-export default function DetailsResponse() {
-  const [mode, setMode] = useState("checking");
+const OptionContainer = styled.div`
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
 
+  height: 100%;
+  width: 100%;
+
+  .multiOption {
+    margin-top: 1em;
+
+    button:not(:first-child) {
+      margin-left: 0.5em;
+    }
+  }
+`;
+
+export default function DetailsResponse() {
   const stateD = GlobalState(DInstance);
   const stateData = GlobalState(DataInstance);
-  const { data, loading } = stateD.get();
-  const { role } = stateData.session.get();
+  const { data } = stateD.get();
+  const { role, hashedUsrUID } = stateData.session.get();
 
-  useEffect(() => {
-    // Checking
-    switch (role) {
-      case "pengguna":
-        data?.respon_detail ? setMode("penggunaRes") : setMode("penggunaNoRes");
-        break;
-      case "admin":
-      case "petugas":
-        if (data?.status === "Menunggu") {
-          setMode("petugasRes");
-        } else if (data?.status === "Diproses") {
+  return (
+    <>
+      {(() => {
+        if (role !== "pengguna") {
+          if (data?.status === "Menunggu") {
+            return (
+              <OptionContainer>
+                <p>{"Pilih opsi respon"}</p>
+                <div className="multiOption">
+                  <Button>Diproses</Button>
+                  <Button>Diteima</Button>
+                </div>
+              </OptionContainer>
+            );
+          } else if (data?.status === "Diproses") {
+            if (data?.petugas_uid === hashedUsrUID) {
+              return <Notify message="Editor here" />;
+            } else {
+              return <Notify message="Dikerjakan oleh petugas lain" />;
+            }
+          } else {
+            return (
+              <>
+                <Label htmlFor="resLaporan">respon laporan</Label>
+                <TextArea name="resLaporan" id="resLaporan" disabled></TextArea>
+              </>
+            );
+          }
+        } else {
+          if (data?.respon_detail) {
+            return (
+              <>
+                <Label htmlFor="resLaporan">respon laporan</Label>
+                <TextArea name="resLaporan" id="resLaporan" disabled></TextArea>
+              </>
+            );
+          } else {
+            return <Notify message="Belum ada respon" />;
+          }
         }
-        break;
-      default:
-        break;
-    }
-  }, [data?.respon_detail, data?.status, role]);
-
-  const ComponentSwitch = Object.freeze({
-    checking: <Notify message="Mengecek respon" />,
-    penggunaRes: (
-      <>
-        <Label htmlFor="resLaporan">respon laporan</Label>
-        <TextArea name="resLaporan" id="resLaporan" disabled></TextArea>
-      </>
-    ),
-    penggunaNoRes: <Notify message="Belum ada respon" />,
-    petugasRes: (
-      <>
-        <Label htmlFor="resLaporan">respon laporan</Label>
-        <TextArea name="resLaporan" id="resLaporan"></TextArea>
-      </>
-    ),
-  });
-
-  return ComponentSwitch[mode];
+      })()}
+    </>
+  );
 }

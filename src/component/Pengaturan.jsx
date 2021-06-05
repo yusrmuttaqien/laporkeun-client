@@ -153,11 +153,19 @@ export default function Pengaturan(props) {
   };
   
   const deleteProfileIMG = () => {
+    const next = () => {
+      toast.promise(deleteIMGProfile(), {
+        loading: "Tunggu sebentar",
+        success: (msg) => msg,
+        error: (err) => err && err.toString(),
+      });
+    };
+
     TriggerPopup({
       content: "Hapus gambar profil?",
       txtYes: "Ya",
       txtNo: "Tidak",
-      cbYes: deleteIMGProfile,
+      cbYes: next,
     });
   };
 

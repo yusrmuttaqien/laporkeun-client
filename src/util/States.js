@@ -40,6 +40,11 @@ const FetchesTemplate = {
     payload: null,
     lastFetch: 0,
   },
+  laporanBaru: {
+    orderBy: 0,
+    payload: null,
+    lastFetch: 0,
+  },
 };
 
 const DTemplate = { stats: false, data: null, loading: false };
@@ -130,6 +135,22 @@ const FetchesWrapper = (s) => ({
     s.laporanPublik.payload[id] && s.laporanPublik.payload[id].set(none),
   setResetLaporanPublik: () =>
     s.laporanPublik.set({ orderBy: 0, payload: null, lastFetch: 0 }),
+
+  // LaporanBaru
+  getLaporanBaruPayload: () => s.laporanBaru.payload.get(),
+  getLaporanBaruLastFetch: () => s.laporanBaru.lastFetch.get(),
+  getLaporanBaruOrderBy: () => s.laporanBaru.orderBy.get(),
+  setLaporanBaruOrderBy: (order) => s.laporanBaru.orderBy.set(order),
+  setLaporanBaruPayload: (payload) => s.laporanBaru.payload.set(payload),
+  setLaporanBaruLastFetch: (lastfetch) =>
+    s.laporanBaru.lastFetch.set(lastfetch),
+  addLaporanBaruPayload: (payload) => s.laporanBaru.payload.merge(payload),
+  addLaporanBaruPayloadImgURL: (id, url) =>
+    s.laporanBaru.payload[id].merge(url),
+  deleteLaporanBaru: (id) =>
+    s.laporanBaru.payload[id] && s.laporanBaru.payload[id].set(none),
+  setResetLaporanBaru: () =>
+    s.laporanBaru.set({ orderBy: 0, payload: null, lastFetch: 0 }),
 });
 
 const LocationWrapper = (s) => ({
@@ -193,6 +214,11 @@ const FetchesData = {
     lastFetch: 0,
   },
   laporanPublik: {
+    orderBy: 0,
+    payload: null,
+    lastFetch: 0,
+  },
+  laporanBaru: {
     orderBy: 0,
     payload: null,
     lastFetch: 0,
