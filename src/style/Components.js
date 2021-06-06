@@ -243,12 +243,12 @@ const Button = styled.button`
   overflow: hidden;
   text-overflow: ellipsis;
 
-  &:focus {
+  &:focus:enabled {
     background-color: ${(props) => props.theme.color.purple};
     color: ${(props) => props.theme.color.white};
   }
 
-  &:hover {
+  &:hover:enabled {
     color: ${(props) => props.theme.color.white};
     background-color: ${(props) => props.theme.color.dark};
     cursor: pointer;

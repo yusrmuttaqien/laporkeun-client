@@ -571,12 +571,14 @@ async function FetchLaporanBaru({ action, ext }) {
   const doneFirstFetch = GlobalStateFetches().getLaporanBaruPayload();
   const lastFetch = GlobalStateFetches().getLaporanBaruLastFetch();
   const orderBy = GlobalStateFetches().getLaporanBaruOrderBy();
+  const hashedUID = GlobalStateSession().getUIDUser();
+  const name = GlobalStateSession().getName();
 
   let laporanses,
     realData = {};
   const databaseLaporanBaru = database
     .collection("laporan")
-    .where("status", "==", "Menunggu")
+    .where("status", "in", ["Menunggu", "Diproses"])
     .limit(PaginationLimit);
 
   GlobalStateFetches().setLoading(true);
@@ -641,6 +643,42 @@ async function FetchLaporanBaru({ action, ext }) {
       GlobalStateFetches().setLaporanBaruPayload(realData);
       break;
     case "asDiproses":
+      const loading = toast.loading("Mengubah status laporan");
+
+      const databaseLaporan = database.collection("laporan").doc(ext);
+
+      try {
+        laporanses = await databaseLaporan.get();
+        laporanses = laporanses.data();
+      } catch (err) {
+        toast.error(`Firebase err: ${err.code}`, {
+          id: loading,
+        });
+        break;
+      }
+
+      if (laporanses.status !== "Menunggu") {
+        toast.error("Laporan sudah diproses, muat ulang daftar", {
+          id: loading,
+        });
+        break;
+      }
+
+      try {
+        await databaseLaporan.update({
+          status: "Diproses",
+          petugas_uid: hashedUID,
+          petugas_name: name,
+        });
+        toast.success(`Status laporan diubah`, {
+          id: loading,
+        });
+      } catch (err) {
+        toast.error(`Firebase err: ${err.code}`, {
+          id: loading,
+        });
+      }
+
       break;
     default:
       break;
