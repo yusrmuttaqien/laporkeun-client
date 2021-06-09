@@ -36,6 +36,8 @@ const Content = styled.div`
   .first {
     display: inherit;
     flex-direction: row;
+    align-items: center;
+    height: 40%;
 
     .imageSection {
       height: 170px;
@@ -97,7 +99,9 @@ export default function DetailsContent() {
   const state = GlobalState(DInstance);
   const { data, loading } = state.get();
 
-  let tempDate = data?.lapor_date.split("T");
+  let tempDate = data?.lapor_date;
+  let tempDateRespon =
+    data?.petugas_name && data?.respon_date[data?.status.toLowerCase()];
 
   return !data ? (
     <Notify message="Memuat detail" />
@@ -125,17 +129,25 @@ export default function DetailsContent() {
               <Metadata>Publikasi:</Metadata>
               <Metadata>Status:</Metadata>
               <Metadata>Visibilitas:</Metadata>
-              {data?.petugas_name && <Metadata>Responden:</Metadata>}
+              {data?.petugas_name && (
+                <>
+                  <Metadata>Responden:</Metadata>
+                  <Metadata>Tgl respon:</Metadata>
+                </>
+              )}
             </div>
             <div className="content">
               <Metadata>{data?.pengguna_name} </Metadata>
               <Metadata>{data?.type} </Metadata>
-              <Metadata>{`${tempDate[0]}, ${
-                tempDate[1].split(".")[0]
-              }`}</Metadata>
+              <Metadata>{tempDate}</Metadata>
               <Metadata>{data?.status} </Metadata>
               <Metadata>{data?.visibility} </Metadata>
-              {data?.petugas_name && <Metadata>{data?.petugas_name}</Metadata>}
+              {data?.petugas_name && (
+                <>
+                  <Metadata>{data?.petugas_name}</Metadata>
+                  <Metadata>{tempDateRespon}</Metadata>
+                </>
+              )}
             </div>
           </div>
         </section>

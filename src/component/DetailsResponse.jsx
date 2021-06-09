@@ -1,11 +1,15 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import { useState as GlobalState } from "@hookstate/core";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
 
 import { Label, TextArea, Notify, Button } from "style/Components";
 import { DInstance, DataInstance } from "util/States";
 import { FetchLaporanBaru } from "util/Fetches";
+import { SchemaTanggapan } from "util/ValidationSchema";
 import { TriggerPopup } from "util/Popup";
+import { Exit } from "style/Icons";
 
 const OptionContainer = styled.div`
   display: flex;
@@ -17,6 +21,7 @@ const OptionContainer = styled.div`
   width: 100%;
 
   .multiOption {
+    display: flex;
     margin-top: 1em;
 
     button:not(:first-child) {
@@ -32,6 +37,10 @@ export default function DetailsResponse() {
   const { role, hashedUsrUID } = stateData.session.get();
   const [manualTerima, setManualTerima] = useState(false);
 
+  const { register, handleSubmit, errors } = useForm({
+    resolver: yupResolver(SchemaTanggapan),
+  });
+
   const setToDiproses = (id) => {
     const next = () => {
       FetchLaporanBaru({ action: "asDiproses", ext: id });
@@ -39,6 +48,29 @@ export default function DetailsResponse() {
 
     TriggerPopup({
       content: "Ubah status 'diproses'?",
+      txtYes: "Ya",
+      txtNo: "Tidak",
+      cbYes: next,
+    });
+  };
+
+  const switchRespon = () => {
+    setManualTerima((prev) => !prev);
+  };
+
+  const handleResponse = (data, e) => {
+    let action =
+      e.nativeEvent.submitter === e.target[2] ? "Diterima" : "Ditolak";
+
+    const next = () => {
+      FetchLaporanBaru({
+        action: "asResponse",
+        ext: { ...data, submitter: action },
+      });
+    };
+
+    TriggerPopup({
+      content: `Respon laporan ${action}?`,
       txtYes: "Ya",
       txtNo: "Tidak",
       cbYes: next,
@@ -53,34 +85,63 @@ export default function DetailsResponse() {
             return (
               <>
                 {manualTerima && (
-                  <Label htmlFor="resLaporan">respon laporan</Label>
+                  <Label htmlFor="resLaporan">
+                    {errors.resLaporan?.message || "respon laporan"}
+                  </Label>
                 )}
-                <OptionContainer>
-                  {manualTerima ? (
-                    <TextArea name="resLaporan" id="resLaporan"></TextArea>
-                  ) : (
+                {manualTerima ? (
+                  <OptionContainer
+                    as="form"
+                    onSubmit={handleSubmit(handleResponse)}
+                  >
+                    <TextArea
+                      name="resLaporan"
+                      id="resLaporan"
+                      ref={register}
+                    ></TextArea>
+                    <div className="multiOption">
+                      <Button
+                        className="normalizeForButton"
+                        onClick={switchRespon}
+                        type="button"
+                      >
+                        <Exit className="inButton" />
+                      </Button>
+                      <Button>Diterima</Button>
+                      <Button>Ditolak</Button>
+                    </div>
+                  </OptionContainer>
+                ) : (
+                  <OptionContainer>
                     <p>{"Pilih opsi respon"}</p>
-                  )}
-                  <div className="multiOption">
-                    <Button onClick={setToDiproses.bind(this, data.id)}>
-                      Diproses
-                    </Button>
-                    <Button>Diterima</Button>
-                  </div>
-                </OptionContainer>
+                    <div className="multiOption">
+                      <Button onClick={setToDiproses.bind(this, data.id)}>
+                        Diproses
+                      </Button>
+                      <Button onClick={switchRespon}>Respon</Button>
+                    </div>
+                  </OptionContainer>
+                )}
               </>
             );
           } else if (data?.status === "Diproses") {
             if (data?.petugas_uid === hashedUsrUID) {
               return (
                 <>
-                  <Label htmlFor="resLaporan">respon laporan</Label>
-                  <OptionContainer>
-                    <TextArea name="resLaporan" id="resLaporan"></TextArea>
+                  <Label htmlFor="resLaporan">
+                    {errors.resLaporan?.message || "respon laporan"}
+                  </Label>
+                  <OptionContainer
+                    as="form"
+                    onSubmit={handleSubmit(handleResponse)}
+                  >
+                    <TextArea
+                      name="resLaporan"
+                      id="resLaporan"
+                      ref={register}
+                    ></TextArea>
                     <div className="multiOption">
-                      <Button onClick={setToDiproses.bind(this, data.id)}>
-                        Ditolak
-                      </Button>
+                      <Button>Ditolak</Button>
                       <Button>Diterima</Button>
                     </div>
                   </OptionContainer>
@@ -97,9 +158,11 @@ export default function DetailsResponse() {
             return (
               <>
                 <Label htmlFor="resLaporan">respon laporan</Label>
-                <TextArea name="resLaporan" id="resLaporan" disabled>
-                  {data?.respon_detail}
-                </TextArea>
+                <TextArea
+                  name="resLaporan"
+                  id="resLaporan"
+                  defaultValue={data?.respon_detail}
+                ></TextArea>
               </>
             );
           }
@@ -108,9 +171,11 @@ export default function DetailsResponse() {
             return (
               <>
                 <Label htmlFor="resLaporan">respon laporan</Label>
-                <TextArea name="resLaporan" id="resLaporan" disabled>
-                  {data?.respon_detail}
-                </TextArea>
+                <TextArea
+                  name="resLaporan"
+                  id="resLaporan"
+                  defaultValue={data?.respon_detail}
+                ></TextArea>
               </>
             );
           } else {

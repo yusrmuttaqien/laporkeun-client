@@ -12,17 +12,13 @@ import {
   Action,
   Label,
 } from "style/Components";
-import { FetchesInstance, DataInstance } from "util/States";
+import { FetchesInstance } from "util/States";
 import { Reload, Info } from "style/Icons";
 import { sortSelect, FetchLaporanBaru } from "util/Fetches";
 import { TriggerDetails } from "component/Details";
 
 export default function LaporanBaru(props) {
   const state = GlobalState(FetchesInstance);
-  const stateSession = GlobalState(DataInstance);
-  const {
-    session: { role, hashedUsrUID },
-  } = stateSession.get();
   const { isLoading } = state.get();
   const { payload, lastFetch, orderBy } = state.laporanBaru.get();
 
@@ -83,49 +79,27 @@ export default function LaporanBaru(props) {
               <Action>Aksi</Action>
             </DataList>
             <Label>Diproses</Label>
-            {role === "admin"
-              ? Object.entries(payload).map(
-                  (data, index) =>
-                    data[1].status === "Diproses" && (
-                      <DataList
-                        className="forBody forData"
-                        key={index}
-                        stats={data[1].status}
-                      >
-                        <section title={data[1].title}>{data[1].title}</section>
-                        <section>{data[1].lapor_date?.split("T")[0]}</section>
-                        <section>{data[1].location.prov}</section>
-                        <section>{data[1].type}</section>
-                        <Action
-                          title="Detail laporan"
-                          onClick={showDetails.bind(this, data[1].id)}
-                        >
-                          <Info />
-                        </Action>
-                      </DataList>
-                    )
-                )
-              : Object.entries(payload).map((data, index) =>
-                  data[1].status === "Diproses" &&
-                  data[1].petugas_uid === hashedUsrUID ? (
-                    <DataList
-                      className="forBody forData"
-                      key={index}
-                      stats={data[1].status}
+            {Object.entries(payload).map(
+              (data, index) =>
+                data[1].status === "Diproses" && (
+                  <DataList
+                    className="forBody forData"
+                    key={index}
+                    stats={data[1].status}
+                  >
+                    <section title={data[1].title}>{data[1].title}</section>
+                    <section>{data[1].lapor_date}</section>
+                    <section>{data[1].location.prov}</section>
+                    <section>{data[1].type}</section>
+                    <Action
+                      title="Detail laporan"
+                      onClick={showDetails.bind(this, data[1].id)}
                     >
-                      <section title={data[1].title}>{data[1].title}</section>
-                      <section>{data[1].lapor_date?.split("T")[0]}</section>
-                      <section>{data[1].location.prov}</section>
-                      <section>{data[1].type}</section>
-                      <Action
-                        title="Detail laporan"
-                        onClick={showDetails.bind(this, data[1].id)}
-                      >
-                        <Info />
-                      </Action>
-                    </DataList>
-                  ) : null
-                )}
+                      <Info />
+                    </Action>
+                  </DataList>
+                )
+            )}
             <Label>Menunggu</Label>
             {Object.entries(payload).map(
               (data, index) =>
@@ -136,7 +110,7 @@ export default function LaporanBaru(props) {
                     stats={data[1].status}
                   >
                     <section title={data[1].title}>{data[1].title}</section>
-                    <section>{data[1].lapor_date?.split("T")[0]}</section>
+                    <section>{data[1].lapor_date}</section>
                     <section>{data[1].location.prov}</section>
                     <section>{data[1].type}</section>
                     <Action

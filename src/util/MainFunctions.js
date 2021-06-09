@@ -12,6 +12,7 @@ import {
   imgProcessing,
   uploadMultipleIMG,
   deleteMultipleIMG,
+  getTime
 } from "util/Helper";
 import {
   GlobalStateSession,
@@ -30,7 +31,7 @@ function userNewTemplate(cred) {
     pic: null,
     role: "pengguna",
     telp: null,
-    acc_date: new Date().toISOString(),
+    acc_date: getTime(),
     name,
   };
 }
@@ -43,7 +44,7 @@ function petugasNewTemplate(cred) {
     pic: null,
     role: "petugas",
     telp: telp,
-    acc_date: new Date().toISOString(),
+    acc_date: getTime(),
     name,
     suspended: false,
   };
@@ -434,12 +435,12 @@ async function deleteIMGProfile() {
 
 async function cleaning() {
   await GlobalStateD().setResetD();
-  await GlobalStateFetches().setResetAll();
   GlobalStateLookup().setLookup({
     deggoLsi: false,
     elor: null,
   });
   await GlobalStateSession().setResetSession();
+  await GlobalStateFetches().setResetAll();
   
   return 1;
 }

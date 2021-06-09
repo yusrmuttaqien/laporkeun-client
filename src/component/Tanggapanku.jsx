@@ -10,35 +10,36 @@ import {
   DataList,
   Notify,
   Action,
+  Label
 } from "style/Components";
 import { FetchesInstance } from "util/States";
 import { Reload, Info } from "style/Icons";
-import { sortSelect, FetchLaporanBaru } from "util/Fetches";
+import { sortSelect, FetchTanggapanku } from "util/Fetches";
 import { TriggerDetails } from "component/Details";
 
 export default function Tanggapanku(props) {
   const state = GlobalState(FetchesInstance);
   const { isLoading } = state.get();
-  const { payload, lastFetch, orderBy } = state.laporanBaru.get();
+  const { payload, lastFetch, orderBy } = state.tanggapanku.get();
 
   const optionChange = (option) => {
-    FetchLaporanBaru({ action: "sortFetch", ext: option });
+    FetchTanggapanku({ action: "sortFetch", ext: option });
   };
 
   const fetchMore = () => {
-    FetchLaporanBaru({ action: "moreFetch" });
+    FetchTanggapanku({ action: "moreFetch" });
   };
 
   const resetFetch = () => {
-    FetchLaporanBaru({ action: "resetFetch" });
+    FetchTanggapanku({ action: "resetFetch" });
   };
 
   const showDetails = (id) => {
-    TriggerDetails({ id, action: "LaporanBaru" });
+    TriggerDetails({ id, action: "Tanggapanku" });
   };
 
   useEffect(() => {
-    FetchLaporanBaru({ action: "effectFetch" });
+    FetchTanggapanku({ action: "effectFetch" });
   }, []);
 
   return (
@@ -77,24 +78,50 @@ export default function Tanggapanku(props) {
               <section>Tipe</section>
               <Action>Aksi</Action>
             </DataList>
-            {Object.entries(payload).map((data, index) => (
-              <DataList
-                className="forBody forData"
-                key={index}
-                stats={data[1].status}
-              >
-                <section title={data[1].title}>{data[1].title}</section>
-                <section>{data[1].lapor_date?.split("T")[0]}</section>
-                <section>{data[1].location.prov}</section>
-                <section>{data[1].type}</section>
-                <Action
-                  title="Detail laporan"
-                  onClick={showDetails.bind(this, data[1].id)}
-                >
-                  <Info />
-                </Action>
-              </DataList>
-            ))}
+            <Label>Diterima</Label>
+            {Object.entries(payload).map(
+              (data, index) =>
+                data[1].status === "Diterima" && (
+                  <DataList
+                    className="forBody forData"
+                    key={index}
+                    stats={data[1].status}
+                  >
+                    <section title={data[1].title}>{data[1].title}</section>
+                    <section>{data[1].lapor_date}</section>
+                    <section>{data[1].location.prov}</section>
+                    <section>{data[1].type}</section>
+                    <Action
+                      title="Detail laporan"
+                      onClick={showDetails.bind(this, data[1].id)}
+                    >
+                      <Info />
+                    </Action>
+                  </DataList>
+                )
+            )}
+            <Label>Ditolak</Label>
+            {Object.entries(payload).map(
+              (data, index) =>
+                data[1].status === "Ditolak" && (
+                  <DataList
+                    className="forBody forData"
+                    key={index}
+                    stats={data[1].status}
+                  >
+                    <section title={data[1].title}>{data[1].title}</section>
+                    <section>{data[1].lapor_date}</section>
+                    <section>{data[1].location.prov}</section>
+                    <section>{data[1].type}</section>
+                    <Action
+                      title="Detail laporan"
+                      onClick={showDetails.bind(this, data[1].id)}
+                    >
+                      <Info />
+                    </Action>
+                  </DataList>
+                )
+            )}
           </ReportBody>
         ) : (
           <Notify message="Tidak ada laporan" />

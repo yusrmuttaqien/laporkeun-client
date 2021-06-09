@@ -219,6 +219,21 @@ async function deleteMultipleIMG(payload, mode) {
   return 1;
 }
 
+function getTime() {
+  let currTime = new Date().toLocaleString("en-ID", {
+    timeZone: "Asia/Jakarta",
+    hour12: false,
+  });
+
+  return currTime;
+}
+
+function getUnixEpooch() {
+  let currTime = Date.now();
+
+  return currTime;
+}
+
 export {
   dimensionIMG,
   compressIMG,
@@ -228,4 +243,6 @@ export {
   imgProcessing,
   uploadMultipleIMG,
   deleteMultipleIMG,
+  getTime,
+  getUnixEpooch,
 };

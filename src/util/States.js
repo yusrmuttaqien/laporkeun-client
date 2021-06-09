@@ -100,7 +100,18 @@ const LookupWrapper = (s) => ({
 const FetchesWrapper = (s) => ({
   // Global
   setLoading: (loading) => s.isLoading.set(loading),
-  setResetAll: () => s.set(FetchesTemplate),
+  setResetAll: () => {
+    s.petugas.payload.set(null);
+    s.laporanku.payload.set(null);
+    s.laporanPublik.payload.set(null);
+    s.laporanBaru.payload.set(null);
+    s.tanggapanku.payload.set(null);
+    s.petugas.set(FetchesTemplate.petugas);
+    s.laporanku.set(FetchesTemplate.laporanku);
+    s.laporanPublik.set(FetchesTemplate.laporanPublik);
+    s.laporanBaru.set(FetchesTemplate.laporanBaru);
+    s.tanggapanku.set(FetchesTemplate.tanggapanku);
+  },
 
   // Petugas
   getPetugasPayload: () => s.petugas.payload.get(),
@@ -150,7 +161,7 @@ const FetchesWrapper = (s) => ({
   setLaporanBaruLastFetch: (lastfetch) =>
     s.laporanBaru.lastFetch.set(lastfetch),
   addLaporanBaruPayload: (payload) => s.laporanBaru.payload.merge(payload),
-  addLaporanBaruPayloadImgURL: (id, url) =>
+  addLaporanBaruPayloadUpdate: (id, url) =>
     s.laporanBaru.payload[id].merge(url),
   deleteLaporanBaru: (id) =>
     s.laporanBaru.payload[id] && s.laporanBaru.payload[id].set(none),
@@ -166,7 +177,7 @@ const FetchesWrapper = (s) => ({
   setTanggapankuLastFetch: (lastfetch) =>
     s.tanggapanku.lastFetch.set(lastfetch),
   addTanggapankuPayload: (payload) => s.tanggapanku.payload.merge(payload),
-  addTanggapankuPayloadImgURL: (id, url) =>
+  addTanggapankuPayloadUpdate: (id, url) =>
     s.tanggapanku.payload[id].merge(url),
   deleteTanggapanku: (id) =>
     s.tanggapanku.payload[id] && s.tanggapanku.payload[id].set(none),
