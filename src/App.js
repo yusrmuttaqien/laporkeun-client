@@ -1,28 +1,29 @@
 import styled from "styled-components";
 import { Toaster } from "react-hot-toast";
 import { Route, BrowserRouter as Router, Switch } from "react-router-dom";
-import { useEffect } from "react";
+import { useEffect, lazy, Suspense } from "react";
 
 import Navbar from "component/Navbar";
-import BuatLaporan from "component/BuatLaporan";
-import Laporanku from "component/Laporanku";
-import LaporanPublik from "component/LaporanPublik";
-import LaporanBaru from "component/LaporanBaru";
-import Tanggapanku from "component/Tanggapanku";
-import SemuaTanggapan from "component/SemuaTanggapan";
-import Petugas from "component/Petugas";
-import Pengaturan from "component/Pengaturan";
-import { Details } from "component/Details";
-import Test from "component/Test";
-import { Loading } from "util/Loading";
-import { Popup } from "util/Popup";
 import { Splash, NotFound } from "component/Splash";
-import PrivateRoute from "util/PrivateRoute";
+import { Loading } from "util/Loading";
 import { check_webp_feature } from "util/WebPCheck";
+import PrivateRoute from "util/PrivateRoute";
+import { Details } from "component/Details";
+import { Popup } from "util/Popup";
 import { authCheck } from "util/MainFunctions";
 
 import BGWebP from "asset/mainBG_WebP.webp";
 import BGProgressive from "asset/mainBG_Progressive.jpg";
+
+const BuatLaporan = lazy(() => import("component/BuatLaporan"));
+const Laporanku = lazy(() => import("component/Laporanku"));
+const LaporanPublik = lazy(() => import("component/LaporanPublik"));
+const LaporanBaru = lazy(() => import("component/LaporanBaru"));
+const Tanggapanku = lazy(() => import("component/Tanggapanku"));
+const SemuaTanggapan = lazy(() => import("component/SemuaTanggapan"));
+const Petugas = lazy(() => import("component/Petugas"));
+const Pengaturan = lazy(() => import("component/Pengaturan"));
+const Test = lazy(() => import("component/Test"));
 
 const AppWrapper = styled.div`
   display: flex;
@@ -88,19 +89,21 @@ function App() {
         <Popup />
         <Loading />
         <View id="View">
-          <Switch>
-            <Route exact path="/" component={Splash} />
-            <PrivateRoute path="/buatlaporan" comp={BuatLaporan} />
-            <PrivateRoute path="/laporanku" comp={Laporanku} />
-            <PrivateRoute path="/laporanpublik" comp={LaporanPublik} />
-            <PrivateRoute path="/laporanbaru" comp={LaporanBaru} />
-            <PrivateRoute path="/tanggapanku" comp={Tanggapanku} />
-            <PrivateRoute path="/semuatanggapan" comp={SemuaTanggapan} />
-            <PrivateRoute path="/petugas" comp={Petugas} />
-            <PrivateRoute path="/pengaturan" comp={Pengaturan} />
-            <Route path="/test" component={Test} />
-            <Route component={NotFound} />
-          </Switch>
+          <Suspense fallback={null}>
+            <Switch>
+              <Route exact path="/" component={Splash} />
+              <PrivateRoute path="/buatlaporan" comp={BuatLaporan} />
+              <PrivateRoute path="/laporanku" comp={Laporanku} />
+              <PrivateRoute path="/laporanpublik" comp={LaporanPublik} />
+              <PrivateRoute path="/laporanbaru" comp={LaporanBaru} />
+              <PrivateRoute path="/tanggapanku" comp={Tanggapanku} />
+              <PrivateRoute path="/semuatanggapan" comp={SemuaTanggapan} />
+              <PrivateRoute path="/petugas" comp={Petugas} />
+              <PrivateRoute path="/pengaturan" comp={Pengaturan} />
+              <Route path="/test" component={Test} />
+              <Route path="" component={NotFound} />
+            </Switch>
+          </Suspense>
         </View>
       </Router>
     </AppWrapper>
