@@ -10,7 +10,7 @@ import {
   DataList,
   Notify,
   Action,
-  Label
+  Label,
 } from "style/Components";
 import { FetchesInstance } from "util/States";
 import { Reload, Info } from "style/Icons";
@@ -34,8 +34,8 @@ export default function Tanggapanku(props) {
     FetchTanggapanku({ action: "resetFetch" });
   };
 
-  const showDetails = (id) => {
-    TriggerDetails({ id, action: "Tanggapanku" });
+  const showDetails = (e) => {
+    TriggerDetails({ id: e.id, status: e.status, action: "Tanggapanku" });
   };
 
   useEffect(() => {
@@ -93,7 +93,10 @@ export default function Tanggapanku(props) {
                     <section>{data[1].type}</section>
                     <Action
                       title="Detail laporan"
-                      onClick={showDetails.bind(this, data[1].id)}
+                      onClick={showDetails.bind(this, {
+                        id: data[1].id,
+                        status: data[1].status,
+                      })}
                     >
                       <Info />
                     </Action>
@@ -115,7 +118,10 @@ export default function Tanggapanku(props) {
                     <section>{data[1].type}</section>
                     <Action
                       title="Detail laporan"
-                      onClick={showDetails.bind(this, data[1].id)}
+                      onClick={showDetails.bind(this, {
+                        id: data[1].id,
+                        status: data[1].status,
+                      })}
                     >
                       <Info />
                     </Action>

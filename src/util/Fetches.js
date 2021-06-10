@@ -399,8 +399,10 @@ async function FetchLaporanku({ action, ext }) {
     case "moreFetch":
       laporanses = await databaseLaporanku.startAfter(lastFetch).get();
       laporanses.docs.forEach((doc) => {
-        realData[doc.id] = doc.data();
-        realData[doc.id] = { ...realData[doc.id], id: doc.id };
+        if (uidAccDateChecker(doc.data().lapor_date, doc.data().pengguna_uid)) {
+          realData[doc.id] = doc.data();
+          realData[doc.id] = { ...realData[doc.id], id: doc.id };
+        }
       });
 
       GlobalStateFetches().addLaporankuPayload(realData);
@@ -638,8 +640,21 @@ async function FetchLaporanBaru({ action, ext }) {
     case "moreFetch":
       laporanses = await databaseLaporanBaru.startAfter(lastFetch).get();
       laporanses.docs.forEach((doc) => {
-        realData[doc.id] = doc.data();
-        realData[doc.id] = { ...realData[doc.id], id: doc.id };
+        if (
+          doc.data().status === "Diproses" &&
+          uidAccDateChecker(
+            doc.data().respon_date.diproses,
+            doc.data().petugas_uid
+          )
+        ) {
+          realData[doc.id] = doc.data();
+          realData[doc.id] = { ...realData[doc.id], id: doc.id };
+        }
+
+        if (doc.data().status === "Menunggu") {
+          realData[doc.id] = doc.data();
+          realData[doc.id] = { ...realData[doc.id], id: doc.id };
+        }
       });
 
       GlobalStateFetches().addLaporanBaruPayload(realData);
@@ -793,8 +808,15 @@ async function FetchTanggapanku({ action, ext }) {
     case "moreFetch":
       laporanses = await databaseTanggapanku.startAfter(lastFetch).get();
       laporanses.docs.forEach((doc) => {
-        realData[doc.id] = doc.data();
-        realData[doc.id] = { ...realData[doc.id], id: doc.id };
+        if (
+          uidAccDateChecker(
+            doc.data().respon_date[doc.data().status.toLowerCase()],
+            doc.data().petugas_uid
+          )
+        ) {
+          realData[doc.id] = doc.data();
+          realData[doc.id] = { ...realData[doc.id], id: doc.id };
+        }
       });
 
       GlobalStateFetches().addTanggapankuPayload(realData);
@@ -816,6 +838,86 @@ async function FetchTanggapanku({ action, ext }) {
 
       GlobalStateFetches().setTanggapankuOrderBy(ext.id);
       GlobalStateFetches().setTanggapankuPayload(realData);
+      break;
+    default:
+      break;
+  }
+
+  GlobalStateFetches().setLoading(false);
+}
+
+async function FetchSemuaTanggapan({ action, ext }) {
+  const doneFirstFetch = GlobalStateFetches().getSemuaTanggapanPayload();
+  const lastFetch = GlobalStateFetches().getSemuaTanggapanLastFetch();
+  const orderBy = GlobalStateFetches().getSemuaTanggapanOrderBy();
+
+  let laporanses,
+    realData = {};
+  const databaseSemuaTanggapan = database
+    .collection("laporan")
+    .where("status", "in", ["Ditolak", "Diterima"])
+    .limit(PaginationLimit);
+
+  GlobalStateFetches().setLoading(true);
+
+  switch (action) {
+    case "effectFetch":
+      if (doneFirstFetch) break;
+
+      FetchSemuaTanggapan({ action: "resetFetch" });
+      break;
+    case "resetFetch":
+      laporanses = await databaseSemuaTanggapan.get();
+      laporanses.docs.forEach((doc) => {
+        realData[doc.id] = doc.data();
+        realData[doc.id] = { ...realData[doc.id], id: doc.id };
+      });
+
+      if (laporanses.empty === true || Object.keys(realData).length === 0) {
+        GlobalStateFetches().setSemuaTanggapanPayload(null);
+        GlobalStateFetches().setSemuaTanggapanLastFetch(0);
+
+        if (orderBy !== 0) {
+          GlobalStateFetches().setSemuaTanggapanOrderBy(0);
+        }
+      } else {
+        GlobalStateFetches().setSemuaTanggapanPayload(realData);
+        GlobalStateFetches().setSemuaTanggapanLastFetch(
+          laporanses.docs[laporanses.docs.length - 1] || 0
+        );
+
+        if (orderBy !== 0) {
+          GlobalStateFetches().setSemuaTanggapanOrderBy(0);
+        }
+      }
+
+      break;
+    case "moreFetch":
+      laporanses = await databaseSemuaTanggapan.startAfter(lastFetch).get();
+      laporanses.docs.forEach((doc) => {
+        realData[doc.id] = doc.data();
+        realData[doc.id] = { ...realData[doc.id], id: doc.id };
+      });
+
+      GlobalStateFetches().addSemuaTanggapanPayload(realData);
+
+      if (orderBy !== 0) {
+        GlobalStateFetches().setSemuaTanggapanOrderBy(0);
+      }
+
+      if (laporanses.empty === true) {
+        GlobalStateFetches().setSemuaTanggapanLastFetch(0);
+      } else {
+        GlobalStateFetches().setSemuaTanggapanLastFetch(
+          laporanses.docs[laporanses.docs.length - 1] || 0
+        );
+      }
+      break;
+    case "sortFetch":
+      realData = await sortBy(doneFirstFetch, ext);
+
+      GlobalStateFetches().setSemuaTanggapanOrderBy(ext.id);
+      GlobalStateFetches().setSemuaTanggapanPayload(realData);
       break;
     default:
       break;
@@ -880,6 +982,19 @@ async function FetchDetails({ action, ext }) {
         });
       }
       break;
+    case "SemuaTanggapan":
+      currentDetails = JSON.parse(
+        JSON.stringify(GlobalStateFetches().getSemuaTanggapanPayload()[ext])
+      );
+
+      if (!currentDetails.picURL && currentDetails.thumbnail) {
+        const url = await multiImgURL(currentDetails.pic, "laporan");
+        currentDetails.picURL = url;
+        GlobalStateFetches().addSemuaTanggapanPayloadUpdate(currentDetails.id, {
+          picURL: currentDetails.picURL,
+        });
+      }
+      break;
     default:
       break;
   }
@@ -898,4 +1013,5 @@ export {
   FetchDetails,
   FetchLaporanBaru,
   FetchTanggapanku,
+  FetchSemuaTanggapan,
 };

@@ -34,8 +34,8 @@ export default function LaporanBaru(props) {
     FetchLaporanBaru({ action: "resetFetch" });
   };
 
-  const showDetails = (id) => {
-    TriggerDetails({ id, action: "LaporanBaru" });
+  const showDetails = (e) => {
+    TriggerDetails({ id: e.id, status: e.status, action: "LaporanBaru" });
   };
 
   useEffect(() => {
@@ -93,7 +93,10 @@ export default function LaporanBaru(props) {
                     <section>{data[1].type}</section>
                     <Action
                       title="Detail laporan"
-                      onClick={showDetails.bind(this, data[1].id)}
+                      onClick={showDetails.bind(this, {
+                        id: data[1].id,
+                        status: data[1].status,
+                      })}
                     >
                       <Info />
                     </Action>
@@ -115,7 +118,10 @@ export default function LaporanBaru(props) {
                     <section>{data[1].type}</section>
                     <Action
                       title="Detail laporan"
-                      onClick={showDetails.bind(this, data[1].id)}
+                      onClick={showDetails.bind(this, {
+                        id: data[1].id,
+                        status: data[1].status,
+                      })}
                     >
                       <Info />
                     </Action>

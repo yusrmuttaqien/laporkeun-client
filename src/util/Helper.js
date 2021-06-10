@@ -60,7 +60,10 @@ function uidAccDateChecker(date, uid) {
   const currDate = GlobalStateSession().getDate();
   const currUID = GlobalStateSession().getUIDUser();
 
-  if (currDate < date && currUID === uid) {
+  let toCompareCurrent = new Date(currDate).toISOString(),
+    toCompareDate = new Date(date).toISOString();
+
+  if (toCompareCurrent < toCompareDate && currUID === uid) {
     return true;
   }
 
@@ -222,7 +225,7 @@ async function deleteMultipleIMG(payload, mode) {
 function getTime() {
   let currTime = new Date().toLocaleString("en-ID", {
     timeZone: "Asia/Jakarta",
-    hour12: false,
+    hour12: true,
   });
 
   return currTime;

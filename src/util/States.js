@@ -50,6 +50,11 @@ const FetchesTemplate = {
     payload: null,
     lastFetch: 0,
   },
+  semuaTanggapan: {
+    orderBy: 0,
+    payload: null,
+    lastFetch: 0,
+  },
 };
 
 const DTemplate = { stats: false, data: null, loading: false };
@@ -106,11 +111,13 @@ const FetchesWrapper = (s) => ({
     s.laporanPublik.payload.set(null);
     s.laporanBaru.payload.set(null);
     s.tanggapanku.payload.set(null);
+    s.semuaTanggapan.payload.set(null);
     s.petugas.set(FetchesTemplate.petugas);
     s.laporanku.set(FetchesTemplate.laporanku);
     s.laporanPublik.set(FetchesTemplate.laporanPublik);
     s.laporanBaru.set(FetchesTemplate.laporanBaru);
     s.tanggapanku.set(FetchesTemplate.tanggapanku);
+    s.semuaTanggapan.set(FetchesTemplate.semuaTanggapan);
   },
 
   // Petugas
@@ -183,6 +190,22 @@ const FetchesWrapper = (s) => ({
     s.tanggapanku.payload[id] && s.tanggapanku.payload[id].set(none),
   setResetTanggapanku: () =>
     s.tanggapanku.set({ orderBy: 0, payload: null, lastFetch: 0 }),
+
+  // SemuaTanggapan
+  getSemuaTanggapanPayload: () => s.semuaTanggapan.payload.get(),
+  getSemuaTanggapanLastFetch: () => s.semuaTanggapan.lastFetch.get(),
+  getSemuaTanggapanOrderBy: () => s.semuaTanggapan.orderBy.get(),
+  setSemuaTanggapanOrderBy: (order) => s.semuaTanggapan.orderBy.set(order),
+  setSemuaTanggapanPayload: (payload) => s.semuaTanggapan.payload.set(payload),
+  setSemuaTanggapanLastFetch: (lastfetch) =>
+    s.semuaTanggapan.lastFetch.set(lastfetch),
+  addSemuaTanggapanPayload: (payload) => s.semuaTanggapan.payload.merge(payload),
+  addSemuaTanggapanPayloadUpdate: (id, url) =>
+    s.semuaTanggapan.payload[id].merge(url),
+  deleteSemuaTanggapan: (id) =>
+    s.semuaTanggapan.payload[id] && s.semuaTanggapan.payload[id].set(none),
+  setResetSemuaTanggapan: () =>
+    s.semuaTanggapan.set({ orderBy: 0, payload: null, lastFetch: 0 }),
 });
 
 const LocationWrapper = (s) => ({
@@ -256,6 +279,11 @@ const FetchesData = {
     lastFetch: 0,
   },
   tanggapanku: {
+    orderBy: 0,
+    payload: null,
+    lastFetch: 0,
+  },
+  semuaTanggapan: {
     orderBy: 0,
     payload: null,
     lastFetch: 0,

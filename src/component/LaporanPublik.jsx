@@ -34,8 +34,8 @@ export default function Laporanku(props) {
     FetchLaporanPublik({ action: "resetFetch" });
   };
 
-  const showDetails = (id) => {
-    TriggerDetails({ id, action: "LaporanPublik" });
+  const showDetails = (e) => {
+    TriggerDetails({ id: e.id, status: e.status, action: "LaporanPublik" });
   };
 
   useEffect(() => {
@@ -93,7 +93,10 @@ export default function Laporanku(props) {
                     <section>{data[1].type}</section>
                     <Action
                       title="Detail laporan"
-                      onClick={showDetails.bind(this, data[1].id)}
+                      onClick={showDetails.bind(this, {
+                        id: data[1].id,
+                        status: data[1].status,
+                      })}
                     >
                       <Info />
                     </Action>
@@ -115,7 +118,10 @@ export default function Laporanku(props) {
                     <section>{data[1].type}</section>
                     <Action
                       title="Detail laporan"
-                      onClick={showDetails.bind(this, data[1].id)}
+                      onClick={showDetails.bind(this, {
+                        id: data[1].id,
+                        status: data[1].status,
+                      })}
                     >
                       <Info />
                     </Action>
@@ -137,7 +143,10 @@ export default function Laporanku(props) {
                     <section>{data[1].type}</section>
                     <Action
                       title="Detail laporan"
-                      onClick={showDetails.bind(this, data[1].id)}
+                      onClick={showDetails.bind(this, {
+                        id: data[1].id,
+                        status: data[1].status,
+                      })}
                     >
                       <Info />
                     </Action>
@@ -159,7 +168,10 @@ export default function Laporanku(props) {
                     <section>{data[1].type}</section>
                     <Action
                       title="Detail laporan"
-                      onClick={showDetails.bind(this, data[1].id)}
+                      onClick={showDetails.bind(this, {
+                        id: data[1].id,
+                        status: data[1].status,
+                      })}
                     >
                       <Info />
                     </Action>
