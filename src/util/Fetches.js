@@ -17,6 +17,19 @@ import {
   getTime,
   getUnixEpooch,
 } from "util/Helper";
+import {
+  collection,
+  query,
+  where,
+  limit,
+  startAfter,
+  getDocs,
+  getDoc,
+  doc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+} from "firebase/firestore";
 import { database } from "util/Firebase";
 
 // Global fetch value
@@ -113,10 +126,6 @@ async function FetchPetugas({ action, ext }) {
 
   let petugases,
     realData = {};
-  const databasePetugas = database
-    .collection("users")
-    .where("role", "==", "petugas")
-    .limit(PaginationLimit);
 
   GlobalStateFetches().setLoading(true);
 
@@ -127,7 +136,13 @@ async function FetchPetugas({ action, ext }) {
       FetchPetugas({ action: "resetFetch" });
       break;
     case "resetFetch":
-      petugases = await databasePetugas.get();
+      petugases = await getDocs(
+        query(
+          collection(database, "users"),
+          where("role", "==", "petugas"),
+          limit(PaginationLimit)
+        )
+      );
       petugases.docs.forEach((doc) => {
         realData[doc.data().name] = doc.data();
       });
@@ -151,7 +166,14 @@ async function FetchPetugas({ action, ext }) {
       }
       break;
     case "moreFetch":
-      petugases = await databasePetugas.startAfter(lastFetch).get();
+      petugases = await getDocs(
+        query(
+          collection(database, "users"),
+          startAfter(lastFetch),
+          where("role", "==", "petugas"),
+          limit(PaginationLimit)
+        )
+      );
       petugases.docs.forEach((doc) => {
         realData[doc.data().name] = doc.data();
       });
@@ -177,10 +199,9 @@ async function FetchPetugas({ action, ext }) {
       GlobalStateFetches().setPetugasPayload(realData);
       break;
     case "closeFetch":
-      await database
-        .collection("users")
-        .doc(ext.identify)
-        .update({ suspended: !ext.suspended });
+      await updateDoc(doc(database, "users", ext.identify), {
+        suspended: !ext.suspended,
+      });
 
       GlobalStateFetches().addPetugasPayload((prev) => ({
         [ext.name]: {
@@ -298,7 +319,6 @@ async function FetchBuatLapor({ action, ext }) {
       break;
     case "submitLaporan":
       const loading = toast.loading("Mengunggah laporan");
-      const databaseLaporan = database.collection("laporan");
       let allIMG,
         imgName = null;
 
@@ -320,7 +340,7 @@ async function FetchBuatLapor({ action, ext }) {
 
       // Upload all
       try {
-        await databaseLaporan.add(dataPush);
+        await addDoc(collection(database, "laporan"), dataPush);
       } catch (err) {
         toast.error("Kesalahan unggah laporan");
         toast.error("Unggah laporan dibatalkan", { id: loading });
@@ -355,10 +375,6 @@ async function FetchLaporanku({ action, ext }) {
   let laporanses,
     isEmpty,
     realData = {};
-  const databaseLaporanku = database
-    .collection("laporan")
-    .where("pengguna_uid", "==", hashedUID)
-    .limit(PaginationLimit);
 
   await GlobalStateFetches().setLoading(true);
 
@@ -369,7 +385,13 @@ async function FetchLaporanku({ action, ext }) {
       FetchLaporanku({ action: "resetFetch" });
       break;
     case "resetFetch":
-      laporanses = await databaseLaporanku.get();
+      laporanses = await getDocs(
+        query(
+          collection(database, "laporan"),
+          where("pengguna_uid", "==", hashedUID),
+          limit(PaginationLimit)
+        )
+      );
       laporanses.docs.forEach((doc) => {
         if (uidAccDateChecker(doc.data().lapor_date, doc.data().pengguna_uid)) {
           realData[doc.id] = doc.data();
@@ -397,13 +419,14 @@ async function FetchLaporanku({ action, ext }) {
 
       break;
     case "moreFetch":
-      laporanses = await databaseLaporanku.startAfter(lastFetch).get();
-      laporanses.docs.forEach((doc) => {
-        if (uidAccDateChecker(doc.data().lapor_date, doc.data().pengguna_uid)) {
-          realData[doc.id] = doc.data();
-          realData[doc.id] = { ...realData[doc.id], id: doc.id };
-        }
-      });
+      laporanses = await getDocs(
+        query(
+          collection(database, "laporan"),
+          startAfter(lastFetch),
+          where("pengguna_uid", "==", hashedUID),
+          limit(PaginationLimit)
+        )
+      );
 
       GlobalStateFetches().addLaporankuPayload(realData);
 
@@ -426,7 +449,6 @@ async function FetchLaporanku({ action, ext }) {
       GlobalStateFetches().setLaporankuPayload(realData);
       break;
     case "deleteFetch":
-      const databaseLaporan = database.collection("laporan").doc(ext.id);
       let currentLaporan;
 
       if (ext.origin === "laporanPublik") {
@@ -441,7 +463,7 @@ async function FetchLaporanku({ action, ext }) {
 
       const loading = toast.loading("Menghapus laporan");
 
-      laporanses = await databaseLaporan.get();
+      laporanses = await getDoc(doc(database, "laporan", ext.id));
       laporanses = laporanses.data();
 
       if (laporanses.status !== "Menunggu") {
@@ -452,7 +474,7 @@ async function FetchLaporanku({ action, ext }) {
       }
 
       try {
-        await databaseLaporan.delete();
+        await deleteDoc(doc(database, "laporan", ext.id));
       } catch (error) {
         toast.error("Kesalahan hapus laporan");
         toast.error("Hapus laporan dibatalkan", { id: loading });
@@ -501,10 +523,6 @@ async function FetchLaporanPublik({ action, ext }) {
 
   let laporanses,
     realData = {};
-  const databaseLaporanPublik = database
-    .collection("laporan")
-    .where("visibility", "==", "Publik")
-    .limit(PaginationLimit);
 
   GlobalStateFetches().setLoading(true);
 
@@ -515,7 +533,13 @@ async function FetchLaporanPublik({ action, ext }) {
       FetchLaporanPublik({ action: "resetFetch" });
       break;
     case "resetFetch":
-      laporanses = await databaseLaporanPublik.get();
+      laporanses = await getDocs(
+        query(
+          collection(database, "laporan"),
+          where("visibility", "==", "Publik"),
+          limit(PaginationLimit)
+        )
+      );
       laporanses.docs.forEach((doc) => {
         realData[doc.id] = doc.data();
         realData[doc.id] = { ...realData[doc.id], id: doc.id };
@@ -541,7 +565,14 @@ async function FetchLaporanPublik({ action, ext }) {
 
       break;
     case "moreFetch":
-      laporanses = await databaseLaporanPublik.startAfter(lastFetch).get();
+      laporanses = await getDocs(
+        query(
+          collection(database, "laporan"),
+          startAfter(lastFetch),
+          where("visibility", "==", "Publik"),
+          limit(PaginationLimit)
+        )
+      );
       laporanses.docs.forEach((doc) => {
         realData[doc.id] = doc.data();
         realData[doc.id] = { ...realData[doc.id], id: doc.id };
@@ -583,12 +614,7 @@ async function FetchLaporanBaru({ action, ext }) {
 
   let laporanses,
     loading,
-    databaseLaporan,
     realData = {};
-  const databaseLaporanBaru = database
-    .collection("laporan")
-    .where("status", "in", ["Menunggu", "Diproses"])
-    .limit(PaginationLimit);
 
   GlobalStateFetches().setLoading(true);
 
@@ -599,7 +625,13 @@ async function FetchLaporanBaru({ action, ext }) {
       FetchLaporanBaru({ action: "resetFetch" });
       break;
     case "resetFetch":
-      laporanses = await databaseLaporanBaru.get();
+      laporanses = await getDocs(
+        query(
+          collection(database, "laporan"),
+          where("status", "in", ["Menunggu", "Diproses"]),
+          limit(PaginationLimit)
+        )
+      );
       laporanses.docs.forEach((doc) => {
         if (
           doc.data().status === "Diproses" &&
@@ -638,7 +670,14 @@ async function FetchLaporanBaru({ action, ext }) {
 
       break;
     case "moreFetch":
-      laporanses = await databaseLaporanBaru.startAfter(lastFetch).get();
+      laporanses = await getDocs(
+        query(
+          collection(database, "laporan"),
+          startAfter(lastFetch),
+          where("status", "in", ["Menunggu", "Diproses"]),
+          limit(PaginationLimit)
+        )
+      );
       laporanses.docs.forEach((doc) => {
         if (
           doc.data().status === "Diproses" &&
@@ -680,10 +719,8 @@ async function FetchLaporanBaru({ action, ext }) {
     case "asDiproses":
       loading = toast.loading("Mengubah status laporan");
 
-      databaseLaporan = database.collection("laporan").doc(ext);
-
       try {
-        laporanses = await databaseLaporan.get();
+        laporanses = await getDoc(doc(database, "laporan", ext));
         laporanses = laporanses.data();
       } catch (err) {
         toast.error(`Firebase err: ${err.code}`, {
@@ -706,7 +743,7 @@ async function FetchLaporanBaru({ action, ext }) {
           petugas_name: name,
           respon_date: { diproses: getTime() },
         };
-        await databaseLaporan.update(payload);
+        await updateDoc(doc(database, "laporan", ext), payload);
         await GlobalStateD().setResetD();
         await GlobalStateFetches().addLaporanBaruPayloadUpdate(ext, payload);
         toast.success(`Status laporan diubah`, {
@@ -723,8 +760,6 @@ async function FetchLaporanBaru({ action, ext }) {
       loading = toast.loading("Menyelesaikan laporan");
       const currID = GlobalStateD().getData().id;
 
-      databaseLaporan = database.collection("laporan").doc(currID);
-
       try {
         let payload = {
           status: ext.submitter,
@@ -733,7 +768,7 @@ async function FetchLaporanBaru({ action, ext }) {
           petugas_name: name,
           respon_detail: ext.resLaporan,
         };
-        await databaseLaporan.update(payload);
+        await updateDoc(doc(database, "laporan", currID), payload);
         await GlobalStateFetches().deleteLaporanBaru(currID);
         await GlobalStateD().setResetD();
         toast.success(`Laporan selesai`, {
@@ -759,10 +794,6 @@ async function FetchTanggapanku({ action, ext }) {
 
   let laporanses,
     realData = {};
-  const databaseTanggapanku = database
-    .collection("laporan")
-    .where("status", "in", ["Ditolak", "Diterima"])
-    .limit(PaginationLimit);
 
   GlobalStateFetches().setLoading(true);
 
@@ -773,7 +804,13 @@ async function FetchTanggapanku({ action, ext }) {
       FetchTanggapanku({ action: "resetFetch" });
       break;
     case "resetFetch":
-      laporanses = await databaseTanggapanku.get();
+      laporanses = await getDocs(
+        query(
+          collection(database, "laporan"),
+          where("status", "in", ["Ditolak", "Diterima"]),
+          limit(PaginationLimit)
+        )
+      );
       laporanses.docs.forEach((doc) => {
         if (
           uidAccDateChecker(
@@ -806,7 +843,14 @@ async function FetchTanggapanku({ action, ext }) {
 
       break;
     case "moreFetch":
-      laporanses = await databaseTanggapanku.startAfter(lastFetch).get();
+      laporanses = await getDocs(
+        query(
+          collection(database, "laporan"),
+          startAfter(lastFetch),
+          where("status", "in", ["Ditolak", "Diterima"]),
+          limit(PaginationLimit)
+        )
+      );
       laporanses.docs.forEach((doc) => {
         if (
           uidAccDateChecker(
@@ -853,10 +897,6 @@ async function FetchSemuaTanggapan({ action, ext }) {
 
   let laporanses,
     realData = {};
-  const databaseSemuaTanggapan = database
-    .collection("laporan")
-    .where("status", "in", ["Ditolak", "Diterima"])
-    .limit(PaginationLimit);
 
   GlobalStateFetches().setLoading(true);
 
@@ -867,7 +907,13 @@ async function FetchSemuaTanggapan({ action, ext }) {
       FetchSemuaTanggapan({ action: "resetFetch" });
       break;
     case "resetFetch":
-      laporanses = await databaseSemuaTanggapan.get();
+      laporanses = await getDocs(
+        query(
+          collection(database, "laporan"),
+          where("status", "in", ["Ditolak", "Diterima"]),
+          limit(PaginationLimit)
+        )
+      );
       laporanses.docs.forEach((doc) => {
         realData[doc.id] = doc.data();
         realData[doc.id] = { ...realData[doc.id], id: doc.id };
@@ -893,7 +939,14 @@ async function FetchSemuaTanggapan({ action, ext }) {
 
       break;
     case "moreFetch":
-      laporanses = await databaseSemuaTanggapan.startAfter(lastFetch).get();
+      laporanses = await getDocs(
+        query(
+          collection(database, "laporan"),
+          startAfter(lastFetch),
+          where("status", "in", ["Ditolak", "Diterima"]),
+          limit(PaginationLimit)
+        )
+      );
       laporanses.docs.forEach((doc) => {
         realData[doc.id] = doc.data();
         realData[doc.id] = { ...realData[doc.id], id: doc.id };

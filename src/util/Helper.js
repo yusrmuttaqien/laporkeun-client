@@ -1,5 +1,11 @@
 import Resizer from "react-image-file-resizer";
 import md5 from "md5";
+import {
+  ref,
+  getDownloadURL,
+  uploadBytes,
+  deleteObject,
+} from "firebase/storage";
 
 import { GlobalStateSession } from "util/States";
 import { storage } from "util/Firebase";
@@ -80,7 +86,7 @@ async function multiImgURL(obj, mode) {
         imgToURL = obj.jpeg;
       }
 
-      imgToURL = await storage.ref("/laporan").child(imgToURL).getDownloadURL();
+      imgToURL = await getDownloadURL(ref(ref(storage, "/laporan"), imgToURL));
       return imgToURL;
     case "profile":
       if (check_webp_feature("alpha")) {
@@ -89,7 +95,7 @@ async function multiImgURL(obj, mode) {
         imgToURL = obj.png;
       }
 
-      imgToURL = await storage.ref("/profile").child(imgToURL).getDownloadURL();
+      imgToURL = await getDownloadURL(ref(ref(storage, "/profile"), imgToURL));
       return imgToURL;
     default:
       break;
@@ -148,18 +154,18 @@ async function uploadMultipleIMG(payload, mode) {
 
   const loopUpload = async (payload) => {
     for (const param in payload) {
-      await storageRef
-        .child(payload[param].name)
-        .put(payload[param].file)
-        .catch((err) => {
-          return 0;
-        });
+      await uploadBytes(
+        ref(storageRef, payload[param].name),
+        payload[param].file
+      ).catch((err) => {
+        return 0;
+      });
     }
   };
 
   switch (mode) {
     case "buatLapor":
-      storageRef = storage.ref("/laporan");
+      storageRef = ref(storage, "/laporan");
 
       try {
         await loopUpload(payload);
@@ -168,7 +174,7 @@ async function uploadMultipleIMG(payload, mode) {
       }
       break;
     case "profile":
-      storageRef = storage.ref("/profile");
+      storageRef = ref(storage, "/profile");
 
       try {
         await loopUpload(payload);
@@ -188,18 +194,15 @@ async function deleteMultipleIMG(payload, mode) {
 
   const loopDelete = async (payload) => {
     for (const param in payload) {
-      await storageRef
-        .child(payload[param])
-        .delete()
-        .catch((err) => {
-          return 0;
-        });
+      await deleteObject(ref(storageRef, payload[param])).catch((err) => {
+        return 0;
+      });
     }
   };
 
   switch (mode) {
     case "deleteLapor":
-      storageRef = storage.ref("/laporan");
+      storageRef = ref(storage, "/laporan");
       try {
         await loopDelete(payload);
       } catch (err) {
@@ -207,7 +210,7 @@ async function deleteMultipleIMG(payload, mode) {
       }
       break;
     case "profile":
-      storageRef = storage.ref("/profile");
+      storageRef = ref(storage, "/profile");
 
       try {
         await loopDelete(payload);

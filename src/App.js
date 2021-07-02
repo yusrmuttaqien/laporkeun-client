@@ -4,7 +4,7 @@ import { Route, BrowserRouter as Router, Switch } from "react-router-dom";
 import { useEffect, lazy, Suspense } from "react";
 
 import Navbar from "component/Navbar";
-import { Splash, NotFound } from "component/Splash";
+import { Splash, NotFound, SusLoading } from "component/Splash";
 import { Loading } from "util/Loading";
 import { check_webp_feature } from "util/WebPCheck";
 import PrivateRoute from "util/PrivateRoute";
@@ -89,7 +89,7 @@ function App() {
         <Popup />
         <Loading />
         <View id="View">
-          <Suspense fallback={null}>
+          <Suspense fallback={<SusLoading />}>
             <Switch>
               <Route exact path="/" component={Splash} />
               <PrivateRoute path="/buatlaporan" comp={BuatLaporan} />

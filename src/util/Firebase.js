@@ -1,7 +1,7 @@
-import firebase from "firebase/app";
-import "firebase/storage";
-import "firebase/firestore";
-import "firebase/auth";
+import { getStorage } from "firebase/storage";
+import { getFirestore } from "firebase/firestore";
+import { initializeApp } from "firebase/app";
+import { getAuth } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: process.env.REACT_APP_API_KEY,
@@ -12,13 +12,12 @@ const firebaseConfig = {
   appId: process.env.REACT_APP_AID,
 };
 
-const main = firebase.initializeApp(firebaseConfig);
-const secondary = firebase.initializeApp(firebaseConfig, "secondary");
+const main = initializeApp(firebaseConfig);
+const secondary = initializeApp(firebaseConfig, "secondary");
 
+const storage = getStorage(main);
+const database = getFirestore(main);
+const auth = getAuth(main);
+const authSecondary = getAuth(secondary);
 
-const storage = main.storage();
-const database = main.firestore();
-const auth = main.auth();
-const authSecondary = secondary.auth();
-
-export { storage, database, auth, authSecondary, firebase as default };
+export { storage, database, auth, authSecondary };

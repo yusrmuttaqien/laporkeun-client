@@ -14,7 +14,7 @@ const Wrapper = styled.div`
   min-height: inherit;
 
   img {
-    ${rfs('60%', 'width')}
+    ${rfs("60%", "width")}
     min-width: 420px;
   }
 `;
@@ -51,4 +51,12 @@ function NotFound() {
   );
 }
 
-export { Splash, NotFound };
+function SusLoading() {
+  return (
+    <Wrapper>
+      <Text>Memuat halaman</Text>
+    </Wrapper>
+  );
+}
+
+export { Splash, NotFound, SusLoading };

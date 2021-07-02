@@ -199,7 +199,8 @@ const FetchesWrapper = (s) => ({
   setSemuaTanggapanPayload: (payload) => s.semuaTanggapan.payload.set(payload),
   setSemuaTanggapanLastFetch: (lastfetch) =>
     s.semuaTanggapan.lastFetch.set(lastfetch),
-  addSemuaTanggapanPayload: (payload) => s.semuaTanggapan.payload.merge(payload),
+  addSemuaTanggapanPayload: (payload) =>
+    s.semuaTanggapan.payload.merge(payload),
   addSemuaTanggapanPayloadUpdate: (id, url) =>
     s.semuaTanggapan.payload[id].merge(url),
   deleteSemuaTanggapan: (id) =>
