@@ -76,16 +76,17 @@ function Details() {
   );
 }
 
-async function TriggerDetails({ id, action }) {
+async function TriggerDetails({ id, status, action }) {
   if (
     GlobalStateD().getData() === null ||
-    GlobalStateD().getData()?.id !== id
+    GlobalStateD().getData()?.id !== id ||
+    GlobalStateD().getData()?.status !== status
   ) {
     await GlobalStateD().setResetD();
     await GlobalStateD().setLoading(true);
     FetchDetails({ ext: id, action });
   }
-  
+
   GlobalStateD().setD(true);
   GlobalStateD().setLoading(false);
 }

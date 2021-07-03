@@ -8,12 +8,29 @@ import {
   GlobalStateD,
 } from "util/States";
 import {
-  compressIMG,
-  dimensionIMG,
   md5Compare,
   multiImgURL,
+  imgProcessing,
+  uploadMultipleIMG,
+  deleteMultipleIMG,
+  uidAccDateChecker,
+  getTime,
+  getUnixEpooch,
 } from "util/Helper";
-import { database, storage } from "util/Firebase";
+import {
+  collection,
+  query,
+  where,
+  limit,
+  startAfter,
+  getDocs,
+  getDoc,
+  doc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+} from "firebase/firestore";
+import { database } from "util/Firebase";
 
 // Global fetch value
 const sortSelect = [
@@ -88,7 +105,7 @@ async function laporNewTemplate(report) {
       prov: GlobalStateLocation().getLocationProv()[locationProv.id].value,
       kota: GlobalStateLocation().getLocationKota()[locationKota.id].value,
     },
-    lapor_date: new Date().toISOString(),
+    lapor_date: getTime(),
     pengguna_uid: hashedUID,
     pengguna_name: GlobalStateSession().getName(),
     petugas_uid: null,
@@ -101,36 +118,6 @@ async function laporNewTemplate(report) {
   };
 }
 
-async function uploadMultiple(payload) {
-  const storageLapor = storage.ref("/laporan");
-
-  for (const param in payload) {
-    await storageLapor
-      .child(payload[param].name)
-      .put(payload[param].file)
-      .catch((err) => {
-        return 0;
-      });
-  }
-
-  return 1;
-}
-
-async function deleteMultiple(payload) {
-  const storageLapor = storage.ref("/laporan");
-
-  for (const param in payload) {
-    await storageLapor
-      .child(payload[param])
-      .delete()
-      .catch((err) => {
-        return 0;
-      });
-  }
-
-  return 1;
-}
-
 // Main fetches
 async function FetchPetugas({ action, ext }) {
   const doneFirstFetch = GlobalStateFetches().getPetugasPayload();
@@ -139,10 +126,6 @@ async function FetchPetugas({ action, ext }) {
 
   let petugases,
     realData = {};
-  const databasePetugas = database
-    .collection("users")
-    .where("role", "==", "petugas")
-    .limit(PaginationLimit);
 
   GlobalStateFetches().setLoading(true);
 
@@ -153,7 +136,13 @@ async function FetchPetugas({ action, ext }) {
       FetchPetugas({ action: "resetFetch" });
       break;
     case "resetFetch":
-      petugases = await databasePetugas.get();
+      petugases = await getDocs(
+        query(
+          collection(database, "users"),
+          where("role", "==", "petugas"),
+          limit(PaginationLimit)
+        )
+      );
       petugases.docs.forEach((doc) => {
         realData[doc.data().name] = doc.data();
       });
@@ -177,7 +166,14 @@ async function FetchPetugas({ action, ext }) {
       }
       break;
     case "moreFetch":
-      petugases = await databasePetugas.startAfter(lastFetch).get();
+      petugases = await getDocs(
+        query(
+          collection(database, "users"),
+          startAfter(lastFetch),
+          where("role", "==", "petugas"),
+          limit(PaginationLimit)
+        )
+      );
       petugases.docs.forEach((doc) => {
         realData[doc.data().name] = doc.data();
       });
@@ -203,10 +199,9 @@ async function FetchPetugas({ action, ext }) {
       GlobalStateFetches().setPetugasPayload(realData);
       break;
     case "closeFetch":
-      await database
-        .collection("users")
-        .doc(ext.identify)
-        .update({ suspended: !ext.suspended });
+      await updateDoc(doc(database, "users", ext.identify), {
+        suspended: !ext.suspended,
+      });
 
       GlobalStateFetches().addPetugasPayload((prev) => ({
         [ext.name]: {
@@ -324,67 +319,41 @@ async function FetchBuatLapor({ action, ext }) {
       break;
     case "submitLaporan":
       const loading = toast.loading("Mengunggah laporan");
-      const databaseLaporan = database.collection("laporan");
-      let imgDimension,
-        imgWhat,
-        imgWEBP,
-        imgJPEG,
-        imgBase64,
+      let allIMG,
         imgName = null;
 
       if (ext.picLaporan[0]) {
-        // Image processing
-        imgDimension = await dimensionIMG(ext.picLaporan[0]);
-        imgWhat =
-          imgDimension.width > imgDimension.height
-            ? { height: imgDimension.height % 2 === 0 ? 8 : 9 }
-            : { width: imgDimension.width % 2 === 0 ? 8 : 9 };
-
-        imgWEBP = await compressIMG({
-          file: ext.picLaporan[0],
-          ...imgDimension,
-        });
-        imgJPEG = await compressIMG({
-          file: ext.picLaporan[0],
-          ...imgDimension,
-          format: "JPEG",
-        });
-        imgBase64 = await compressIMG({
-          file: ext.picLaporan[0],
-          ...imgWhat,
-          quality: 50,
-          format: "JPEG",
-          output: "base64",
-        });
+        allIMG = await imgProcessing(ext.picLaporan[0], "buatLapor");
 
         // Image name
         imgName =
           (await md5Compare(GlobalStateSession().getUID(), "users")) +
-          new Date().getTime();
+          getUnixEpooch();
       }
 
       // Generate details
       const dataPush = await laporNewTemplate({
         ...ext,
         picLaporan: imgName || null,
-        thumbnail: imgBase64 || null,
+        thumbnail: allIMG?.imgBase64 || null,
       });
-      const imgPush = {
-        webp: { name: `${imgName}.webp`, file: imgWEBP },
-        jpeg: { name: `${imgName}.jpeg`, file: imgJPEG },
-      };
 
       // Upload all
       try {
-        await databaseLaporan.add(dataPush);
+        await addDoc(collection(database, "laporan"), dataPush);
       } catch (err) {
         toast.error("Kesalahan unggah laporan");
         toast.error("Unggah laporan dibatalkan", { id: loading });
         break;
       }
 
-      if (imgBase64) {
-        if (!(await uploadMultiple(imgPush))) {
+      if (allIMG?.imgBase64) {
+        const imgPush = {
+          webp: { name: `${imgName}.webp`, file: allIMG.imgWEBP },
+          jpeg: { name: `${imgName}.jpeg`, file: allIMG.imgJPEG },
+        };
+
+        if (!(await uploadMultipleIMG(imgPush, "buatLapor"))) {
           toast.error("Kesalahan unggah gambar");
         }
       }
@@ -406,12 +375,8 @@ async function FetchLaporanku({ action, ext }) {
   let laporanses,
     isEmpty,
     realData = {};
-  const databaseLaporanku = database
-    .collection("laporan")
-    .where("pengguna_uid", "==", hashedUID)
-    .limit(PaginationLimit);
 
-  GlobalStateFetches().setLoading(true);
+  await GlobalStateFetches().setLoading(true);
 
   switch (action) {
     case "effectFetch":
@@ -420,10 +385,18 @@ async function FetchLaporanku({ action, ext }) {
       FetchLaporanku({ action: "resetFetch" });
       break;
     case "resetFetch":
-      laporanses = await databaseLaporanku.get();
+      laporanses = await getDocs(
+        query(
+          collection(database, "laporan"),
+          where("pengguna_uid", "==", hashedUID),
+          limit(PaginationLimit)
+        )
+      );
       laporanses.docs.forEach((doc) => {
-        realData[doc.id] = doc.data();
-        realData[doc.id] = { ...realData[doc.id], id: doc.id };
+        if (uidAccDateChecker(doc.data().lapor_date, doc.data().pengguna_uid)) {
+          realData[doc.id] = doc.data();
+          realData[doc.id] = { ...realData[doc.id], id: doc.id };
+        }
       });
 
       if (laporanses.empty === true) {
@@ -446,11 +419,14 @@ async function FetchLaporanku({ action, ext }) {
 
       break;
     case "moreFetch":
-      laporanses = await databaseLaporanku.startAfter(lastFetch).get();
-      laporanses.docs.forEach((doc) => {
-        realData[doc.id] = doc.data();
-        realData[doc.id] = { ...realData[doc.id], id: doc.id };
-      });
+      laporanses = await getDocs(
+        query(
+          collection(database, "laporan"),
+          startAfter(lastFetch),
+          where("pengguna_uid", "==", hashedUID),
+          limit(PaginationLimit)
+        )
+      );
 
       GlobalStateFetches().addLaporankuPayload(realData);
 
@@ -473,7 +449,6 @@ async function FetchLaporanku({ action, ext }) {
       GlobalStateFetches().setLaporankuPayload(realData);
       break;
     case "deleteFetch":
-      const databaseLaporan = database.collection("laporan").doc(ext.id);
       let currentLaporan;
 
       if (ext.origin === "laporanPublik") {
@@ -488,7 +463,7 @@ async function FetchLaporanku({ action, ext }) {
 
       const loading = toast.loading("Menghapus laporan");
 
-      laporanses = await databaseLaporan.get();
+      laporanses = await getDoc(doc(database, "laporan", ext.id));
       laporanses = laporanses.data();
 
       if (laporanses.status !== "Menunggu") {
@@ -499,7 +474,7 @@ async function FetchLaporanku({ action, ext }) {
       }
 
       try {
-        await databaseLaporan.delete();
+        await deleteDoc(doc(database, "laporan", ext.id));
       } catch (error) {
         toast.error("Kesalahan hapus laporan");
         toast.error("Hapus laporan dibatalkan", { id: loading });
@@ -507,7 +482,7 @@ async function FetchLaporanku({ action, ext }) {
       }
 
       if (currentLaporan.thumbnail) {
-        if (!(await deleteMultiple(currentLaporan.pic))) {
+        if (!(await deleteMultipleIMG(currentLaporan.pic, "deleteLapor"))) {
           toast.error("Kesalahan hapus gambar");
         }
       }
@@ -520,7 +495,7 @@ async function FetchLaporanku({ action, ext }) {
         JSON.stringify(GlobalStateFetches().getLaporankuPayload())
       );
 
-      if (Object.keys(isEmpty).length === 0) {
+      if (!isEmpty || Object.keys(isEmpty).length === 0) {
         GlobalStateFetches().setResetLaporanku();
       }
 
@@ -528,7 +503,7 @@ async function FetchLaporanku({ action, ext }) {
         JSON.stringify(GlobalStateFetches().getLaporanPublikPayload())
       );
 
-      if (Object.keys(isEmpty).length === 0) {
+      if (!isEmpty || Object.keys(isEmpty).length === 0) {
         GlobalStateFetches().setResetLaporanPublik();
       }
 
@@ -548,10 +523,6 @@ async function FetchLaporanPublik({ action, ext }) {
 
   let laporanses,
     realData = {};
-  const databaseLaporanPublik = database
-    .collection("laporan")
-    .where("visibility", "==", "Publik")
-    .limit(PaginationLimit);
 
   GlobalStateFetches().setLoading(true);
 
@@ -562,7 +533,13 @@ async function FetchLaporanPublik({ action, ext }) {
       FetchLaporanPublik({ action: "resetFetch" });
       break;
     case "resetFetch":
-      laporanses = await databaseLaporanPublik.get();
+      laporanses = await getDocs(
+        query(
+          collection(database, "laporan"),
+          where("visibility", "==", "Publik"),
+          limit(PaginationLimit)
+        )
+      );
       laporanses.docs.forEach((doc) => {
         realData[doc.id] = doc.data();
         realData[doc.id] = { ...realData[doc.id], id: doc.id };
@@ -588,7 +565,14 @@ async function FetchLaporanPublik({ action, ext }) {
 
       break;
     case "moreFetch":
-      laporanses = await databaseLaporanPublik.startAfter(lastFetch).get();
+      laporanses = await getDocs(
+        query(
+          collection(database, "laporan"),
+          startAfter(lastFetch),
+          where("visibility", "==", "Publik"),
+          limit(PaginationLimit)
+        )
+      );
       laporanses.docs.forEach((doc) => {
         realData[doc.id] = doc.data();
         realData[doc.id] = { ...realData[doc.id], id: doc.id };
@@ -621,7 +605,381 @@ async function FetchLaporanPublik({ action, ext }) {
   GlobalStateFetches().setLoading(false);
 }
 
-async function FetchDetails({ ext, action }) {
+async function FetchLaporanBaru({ action, ext }) {
+  const doneFirstFetch = GlobalStateFetches().getLaporanBaruPayload();
+  const lastFetch = GlobalStateFetches().getLaporanBaruLastFetch();
+  const orderBy = GlobalStateFetches().getLaporanBaruOrderBy();
+  const hashedUID = GlobalStateSession().getUIDUser();
+  const name = GlobalStateSession().getName();
+
+  let laporanses,
+    loading,
+    realData = {};
+
+  GlobalStateFetches().setLoading(true);
+
+  switch (action) {
+    case "effectFetch":
+      if (doneFirstFetch) break;
+
+      FetchLaporanBaru({ action: "resetFetch" });
+      break;
+    case "resetFetch":
+      laporanses = await getDocs(
+        query(
+          collection(database, "laporan"),
+          where("status", "in", ["Menunggu", "Diproses"]),
+          limit(PaginationLimit)
+        )
+      );
+      laporanses.docs.forEach((doc) => {
+        if (
+          doc.data().status === "Diproses" &&
+          uidAccDateChecker(
+            doc.data().respon_date.diproses,
+            doc.data().petugas_uid
+          )
+        ) {
+          realData[doc.id] = doc.data();
+          realData[doc.id] = { ...realData[doc.id], id: doc.id };
+        }
+
+        if (doc.data().status === "Menunggu") {
+          realData[doc.id] = doc.data();
+          realData[doc.id] = { ...realData[doc.id], id: doc.id };
+        }
+      });
+
+      if (laporanses.empty === true || Object.keys(realData).length === 0) {
+        GlobalStateFetches().setLaporanBaruPayload(null);
+        GlobalStateFetches().setLaporanBaruLastFetch(0);
+
+        if (orderBy !== 0) {
+          GlobalStateFetches().setLaporanBaruOrderBy(0);
+        }
+      } else {
+        GlobalStateFetches().setLaporanBaruPayload(realData);
+        GlobalStateFetches().setLaporanBaruLastFetch(
+          laporanses.docs[laporanses.docs.length - 1] || 0
+        );
+
+        if (orderBy !== 0) {
+          GlobalStateFetches().setLaporanBaruOrderBy(0);
+        }
+      }
+
+      break;
+    case "moreFetch":
+      laporanses = await getDocs(
+        query(
+          collection(database, "laporan"),
+          startAfter(lastFetch),
+          where("status", "in", ["Menunggu", "Diproses"]),
+          limit(PaginationLimit)
+        )
+      );
+      laporanses.docs.forEach((doc) => {
+        if (
+          doc.data().status === "Diproses" &&
+          uidAccDateChecker(
+            doc.data().respon_date.diproses,
+            doc.data().petugas_uid
+          )
+        ) {
+          realData[doc.id] = doc.data();
+          realData[doc.id] = { ...realData[doc.id], id: doc.id };
+        }
+
+        if (doc.data().status === "Menunggu") {
+          realData[doc.id] = doc.data();
+          realData[doc.id] = { ...realData[doc.id], id: doc.id };
+        }
+      });
+
+      GlobalStateFetches().addLaporanBaruPayload(realData);
+
+      if (orderBy !== 0) {
+        GlobalStateFetches().setLaporanBaruOrderBy(0);
+      }
+
+      if (laporanses.empty === true) {
+        GlobalStateFetches().setLaporanBaruLastFetch(0);
+      } else {
+        GlobalStateFetches().setLaporanBaruLastFetch(
+          laporanses.docs[laporanses.docs.length - 1] || 0
+        );
+      }
+      break;
+    case "sortFetch":
+      realData = await sortBy(doneFirstFetch, ext);
+
+      GlobalStateFetches().setLaporanBaruOrderBy(ext.id);
+      GlobalStateFetches().setLaporanBaruPayload(realData);
+      break;
+    case "asDiproses":
+      loading = toast.loading("Mengubah status laporan");
+
+      try {
+        laporanses = await getDoc(doc(database, "laporan", ext));
+        laporanses = laporanses.data();
+      } catch (err) {
+        toast.error(`Firebase err: ${err.code}`, {
+          id: loading,
+        });
+        break;
+      }
+
+      if (laporanses.status !== "Menunggu") {
+        toast.error("Laporan sudah diproses, muat ulang daftar", {
+          id: loading,
+        });
+        break;
+      }
+
+      try {
+        let payload = {
+          status: "Diproses",
+          petugas_uid: hashedUID,
+          petugas_name: name,
+          respon_date: { diproses: getTime() },
+        };
+        await updateDoc(doc(database, "laporan", ext), payload);
+        await GlobalStateD().setResetD();
+        await GlobalStateFetches().addLaporanBaruPayloadUpdate(ext, payload);
+        toast.success(`Status laporan diubah`, {
+          id: loading,
+        });
+      } catch (err) {
+        toast.error(`Firebase err: ${err.code}`, {
+          id: loading,
+        });
+      }
+
+      break;
+    case "asResponse":
+      loading = toast.loading("Menyelesaikan laporan");
+      const currID = GlobalStateD().getData().id;
+
+      try {
+        let payload = {
+          status: ext.submitter,
+          [`respon_date.${ext.submitter.toLowerCase()}`]: getTime(),
+          petugas_uid: hashedUID,
+          petugas_name: name,
+          respon_detail: ext.resLaporan,
+        };
+        await updateDoc(doc(database, "laporan", currID), payload);
+        await GlobalStateFetches().deleteLaporanBaru(currID);
+        await GlobalStateD().setResetD();
+        toast.success(`Laporan selesai`, {
+          id: loading,
+        });
+      } catch (err) {
+        toast.error(`Firebase err: ${err.code}`, {
+          id: loading,
+        });
+      }
+      break;
+    default:
+      break;
+  }
+
+  GlobalStateFetches().setLoading(false);
+}
+
+async function FetchTanggapanku({ action, ext }) {
+  const doneFirstFetch = GlobalStateFetches().getTanggapankuPayload();
+  const lastFetch = GlobalStateFetches().getTanggapankuLastFetch();
+  const orderBy = GlobalStateFetches().getTanggapankuOrderBy();
+
+  let laporanses,
+    realData = {};
+
+  GlobalStateFetches().setLoading(true);
+
+  switch (action) {
+    case "effectFetch":
+      if (doneFirstFetch) break;
+
+      FetchTanggapanku({ action: "resetFetch" });
+      break;
+    case "resetFetch":
+      laporanses = await getDocs(
+        query(
+          collection(database, "laporan"),
+          where("status", "in", ["Ditolak", "Diterima"]),
+          limit(PaginationLimit)
+        )
+      );
+      laporanses.docs.forEach((doc) => {
+        if (
+          uidAccDateChecker(
+            doc.data().respon_date[doc.data().status.toLowerCase()],
+            doc.data().petugas_uid
+          )
+        ) {
+          realData[doc.id] = doc.data();
+          realData[doc.id] = { ...realData[doc.id], id: doc.id };
+        }
+      });
+
+      if (laporanses.empty === true || Object.keys(realData).length === 0) {
+        GlobalStateFetches().setTanggapankuPayload(null);
+        GlobalStateFetches().setTanggapankuLastFetch(0);
+
+        if (orderBy !== 0) {
+          GlobalStateFetches().setTanggapankuOrderBy(0);
+        }
+      } else {
+        GlobalStateFetches().setTanggapankuPayload(realData);
+        GlobalStateFetches().setTanggapankuLastFetch(
+          laporanses.docs[laporanses.docs.length - 1] || 0
+        );
+
+        if (orderBy !== 0) {
+          GlobalStateFetches().setTanggapankuOrderBy(0);
+        }
+      }
+
+      break;
+    case "moreFetch":
+      laporanses = await getDocs(
+        query(
+          collection(database, "laporan"),
+          startAfter(lastFetch),
+          where("status", "in", ["Ditolak", "Diterima"]),
+          limit(PaginationLimit)
+        )
+      );
+      laporanses.docs.forEach((doc) => {
+        if (
+          uidAccDateChecker(
+            doc.data().respon_date[doc.data().status.toLowerCase()],
+            doc.data().petugas_uid
+          )
+        ) {
+          realData[doc.id] = doc.data();
+          realData[doc.id] = { ...realData[doc.id], id: doc.id };
+        }
+      });
+
+      GlobalStateFetches().addTanggapankuPayload(realData);
+
+      if (orderBy !== 0) {
+        GlobalStateFetches().setTanggapankuOrderBy(0);
+      }
+
+      if (laporanses.empty === true) {
+        GlobalStateFetches().setTanggapankuLastFetch(0);
+      } else {
+        GlobalStateFetches().setTanggapankuLastFetch(
+          laporanses.docs[laporanses.docs.length - 1] || 0
+        );
+      }
+      break;
+    case "sortFetch":
+      realData = await sortBy(doneFirstFetch, ext);
+
+      GlobalStateFetches().setTanggapankuOrderBy(ext.id);
+      GlobalStateFetches().setTanggapankuPayload(realData);
+      break;
+    default:
+      break;
+  }
+
+  GlobalStateFetches().setLoading(false);
+}
+
+async function FetchSemuaTanggapan({ action, ext }) {
+  const doneFirstFetch = GlobalStateFetches().getSemuaTanggapanPayload();
+  const lastFetch = GlobalStateFetches().getSemuaTanggapanLastFetch();
+  const orderBy = GlobalStateFetches().getSemuaTanggapanOrderBy();
+
+  let laporanses,
+    realData = {};
+
+  GlobalStateFetches().setLoading(true);
+
+  switch (action) {
+    case "effectFetch":
+      if (doneFirstFetch) break;
+
+      FetchSemuaTanggapan({ action: "resetFetch" });
+      break;
+    case "resetFetch":
+      laporanses = await getDocs(
+        query(
+          collection(database, "laporan"),
+          where("status", "in", ["Ditolak", "Diterima"]),
+          limit(PaginationLimit)
+        )
+      );
+      laporanses.docs.forEach((doc) => {
+        realData[doc.id] = doc.data();
+        realData[doc.id] = { ...realData[doc.id], id: doc.id };
+      });
+
+      if (laporanses.empty === true || Object.keys(realData).length === 0) {
+        GlobalStateFetches().setSemuaTanggapanPayload(null);
+        GlobalStateFetches().setSemuaTanggapanLastFetch(0);
+
+        if (orderBy !== 0) {
+          GlobalStateFetches().setSemuaTanggapanOrderBy(0);
+        }
+      } else {
+        GlobalStateFetches().setSemuaTanggapanPayload(realData);
+        GlobalStateFetches().setSemuaTanggapanLastFetch(
+          laporanses.docs[laporanses.docs.length - 1] || 0
+        );
+
+        if (orderBy !== 0) {
+          GlobalStateFetches().setSemuaTanggapanOrderBy(0);
+        }
+      }
+
+      break;
+    case "moreFetch":
+      laporanses = await getDocs(
+        query(
+          collection(database, "laporan"),
+          startAfter(lastFetch),
+          where("status", "in", ["Ditolak", "Diterima"]),
+          limit(PaginationLimit)
+        )
+      );
+      laporanses.docs.forEach((doc) => {
+        realData[doc.id] = doc.data();
+        realData[doc.id] = { ...realData[doc.id], id: doc.id };
+      });
+
+      GlobalStateFetches().addSemuaTanggapanPayload(realData);
+
+      if (orderBy !== 0) {
+        GlobalStateFetches().setSemuaTanggapanOrderBy(0);
+      }
+
+      if (laporanses.empty === true) {
+        GlobalStateFetches().setSemuaTanggapanLastFetch(0);
+      } else {
+        GlobalStateFetches().setSemuaTanggapanLastFetch(
+          laporanses.docs[laporanses.docs.length - 1] || 0
+        );
+      }
+      break;
+    case "sortFetch":
+      realData = await sortBy(doneFirstFetch, ext);
+
+      GlobalStateFetches().setSemuaTanggapanOrderBy(ext.id);
+      GlobalStateFetches().setSemuaTanggapanPayload(realData);
+      break;
+    default:
+      break;
+  }
+
+  GlobalStateFetches().setLoading(false);
+}
+
+async function FetchDetails({ action, ext }) {
   let currentDetails;
 
   switch (action) {
@@ -651,9 +1009,49 @@ async function FetchDetails({ ext, action }) {
         });
       }
       break;
+    case "LaporanBaru":
+      currentDetails = JSON.parse(
+        JSON.stringify(GlobalStateFetches().getLaporanBaruPayload()[ext])
+      );
+
+      if (!currentDetails.picURL && currentDetails.thumbnail) {
+        const url = await multiImgURL(currentDetails.pic, "laporan");
+        currentDetails.picURL = url;
+        GlobalStateFetches().addLaporanBaruPayloadUpdate(currentDetails.id, {
+          picURL: currentDetails.picURL,
+        });
+      }
+      break;
+    case "Tanggapanku":
+      currentDetails = JSON.parse(
+        JSON.stringify(GlobalStateFetches().getTanggapankuPayload()[ext])
+      );
+
+      if (!currentDetails.picURL && currentDetails.thumbnail) {
+        const url = await multiImgURL(currentDetails.pic, "laporan");
+        currentDetails.picURL = url;
+        GlobalStateFetches().addTanggapankuPayloadUpdate(currentDetails.id, {
+          picURL: currentDetails.picURL,
+        });
+      }
+      break;
+    case "SemuaTanggapan":
+      currentDetails = JSON.parse(
+        JSON.stringify(GlobalStateFetches().getSemuaTanggapanPayload()[ext])
+      );
+
+      if (!currentDetails.picURL && currentDetails.thumbnail) {
+        const url = await multiImgURL(currentDetails.pic, "laporan");
+        currentDetails.picURL = url;
+        GlobalStateFetches().addSemuaTanggapanPayloadUpdate(currentDetails.id, {
+          picURL: currentDetails.picURL,
+        });
+      }
+      break;
     default:
       break;
   }
+
   await GlobalStateD().setData(currentDetails);
   return 1;
 }
@@ -666,4 +1064,7 @@ export {
   FetchLaporanku,
   FetchLaporanPublik,
   FetchDetails,
+  FetchLaporanBaru,
+  FetchTanggapanku,
+  FetchSemuaTanggapan,
 };

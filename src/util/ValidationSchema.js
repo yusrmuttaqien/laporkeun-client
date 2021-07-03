@@ -70,7 +70,7 @@ const SchemaLaporan = yup.object().shape({
 });
 
 const SchemaTanggapan = yup.object().shape({
-  responBalik: yup
+  resLaporan: yup
     .string()
     .required("Respon wajib diisi")
     .max(2000, "Respon maksimal 2000 karakter"),

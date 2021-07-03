@@ -4,7 +4,7 @@ import { useState as GlobalState } from "@hookstate/core";
 import { useHistory } from "react-router-dom";
 
 import { Button } from "style/Components";
-import { Exit } from "style/Icons";
+import { Exit, Info } from "style/Icons";
 import { DInstance } from "util/States";
 import { uidAccDateChecker } from "util/Helper";
 import { TriggerPopup } from "util/Popup";
@@ -40,7 +40,10 @@ export default function DetailsControl(props) {
 
   const handleDelete = () => {
     const next = () => {
-      FetchLaporanku({ action: "deleteFetch", ext: {id: data?.id, origin: history.location.pathname.substring(1) } });
+      FetchLaporanku({
+        action: "deleteFetch",
+        ext: { id: data?.id, origin: history.location.pathname.substring(1) },
+      });
     };
 
     TriggerPopup({
@@ -48,6 +51,13 @@ export default function DetailsControl(props) {
       txtYes: "Ya",
       txtNo: "Tidak",
       cbYes: next,
+    });
+  };
+
+  const handleInteractionInfo = () => {
+    TriggerPopup({
+      content: "Fitur akan mendatang (Info Interaksi)",
+      txtNo: "Baiklah",
     });
   };
 
@@ -69,6 +79,9 @@ export default function DetailsControl(props) {
             uidAccDateChecker(data?.lapor_date, data?.pengguna_uid) ? (
               <Button onClick={handleDelete}>hapus</Button>
             ) : null}
+            <Button className="normalizeForButton" onClick={handleInteractionInfo}>
+              <Info className="inButton" />
+            </Button>
           </div>
         </>
       )}

@@ -1,13 +1,38 @@
 import { toast } from "react-hot-toast";
+import {
+  EmailAuthProvider,
+  reauthenticateWithCredential,
+  onAuthStateChanged,
+  createUserWithEmailAndPassword,
+  signOut,
+  updateEmail,
+  updatePassword,
+  signInWithEmailAndPassword,
+  deleteUser,
+} from "firebase/auth";
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  getDoc,
+  doc,
+  setDoc,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+} from "firebase/firestore";
 
-import Firebase, {
-  database,
-  auth,
-  storage,
-  authSecondary,
-} from "util/Firebase";
+import { database, auth, authSecondary } from "util/Firebase";
 import { TriggerLoading } from "util/Loading";
-import { md5Compare } from "util/Helper";
+import {
+  md5Compare,
+  multiImgURL,
+  imgProcessing,
+  uploadMultipleIMG,
+  deleteMultipleIMG,
+  getTime,
+} from "util/Helper";
 import {
   GlobalStateSession,
   GlobalStateD,
@@ -25,7 +50,7 @@ function userNewTemplate(cred) {
     pic: null,
     role: "pengguna",
     telp: null,
-    acc_date: new Date().toISOString(),
+    acc_date: getTime(),
     name,
   };
 }
@@ -38,7 +63,7 @@ function petugasNewTemplate(cred) {
     pic: null,
     role: "petugas",
     telp: telp,
-    acc_date: new Date().toISOString(),
+    acc_date: getTime(),
     name,
     suspended: false,
   };
@@ -46,10 +71,9 @@ function petugasNewTemplate(cred) {
 
 async function checkIsRegistered(toCompare) {
   let isExist = {};
-  await database
-    .collection("registered")
-    .where("string", "==", toCompare)
-    .get()
+  await getDocs(
+    query(collection(database, "registered"), where("string", "==", toCompare))
+  )
     .then((querySnapshot) => {
       isExist.stat = false;
       querySnapshot.forEach((doc) => {
@@ -93,19 +117,19 @@ function checkWithSession(data, sessionData) {
 
 async function reAuthenticate(key) {
   const currFakeEmailPrefix = GlobalStateSession().getName();
-  const credential = Firebase.auth.EmailAuthProvider.credential(
+  const credential = EmailAuthProvider.credential(
     currFakeEmailPrefix.toLowerCase() + "@laporkeun.com",
     key
   );
 
-  return await auth.currentUser.reauthenticateWithCredential(credential);
+  return await reauthenticateWithCredential(auth.currentUser, credential);
 }
 
 // Main Function
 async function authCheck() {
   TriggerLoading({ stats: true, message: "Memuat akun" });
 
-  await auth.onAuthStateChanged(async (user) => {
+  await onAuthStateChanged(auth, async (user) => {
     if (user) {
       await fetchUserData(user.uid);
       TriggerLoading({ stats: false });
@@ -120,14 +144,10 @@ async function authCheck() {
 
 async function fetchUserData(uid) {
   const userId = await md5Compare(uid, "users");
-  const storageProfile = storage.ref("/profile");
   const getLookup = JSON.parse(JSON.stringify(GlobalStateLookup().getLookup()));
   let details = {};
 
-  await database
-    .collection("users")
-    .doc(userId)
-    .get()
+  await getDoc(doc(database, "users", userId))
     .then((doc) => {
       details = doc.data();
       details.isLogged = true;
@@ -161,7 +181,7 @@ async function fetchUserData(uid) {
   }
 
   if (details.pic) {
-    details.picURL = await storageProfile.child(details.pic).getDownloadURL();
+    details.picURL = await multiImgURL(details.pic, "profile");
   }
   GlobalStateSession().setSession(details);
   return 1;
@@ -185,7 +205,8 @@ async function regisPengguna(cred) {
 
   //   Create account & check name
   try {
-    const UserDetails = await auth.createUserWithEmailAndPassword(
+    const UserDetails = await createUserWithEmailAndPassword(
+      auth,
       fakeEmail,
       kataSandi
     );
@@ -196,8 +217,8 @@ async function regisPengguna(cred) {
 
   //   Create account details & registered
   try {
-    await database.collection("users").doc(userId).set(usrCred);
-    await database.collection("registered").add({ string: toCompare });
+    await setDoc(doc(database, "users", userId), usrCred);
+    await addDoc(collection(database, "registered"), { string: toCompare });
     return Promise.resolve(`Akun ${name} berhasil dibuat`);
   } catch (err) {
     return Promise.reject(`Firebase err: ${err.code} 2`);
@@ -213,7 +234,8 @@ async function regisPetugas(cred) {
 
   //   Create account & check name
   try {
-    const UserDetails = await authSecondary.createUserWithEmailAndPassword(
+    const UserDetails = await createUserWithEmailAndPassword(
+      authSecondary,
       fakeEmail,
       kataSandi
     );
@@ -225,8 +247,8 @@ async function regisPetugas(cred) {
 
   //   Create account details & registered
   try {
-    await database.collection("users").doc(userId).set(usrCred);
-    await authSecondary.signOut();
+    await setDoc(doc(database, "users", userId), usrCred);
+    await signOut(authSecondary);
     return Promise.resolve(`Akun ${name} berhasil dibuat`);
   } catch (err) {
     return Promise.reject(`Firebase err: ${err.code}`);
@@ -240,14 +262,13 @@ async function updateProfile(update) {
   try {
     await reAuthenticate(key);
   } catch (err) {
+    console.log(err)
     return Promise.reject(`Firebase err: ${err.code}`);
   }
 
   const currUID = GlobalStateSession().getUID();
   const hashedCurrUID = GlobalStateSession().getUIDUser();
   const currPic = GlobalStateSession().getPic();
-  const storageProfile = storage.ref("/profile");
-  const databaseProfile = database.collection("users");
   let passChange,
     emailChange,
     dataChange = await checkWithSession(data, sessionData);
@@ -268,36 +289,46 @@ async function updateProfile(update) {
     // Check there is old image
     if (currPic) {
       // Delete old pic
-      await storageProfile
-        .child(currPic)
-        .delete()
-        .then(() => toast.success("Foto lama terhapus"))
-        .catch((err) => {
-          return Promise.reject(`Firebase err: ${err.code}`);
-        });
+      try {
+        await deleteMultipleIMG(currPic, "profile");
+        toast.success("Foto lama terhapus");
+      } catch (err) {
+        return Promise.reject(`Firebase err: ${err.code}`);
+      }
     }
 
     // Set new name
-    let newName = `${hashedCurrUID}.${dataChange.pic.type.split("/")[1]}`;
+    let allIMG,
+      imgPackage,
+      newName = hashedCurrUID;
+
+    allIMG = await imgProcessing(dataChange.pic, "profile");
+
+    imgPackage = {
+      webp: { name: `${newName}.webp`, file: allIMG.imgWEBP },
+      png: { name: `${newName}.png`, file: allIMG.imgPNG },
+    };
 
     // Upload new image
-    await storageProfile
-      .child(newName)
-      .put(dataChange.pic)
-      .then(() => toast.success("Foto baru terunggah"))
-      .catch((err) => {
-        return Promise.reject(`Firebase err: ${err.code}`);
-      });
+    try {
+      await uploadMultipleIMG(imgPackage, "profile");
+      toast.success("Foto baru terunggah");
+    } catch (err) {
+      console.log(err)
+      return Promise.reject(`Firebase err: ${err.code}`);
+    }
 
     // Change file to filename
-    dataChange.pic = newName;
+    dataChange.pic = {
+      webp: `${newName}.webp`,
+      png: `${newName}.png`,
+    };
   }
 
   // Update email & password if available
   if (dataChange.name) {
     emailChange = dataChange.name.toLowerCase() + "@laporkeun.com";
-    await auth.currentUser
-      .updateEmail(emailChange)
+    await updateEmail(auth.currentUser, emailChange)
       .then(() => toast.success("Nama berhasil diubah"))
       .catch((err) => {
         return Promise.reject(`Firebase err: ${err.code}`);
@@ -305,8 +336,7 @@ async function updateProfile(update) {
   }
 
   if (passChange) {
-    await auth.currentUser
-      .updatePassword(passChange)
+    await updatePassword(auth.currentUser, passChange)
       .then(() => toast.success("Kata sandi berhasil diubah"))
       .catch((err) => {
         return Promise.reject(`Firebase err: ${err.code}`);
@@ -314,16 +344,18 @@ async function updateProfile(update) {
   }
 
   // Update user details
-  await databaseProfile
-    .doc(hashedCurrUID)
-    .update(dataChange)
+  await updateDoc(doc(database, "users", hashedCurrUID), dataChange)
     .then(() => toast.success("Detail akun berhasil diubah"))
     .catch((err) => {
       return Promise.reject(`Firebase err: ${err.code}`);
     });
 
   await fetchUserData(currUID);
-  return Promise.resolve("Akun berhasil diperbarui");
+  return Promise.resolve(
+    dataChange.pic
+      ? "Akun berhasil diperbarui, muat ulang halaman"
+      : "Akun berhasil diperbarui"
+  );
 }
 
 async function login(cred) {
@@ -331,7 +363,7 @@ async function login(cred) {
   const fakeEmail = name.toLowerCase() + "@laporkeun.com";
 
   try {
-    await auth.signInWithEmailAndPassword(fakeEmail, kataSandi);
+    await signInWithEmailAndPassword(auth, fakeEmail, kataSandi);
     return Promise.resolve(`Selamat datang, ${name}`);
   } catch (err) {
     return Promise.reject(`Firebase err: ${err.code}`);
@@ -343,9 +375,6 @@ async function deleteAccount(key) {
   const currNIK = GlobalStateSession().getNIK();
   const hashedCurrUID = GlobalStateSession().getUIDUser();
   const toCompare = await md5Compare(currNIK);
-  const storageProfile = storage.ref("/profile");
-  const databaseProfile = database.collection("users");
-  const databaseRegistered = database.collection("registered");
 
   // User reauthenticate
   try {
@@ -356,29 +385,25 @@ async function deleteAccount(key) {
 
   // Check if there is image
   if (currPic) {
-    // Delete pic
-    await storageProfile
-      .child(currPic)
-      .delete()
-      .then(() => toast.success("Foto dihapus"))
-      .catch((err) => {
-        return Promise.reject(`Firebase err: ${err.code}`);
-      });
+    try {
+      await deleteMultipleIMG(currPic, "profile");
+      toast.success("Foto terhapus");
+    } catch (err) {
+      return Promise.reject(`Firebase err: ${err.code}`);
+    }
   }
 
   // Delete user detail
-  await databaseProfile
-    .doc(hashedCurrUID)
-    .delete()
+  await deleteDoc(doc(database, "users", hashedCurrUID))
     .then(() => toast.success("Detail akun dihapus"))
     .catch((err) => {
       return Promise.reject(`Firebase err: ${err.code}`);
     });
 
   // Delete registered
-  await databaseRegistered
-    .where("string", "==", toCompare)
-    .get()
+  await getDocs(
+    query(collection(database, "registered"), where("string", "==", toCompare))
+  )
     .then((querySnapshot) => {
       querySnapshot.forEach((doc) => {
         doc.ref.delete();
@@ -389,8 +414,7 @@ async function deleteAccount(key) {
     });
 
   // Delete account
-  await auth.currentUser
-    .delete()
+  await deleteUser(auth.currentUser)
     .then(() => {
       toast.success("Auth berhasil diputus");
     })
@@ -402,19 +426,35 @@ async function deleteAccount(key) {
   return Promise.resolve("Akun berhasil dihapus");
 }
 
+async function deleteIMGProfile() {
+  const currPic = GlobalStateSession().getPic();
+  const hashedCurrUID = GlobalStateSession().getUIDUser();
+  let dataChange = { pic: null };
+
+  try {
+    await deleteMultipleIMG(currPic, "profile");
+    await updateDoc(doc(database, "users", hashedCurrUID), dataChange);
+
+    return Promise.resolve("Foto terhapus, muat ulang halaman");
+  } catch (err) {
+    return Promise.reject(`Firebase err: ${err.code}`);
+  }
+}
+
 async function cleaning() {
-  await GlobalStateSession().setResetSession();
   await GlobalStateD().setResetD();
-  await GlobalStateFetches().setResetAll();
   GlobalStateLookup().setLookup({
     deggoLsi: false,
     elor: null,
   });
+  await GlobalStateSession().setResetSession();
+  await GlobalStateFetches().setResetAll();
+
   return 1;
 }
 
 async function logout() {
-  await auth.signOut();
+  await signOut(auth);
   await cleaning();
   return 1;
 }
@@ -428,4 +468,5 @@ export {
   login,
   updateProfile,
   deleteAccount,
+  deleteIMGProfile,
 };

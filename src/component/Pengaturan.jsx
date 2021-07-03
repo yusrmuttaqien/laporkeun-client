@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import { useState as GlobalState } from "@hookstate/core";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { useForm } from "react-hook-form";
 import { toast } from "react-hot-toast";
+import composeRefs from "@seznam/compose-react-refs";
 
 import {
   ReportWrapper,
@@ -17,32 +18,94 @@ import {
 } from "style/Components";
 import { TriggerPopup } from "util/Popup";
 import { DataInstance } from "util/States";
-import { SchemaSetting } from "util/ValidationSchema";
-import { updateProfile, deleteAccount } from "util/MainFunctions";
-import { Trashbin } from "style/Icons";
-
-import defaultUser from "asset/defaultUser.svg";
+import {
+  SchemaSetting,
+  SUPPORTED_FORMATS,
+  FILE_SIZE,
+} from "util/ValidationSchema";
+import {
+  updateProfile,
+  deleteAccount,
+  deleteIMGProfile,
+} from "util/MainFunctions";
+import { Trashbin, Warning as WarningIcon } from "style/Icons";
+import { compressIMG, dimensionIMG } from "util/Helper";
 
 export default function Pengaturan(props) {
   const state = GlobalState(DataInstance);
   const { pic, name, telp, picURL, role } = state.session.get();
 
-  const [filename, setFileName] = useState("");
-  const [aspectRatio, setAspectRatio] = useState();
   const [isPic, setIsPic] = useState({ err: false });
 
+  // Unused pic err message
   const { register, handleSubmit, errors } = useForm({
     resolver: yupResolver(SchemaSetting),
-    context: { aspectRatio },
+    context: { aspectRatio: isPic?.aspectRatio },
   });
 
-  const previewPic = (e) => {
-    setFileName(e.target.files[0].name);
-    const reader = new Image();
-    reader.onload = async () => {
-      await setAspectRatio(reader.height / reader.width);
-    };
-    reader.src = window.URL.createObjectURL(e.target.files[0]);
+  const inputFile = useRef();
+
+  const previewPic = async (e) => {
+    if (e.target.files[0]) {
+      const isValid = SUPPORTED_FORMATS.includes(e.target.files[0].type);
+      const isHuge = e.target.files[0].size > FILE_SIZE;
+      let isGoodRatio = await dimensionIMG(e.target.files[0]);
+      isGoodRatio = isGoodRatio.height / isGoodRatio.width;
+
+      if (!isValid) {
+        await setIsPic((prev) => ({
+          err: true,
+          name: `${e.target.files[0].name}, tidak didukung`,
+        }));
+        e.target.value = "";
+        return 0;
+      }
+
+      if (isHuge) {
+        await setIsPic((prev) => ({
+          err: true,
+          name: `${e.target.files[0].name}, terlalu besar`,
+        }));
+        e.target.value = "";
+        return 0;
+      }
+
+      if (isGoodRatio !== 1) {
+        await setIsPic((prev) => ({
+          err: true,
+          name: `${e.target.files[0].name}, rasio tidak 1:1`,
+        }));
+        e.target.value = "";
+        return 0;
+      }
+
+      const preview = await compressIMG({
+        file: e.target.files[0],
+        height: 500,
+        format: "JPEG",
+        output: "base64",
+      });
+
+      setIsPic({
+        err: false,
+        file: preview,
+        name: e.target.files[0].name,
+        aspectRatio: isGoodRatio,
+      });
+    }
+  };
+
+  const deletePic = () => {
+    const e = inputFile.current;
+
+    setIsPic();
+
+    e.value = "";
+
+    if (!/safari/i.test(navigator.userAgent)) {
+      e.type = "";
+      e.type = "file";
+    }
   };
 
   const onSubmit = (data) => {
@@ -51,7 +114,10 @@ export default function Pengaturan(props) {
       const sessionData = { pic, name, telp };
       toast.promise(updateProfile({ data, sessionData, key }), {
         loading: "Tunggu sebentar kawan",
-        success: (msg) => msg,
+        success: (msg) => {
+          setIsPic();
+          return msg;
+        },
         error: (err) => err && err.toString(),
       });
     };
@@ -75,13 +141,30 @@ export default function Pengaturan(props) {
         error: (err) => err && err.toString(),
       });
     };
-
+    
     TriggerPopup({
       form: true,
       content: "Anda yakin ingin menghapus akun?",
       txtYes: "Ya",
-      txtNo: "Tidak jadi",
+      txtNo: "Tidak",
       txtLabel: "Kata sandi",
+      cbYes: next,
+    });
+  };
+  
+  const deleteProfileIMG = () => {
+    const next = () => {
+      toast.promise(deleteIMGProfile(), {
+        loading: "Tunggu sebentar",
+        success: (msg) => msg,
+        error: (err) => err && err.toString(),
+      });
+    };
+
+    TriggerPopup({
+      content: "Hapus gambar profil?",
+      txtYes: "Ya",
+      txtNo: "Tidak",
       cbYes: next,
     });
   };
@@ -95,7 +178,7 @@ export default function Pengaturan(props) {
             {role === "pengguna" && (
               <Button onClick={onDelete}>Hapus akun</Button>
             )}
-            {picURL && <Button>Hapus gambar</Button>}
+            {picURL && <Button onClick={deleteProfileIMG}>Hapus gambar</Button>}
             <Button type="submit" form="changeSetting">
               Simpan
             </Button>
@@ -107,37 +190,36 @@ export default function Pengaturan(props) {
               {isPic?.file && (
                 <>
                   <Button
-                    className="normalizeForButton forBuatLaporPreview"
+                    className="normalizeForButton forPengaturanPreview"
                     type="button"
                     title="Hapus gambar"
+                    onClick={deletePic}
                   >
                     <Trashbin className="inButton" />
                   </Button>
                   <img src={isPic?.file} alt="imgPreview" />
                 </>
               )}
-              {isPic?.err && <Warning className="inAction" />}
+              {isPic?.err && <WarningIcon className="inAction" />}
               <div className="text">
                 {isPic?.name
                   ? isPic?.name
-                  : "Klik tombol dibawah untuk ubah gambar"}
+                  : picURL
+                  ? "Klik tombol dibawah untuk ubah gambar profil"
+                  : "Klik tombol dibawah untuk tambah gambar profil"}
               </div>
               <Button>
                 <Label htmlFor="pic" className="forButton">
-                  {errors.pic?.message
-                    ? errors.pic?.message
-                    : filename
-                    ? filename
-                    : "Ubah profil"}
+                  {picURL || isPic?.file ? "Ubah profil" : "Tambah profil"}
                 </Label>
                 <Input
                   form="changeSetting"
                   type="file"
                   name="pic"
                   id="pic"
-                  accept="image/x-png,image/gif,image/jpeg"
+                  accept="image/png,image/gif,image/jpeg,image/jpg,image/webp;capture=camera"
                   className="forFile"
-                  ref={register}
+                  ref={composeRefs(register, inputFile)}
                   onChange={previewPic}
                 />
               </Button>

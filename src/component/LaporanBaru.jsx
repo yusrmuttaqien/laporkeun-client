@@ -1,242 +1,138 @@
-import React, { useState } from "react";
-import styled from "styled-components";
-import { useLocation } from "react-router-dom";
-import Select from "react-select";
-import rfs from "rfsjs";
+import React, { useEffect } from "react";
 import { useState as GlobalState } from "@hookstate/core";
 
-import { useLaporanBaru } from "util/CustomHooks";
 import {
   ReportWrapper,
-  Action,
   Report,
   ReportBody,
   Button,
+  CustomSelect,
+  DataList,
+  Notify,
+  Action,
+  Label,
 } from "style/Components";
-import { DInstance } from "util/States";
+import { FetchesInstance } from "util/States";
+import { Reload, Info } from "style/Icons";
+import { sortSelect, FetchLaporanBaru } from "util/Fetches";
+import { TriggerDetails } from "component/Details";
 
-const options = [
-  { value: "Date DESC", label: "Terbaru" },
-  { value: "Date ASC", label: "Terlama" },
-  // { value: "stat Menunggu", label: "Menunggu" },
-  // { value: "stat Diterima", label: "Diterima" },
-];
+export default function LaporanBaru(props) {
+  const state = GlobalState(FetchesInstance);
+  const { isLoading } = state.get();
+  const { payload, lastFetch, orderBy } = state.laporanBaru.get();
 
-const CustomReport = styled(Report)`
-  .reportHeader {
-    display: inherit;
-    align-items: center;
-    justify-content: space-between;
-
-    h1 {
-      white-space: nowrap;
-      overflow: hidden;
-      text-overflow: ellipsis;
-    }
-  }
-`;
-
-const CustomSelect = styled(Select)`
-  background-color: transparent;
-  outline: none;
-  width: 200px;
-
-  .Select__control {
-    background-color: transparent;
-    border-color: ${(props) => props.theme.color.grey};
-    box-shadow: none;
-
-    .Select__value-container--has-value {
-      .Select__single-value {
-        color: ${(props) => props.theme.color.grey};
-      }
-    }
-
-    &:hover {
-      border-color: ${(props) => props.theme.color.purple};
-    }
-  }
-
-  .Select__menu {
-    background-color: ${(props) => props.theme.color.darkTransparent};
-    backdrop-filter: blur(${(props) => props.theme.value.blur});
-  }
-
-  .Select__option {
-    &.Select__option--is-selected {
-      background-color: ${(props) => props.theme.color.purple};
-
-      &.Select__option--is-focused {
-        background-color: ${(props) => props.theme.color.purple};
-      }
-    }
-
-    &.Select__option--is-focused {
-      background-color: transparent;
-    }
-  }
-
-  @media only screen and (max-width: 950px) {
-    width: 140px;
-  }
-`;
-
-const ReportBodyCustomNotFound = styled(ReportBody)`
-  justify-content: center;
-  align-items: center;
-
-  img {
-    ${rfs("70%", "width")};
-  }
-
-  a {
-    color: ${(props) => props.theme.color.white};
-  }
-`;
-
-const ReportBodyCustom = styled(ReportBody)`
-  position: relative;
-  padding-right: 5px;
-`;
-
-const DataList = styled.div`
-  /* background-color: ${(props) => props.theme.color.white}; */
-  background-color: ${(props) => {
-    if (props.stats === "Diterima") {
-      return props.theme.color.done;
-    } else if (props.stats === "Menunggu") {
-      return props.theme.color.waiting;
-    } else {
-      return props.theme.color.white;
-    }
-  }};
-  color: ${(props) => props.theme.color.dark};
-  border-radius: ${(props) => props.theme.value.radius};
-
-  display: inherit;
-  justify-content: space-around;
-
-  padding: 0.3em 0.5em;
-  margin-bottom: 0.5em;
-
-  ${Action} {
-    width: 100px;
-  }
-
-  &:nth-child(1) {
-    background-color: ${(props) => props.theme.color.purple};
-    font-weight: ${(props) => props.theme.value.font.medium};
-    color: ${(props) => props.theme.color.white};
-
-    position: sticky;
-    top: 0;
-
-    cursor: default;
-
-    ${Action} {
-      cursor: default;
-      width: 100px;
-    }
-  }
-
-  section {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    width: 100px;
-    text-align: center;
-
-    &:nth-child(1) {
-      font-weight: ${(props) => props.theme.value.font.medium};
-    }
-  }
-
-  @media only screen and (max-width: 950px) {
-    section {
-      &:nth-child(2) {
-        display: none;
-      }
-    }
-  }
-`;
-
-const MoreButton = styled(Button)`
-  margin-bottom: 0.5em;
-`;
-
-export default function LaporanBaru() {
-  let { pathname } = useLocation();
-  pathname = pathname.substring(1);
-
-  const state = GlobalState(DInstance);
-
-  const [page, setPage] = useState(1);
-  const [sort, setSort] = useState("Date DESC");
-
-  const { hasMore, laporanbaru } = useLaporanBaru(page, sort);
-
-  const loadNext = () => {
-    setPage(page + 1);
+  const optionChange = (option) => {
+    FetchLaporanBaru({ action: "sortFetch", ext: option });
   };
 
-  const handleChange = (value) => {
-    setSort(value.value);
-    setPage(1);
+  const fetchMore = () => {
+    FetchLaporanBaru({ action: "moreFetch" });
   };
 
-  const handleDetails = (laporan) => {
-    state.stats.set(true);
-    // fetch detail report
-    // detailReport({ id: laporan.id_report, nik: laporan.NIK });
+  const resetFetch = () => {
+    FetchLaporanBaru({ action: "resetFetch" });
   };
+
+  const showDetails = (e) => {
+    TriggerDetails({ id: e.id, status: e.status, action: "LaporanBaru" });
+  };
+
+  useEffect(() => {
+    FetchLaporanBaru({ action: "effectFetch" });
+  }, []);
 
   return (
     <ReportWrapper>
-      <CustomReport>
+      <Report>
         <div className="reportHeader">
-          <h1 title={pathname}>{pathname}</h1>
-          <CustomSelect
-            options={options}
-            classNamePrefix={"Select"}
-            defaultValue={options[0]}
-            placeholder="Urutkan dari"
-            onChange={handleChange}
-          />
+          <h1 title={props.name}>{props.name}</h1>
+          <div className="multiOption">
+            <CustomSelect
+              options={sortSelect}
+              classNamePrefix={"Select"}
+              defaultValue={sortSelect[orderBy]}
+              value={sortSelect[orderBy]}
+              onChange={optionChange}
+              isDisabled={payload ? false : true}
+            />
+            <Button
+              onClick={resetFetch}
+              className="forIcon"
+              title="Muat ulang"
+              disabled={isLoading}
+            >
+              <Reload className="inButton" />
+            </Button>
+            <Button disabled={lastFetch === 0 || isLoading} onClick={fetchMore}>
+              {lastFetch === 0 ? "Akhir data" : "Muat lagi"}
+            </Button>
+          </div>
         </div>
-        {laporanbaru.length === 0 ? (
-          // NOTE: Redesign
-          <ReportBodyCustomNotFound>Tidak ada laporan</ReportBodyCustomNotFound>
-        ) : (
-          <ReportBodyCustom>
-            <DataList>
-              <section>Judul Laporan</section>
+        {payload ? (
+          <ReportBody className="forDataList">
+            <DataList className="forHeading">
+              <section>Judul</section>
               <section>Tanggal lapor</section>
-              <section>Visibilitas</section>
-              <section>Status</section>
-              <Action>Detail</Action>
+              <section>Lokasi</section>
+              <section>Tipe</section>
+              <Action>Aksi</Action>
             </DataList>
-            {laporanbaru.map((laporan, index) => (
-              <DataList key={index} stats={laporan.stat}>
-                <section title={laporan.title}>{laporan.title}</section>
-                <section>{laporan.date_report}</section>
-                <section>{laporan.vis}</section>
-                <section>{laporan.stat}</section>
-                <Action
-                  title="Buka Detail"
-                  onClick={() => {
-                    handleDetails(laporan);
-                  }}
-                >
-                  <span className="material-icons">launch</span>
-                </Action>
-              </DataList>
-            ))}
-            {hasMore && (
-              <MoreButton onClick={loadNext}>Muat lagi</MoreButton>
+            <Label>Diproses</Label>
+            {Object.entries(payload).map(
+              (data, index) =>
+                data[1].status === "Diproses" && (
+                  <DataList
+                    className="forBody forData"
+                    key={index}
+                    stats={data[1].status}
+                  >
+                    <section title={data[1].title}>{data[1].title}</section>
+                    <section>{data[1].lapor_date}</section>
+                    <section>{data[1].location.prov}</section>
+                    <section>{data[1].type}</section>
+                    <Action
+                      title="Detail laporan"
+                      onClick={showDetails.bind(this, {
+                        id: data[1].id,
+                        status: data[1].status,
+                      })}
+                    >
+                      <Info />
+                    </Action>
+                  </DataList>
+                )
             )}
-          </ReportBodyCustom>
+            <Label>Menunggu</Label>
+            {Object.entries(payload).map(
+              (data, index) =>
+                data[1].status === "Menunggu" && (
+                  <DataList
+                    className="forBody forData"
+                    key={index}
+                    stats={data[1].status}
+                  >
+                    <section title={data[1].title}>{data[1].title}</section>
+                    <section>{data[1].lapor_date}</section>
+                    <section>{data[1].location.prov}</section>
+                    <section>{data[1].type}</section>
+                    <Action
+                      title="Detail laporan"
+                      onClick={showDetails.bind(this, {
+                        id: data[1].id,
+                        status: data[1].status,
+                      })}
+                    >
+                      <Info />
+                    </Action>
+                  </DataList>
+                )
+            )}
+          </ReportBody>
+        ) : (
+          <Notify message="Tidak ada laporan" />
         )}
-      </CustomReport>
+      </Report>
     </ReportWrapper>
   );
 }

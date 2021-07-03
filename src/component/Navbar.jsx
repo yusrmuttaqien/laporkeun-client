@@ -57,6 +57,18 @@ const LogoContainer = styled.div`
   section {
     transition: ${(props) => props.theme.value.transition};
     transition-property: opacity;
+    position: absolute;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    height: 100%;
+    width: 100%;
+
+    img {
+      height: 100%;
+      width: 200px;
+      object-fit: contain;;
+    }
 
     &:nth-child(1) {
       opacity: 1;
@@ -64,10 +76,6 @@ const LogoContainer = styled.div`
 
     &:nth-child(2) {
       opacity: 0;
-      position: absolute;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
     }
   }
 
@@ -111,7 +119,7 @@ export default function Navbar(props) {
             src={About}
             alt="Logo with Credit"
             draggable="false"
-            id="logowDesc"
+            id="logo"
             title="laporkeun! by yusr.dhm"
           />
         </section>

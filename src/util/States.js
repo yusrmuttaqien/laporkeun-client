@@ -40,6 +40,21 @@ const FetchesTemplate = {
     payload: null,
     lastFetch: 0,
   },
+  laporanBaru: {
+    orderBy: 0,
+    payload: null,
+    lastFetch: 0,
+  },
+  tanggapanku: {
+    orderBy: 0,
+    payload: null,
+    lastFetch: 0,
+  },
+  semuaTanggapan: {
+    orderBy: 0,
+    payload: null,
+    lastFetch: 0,
+  },
 };
 
 const DTemplate = { stats: false, data: null, loading: false };
@@ -90,7 +105,20 @@ const LookupWrapper = (s) => ({
 const FetchesWrapper = (s) => ({
   // Global
   setLoading: (loading) => s.isLoading.set(loading),
-  setResetAll: () => s.set(FetchesTemplate),
+  setResetAll: () => {
+    s.petugas.payload.set(null);
+    s.laporanku.payload.set(null);
+    s.laporanPublik.payload.set(null);
+    s.laporanBaru.payload.set(null);
+    s.tanggapanku.payload.set(null);
+    s.semuaTanggapan.payload.set(null);
+    s.petugas.set(FetchesTemplate.petugas);
+    s.laporanku.set(FetchesTemplate.laporanku);
+    s.laporanPublik.set(FetchesTemplate.laporanPublik);
+    s.laporanBaru.set(FetchesTemplate.laporanBaru);
+    s.tanggapanku.set(FetchesTemplate.tanggapanku);
+    s.semuaTanggapan.set(FetchesTemplate.semuaTanggapan);
+  },
 
   // Petugas
   getPetugasPayload: () => s.petugas.payload.get(),
@@ -110,7 +138,8 @@ const FetchesWrapper = (s) => ({
   setLaporankuLastFetch: (lastfetch) => s.laporanku.lastFetch.set(lastfetch),
   addLaporankuPayload: (payload) => s.laporanku.payload.merge(payload),
   addLaporankuPayloadImgURL: (id, url) => s.laporanku.payload[id].merge(url),
-  deleteLaporanku: (id) => s.laporanku.payload[id].set(none),
+  deleteLaporanku: (id) =>
+    s.laporanku.payload[id] && s.laporanku.payload[id].set(none),
   setResetLaporanku: () =>
     s.laporanku.set({ orderBy: 0, payload: null, lastFetch: 0 }),
 
@@ -125,9 +154,59 @@ const FetchesWrapper = (s) => ({
   addLaporanPublikPayload: (payload) => s.laporanPublik.payload.merge(payload),
   addLaporanPublikPayloadImgURL: (id, url) =>
     s.laporanPublik.payload[id].merge(url),
-  deleteLaporanPublik: (id) => s.laporanPublik.payload[id].set(none),
+  deleteLaporanPublik: (id) =>
+    s.laporanPublik.payload[id] && s.laporanPublik.payload[id].set(none),
   setResetLaporanPublik: () =>
     s.laporanPublik.set({ orderBy: 0, payload: null, lastFetch: 0 }),
+
+  // LaporanBaru
+  getLaporanBaruPayload: () => s.laporanBaru.payload.get(),
+  getLaporanBaruLastFetch: () => s.laporanBaru.lastFetch.get(),
+  getLaporanBaruOrderBy: () => s.laporanBaru.orderBy.get(),
+  setLaporanBaruOrderBy: (order) => s.laporanBaru.orderBy.set(order),
+  setLaporanBaruPayload: (payload) => s.laporanBaru.payload.set(payload),
+  setLaporanBaruLastFetch: (lastfetch) =>
+    s.laporanBaru.lastFetch.set(lastfetch),
+  addLaporanBaruPayload: (payload) => s.laporanBaru.payload.merge(payload),
+  addLaporanBaruPayloadUpdate: (id, url) =>
+    s.laporanBaru.payload[id].merge(url),
+  deleteLaporanBaru: (id) =>
+    s.laporanBaru.payload[id] && s.laporanBaru.payload[id].set(none),
+  setResetLaporanBaru: () =>
+    s.laporanBaru.set({ orderBy: 0, payload: null, lastFetch: 0 }),
+
+  // Tanggapanku
+  getTanggapankuPayload: () => s.tanggapanku.payload.get(),
+  getTanggapankuLastFetch: () => s.tanggapanku.lastFetch.get(),
+  getTanggapankuOrderBy: () => s.tanggapanku.orderBy.get(),
+  setTanggapankuOrderBy: (order) => s.tanggapanku.orderBy.set(order),
+  setTanggapankuPayload: (payload) => s.tanggapanku.payload.set(payload),
+  setTanggapankuLastFetch: (lastfetch) =>
+    s.tanggapanku.lastFetch.set(lastfetch),
+  addTanggapankuPayload: (payload) => s.tanggapanku.payload.merge(payload),
+  addTanggapankuPayloadUpdate: (id, url) =>
+    s.tanggapanku.payload[id].merge(url),
+  deleteTanggapanku: (id) =>
+    s.tanggapanku.payload[id] && s.tanggapanku.payload[id].set(none),
+  setResetTanggapanku: () =>
+    s.tanggapanku.set({ orderBy: 0, payload: null, lastFetch: 0 }),
+
+  // SemuaTanggapan
+  getSemuaTanggapanPayload: () => s.semuaTanggapan.payload.get(),
+  getSemuaTanggapanLastFetch: () => s.semuaTanggapan.lastFetch.get(),
+  getSemuaTanggapanOrderBy: () => s.semuaTanggapan.orderBy.get(),
+  setSemuaTanggapanOrderBy: (order) => s.semuaTanggapan.orderBy.set(order),
+  setSemuaTanggapanPayload: (payload) => s.semuaTanggapan.payload.set(payload),
+  setSemuaTanggapanLastFetch: (lastfetch) =>
+    s.semuaTanggapan.lastFetch.set(lastfetch),
+  addSemuaTanggapanPayload: (payload) =>
+    s.semuaTanggapan.payload.merge(payload),
+  addSemuaTanggapanPayloadUpdate: (id, url) =>
+    s.semuaTanggapan.payload[id].merge(url),
+  deleteSemuaTanggapan: (id) =>
+    s.semuaTanggapan.payload[id] && s.semuaTanggapan.payload[id].set(none),
+  setResetSemuaTanggapan: () =>
+    s.semuaTanggapan.set({ orderBy: 0, payload: null, lastFetch: 0 }),
 });
 
 const LocationWrapper = (s) => ({
@@ -191,6 +270,21 @@ const FetchesData = {
     lastFetch: 0,
   },
   laporanPublik: {
+    orderBy: 0,
+    payload: null,
+    lastFetch: 0,
+  },
+  laporanBaru: {
+    orderBy: 0,
+    payload: null,
+    lastFetch: 0,
+  },
+  tanggapanku: {
+    orderBy: 0,
+    payload: null,
+    lastFetch: 0,
+  },
+  semuaTanggapan: {
     orderBy: 0,
     payload: null,
     lastFetch: 0,

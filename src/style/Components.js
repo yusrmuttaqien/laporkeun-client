@@ -243,12 +243,12 @@ const Button = styled.button`
   overflow: hidden;
   text-overflow: ellipsis;
 
-  &:focus {
+  &:focus:enabled {
     background-color: ${(props) => props.theme.color.purple};
     color: ${(props) => props.theme.color.white};
   }
 
-  &:hover {
+  &:hover:enabled {
     color: ${(props) => props.theme.color.white};
     background-color: ${(props) => props.theme.color.dark};
     cursor: pointer;
@@ -283,6 +283,15 @@ const Button = styled.button`
     padding: 0.3em 0.4em;
     top: 0.5em;
     right: 0.5em;
+  }
+
+  &.forPengaturanPreview {
+    position: absolute;
+    padding: 0.3em 0.4em;
+    top: 18%;
+    left: 79%;
+
+    transform: translate(-50%, -50%);
   }
 `;
 

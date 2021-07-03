@@ -10,6 +10,7 @@ import {
   DataList,
   Notify,
   Action,
+  Label,
 } from "style/Components";
 import { FetchesInstance } from "util/States";
 import { Reload, Info } from "style/Icons";
@@ -33,8 +34,8 @@ export default function Laporanku(props) {
     FetchLaporanku({ action: "resetFetch" });
   };
 
-  const showDetails = (id) => {
-    TriggerDetails({ id, action: "Laporanku" });
+  const showDetails = (e) => {
+    TriggerDetails({ id: e.id, status: e.status, action: "Laporanku" });
   };
 
   useEffect(() => {
@@ -77,24 +78,106 @@ export default function Laporanku(props) {
               <section>Tipe</section>
               <Action>Aksi</Action>
             </DataList>
-            {Object.entries(payload).map((data, index) => (
-              <DataList
-                className="forBody forData"
-                key={index}
-                stats={data[1].status}
-              >
-                <section title={data[1].title}>{data[1].title}</section>
-                <section>{data[1].lapor_date?.split("T")[0]}</section>
-                <section>{data[1].location.prov}</section>
-                <section>{data[1].type}</section>
-                <Action
-                  title="Detail laporan"
-                  onClick={showDetails.bind(this, data[1].id)}
-                >
-                  <Info />
-                </Action>
-              </DataList>
-            ))}
+            <Label>Diproses</Label>
+            {Object.entries(payload).map(
+              (data, index) =>
+                data[1].status === "Diproses" && (
+                  <DataList
+                    className="forBody forData"
+                    key={index}
+                    stats={data[1].status}
+                  >
+                    <section title={data[1].title}>{data[1].title}</section>
+                    <section>{data[1].lapor_date}</section>
+                    <section>{data[1].location.prov}</section>
+                    <section>{data[1].type}</section>
+                    <Action
+                      title="Detail laporan"
+                      onClick={showDetails.bind(this, {
+                        id: data[1].id,
+                        status: data[1].status,
+                      })}
+                    >
+                      <Info />
+                    </Action>
+                  </DataList>
+                )
+            )}
+            <Label>Menunggu</Label>
+            {Object.entries(payload).map(
+              (data, index) =>
+                data[1].status === "Menunggu" && (
+                  <DataList
+                    className="forBody forData"
+                    key={index}
+                    stats={data[1].status}
+                  >
+                    <section title={data[1].title}>{data[1].title}</section>
+                    <section>{data[1].lapor_date}</section>
+                    <section>{data[1].location.prov}</section>
+                    <section>{data[1].type}</section>
+                    <Action
+                      title="Detail laporan"
+                      onClick={showDetails.bind(this, {
+                        id: data[1].id,
+                        status: data[1].status,
+                      })}
+                    >
+                      <Info />
+                    </Action>
+                  </DataList>
+                )
+            )}
+            <Label>Diterima</Label>
+            {Object.entries(payload).map(
+              (data, index) =>
+                data[1].status === "Diterima" && (
+                  <DataList
+                    className="forBody forData"
+                    key={index}
+                    stats={data[1].status}
+                  >
+                    <section title={data[1].title}>{data[1].title}</section>
+                    <section>{data[1].lapor_date}</section>
+                    <section>{data[1].location.prov}</section>
+                    <section>{data[1].type}</section>
+                    <Action
+                      title="Detail laporan"
+                      onClick={showDetails.bind(this, {
+                        id: data[1].id,
+                        status: data[1].status,
+                      })}
+                    >
+                      <Info />
+                    </Action>
+                  </DataList>
+                )
+            )}
+            <Label>Ditolak</Label>
+            {Object.entries(payload).map(
+              (data, index) =>
+                data[1].status === "Ditolak" && (
+                  <DataList
+                    className="forBody forData"
+                    key={index}
+                    stats={data[1].status}
+                  >
+                    <section title={data[1].title}>{data[1].title}</section>
+                    <section>{data[1].lapor_date}</section>
+                    <section>{data[1].location.prov}</section>
+                    <section>{data[1].type}</section>
+                    <Action
+                      title="Detail laporan"
+                      onClick={showDetails.bind(this, {
+                        id: data[1].id,
+                        status: data[1].status,
+                      })}
+                    >
+                      <Info />
+                    </Action>
+                  </DataList>
+                )
+            )}
           </ReportBody>
         ) : (
           <Notify message="Tidak ada laporan" />

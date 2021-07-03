@@ -1,10 +1,19 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import styled from "styled-components";
+import { InView } from "react-intersection-observer";
 
 const ImageWrapper = styled.div`
   position: relative;
   height: ${(props) => (props.height ? `${props.height}px` : "100%")};
   width: ${(props) => (props.width ? `${props.width}px` : "100%")};
+
+  &.forUserStats {
+    margin-right: 0.6em;
+
+    img {
+      border-radius: 50%;
+    }
+  }
 
   img {
     width: 100%;
@@ -24,37 +33,38 @@ const ImageWrapper = styled.div`
   }
 `;
 
-export default function ImageView({ thumbnail, height, width, img }) {
+export default function ImageView({
+  thumbnail,
+  height,
+  width,
+  img,
+  className,
+}) {
   const [loading, setLoading] = useState(false);
 
   const view = useRef();
 
-  useEffect(() => {
-    const callback = (entries) => {
-      entries.forEach((entry) => {
-        if (entry.isIntersecting) {
-          let downloadingImage = new Image();
-          downloadingImage.onload = async () => {
-            downloadingImage.alt = "imgView";
-            view.current.appendChild(downloadingImage);
-            setLoading(true);
-          };
-          downloadingImage.src = img;
-          observer.disconnect()
-        }
-      });
-    };
-
-    const observer = new IntersectionObserver(callback, {
-      threshold: 1.0,
-    });
-    observer.observe(view.current);
-
-    return () => observer.disconnect();
-  }, [img]);
+  const callback = (inView, entry) => {
+    if (inView) {
+      let downloadingImage = new Image();
+      downloadingImage.onload = async () => {
+        downloadingImage.alt = "imgView";
+        view.current.appendChild(downloadingImage);
+        setLoading(true);
+      };
+      downloadingImage.src = img;
+    }
+  };
 
   return (
-    <ImageWrapper height={height} width={width} ref={view} visible={loading}>
+    <ImageWrapper
+      height={height}
+      width={width}
+      visible={loading}
+      ref={view}
+      className={className}
+    >
+      <InView onChange={callback} triggerOnce={true} />
       <img src={thumbnail} alt="imgThumb" className="imgThumb" />
     </ImageWrapper>
   );

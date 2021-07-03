@@ -1,5 +1,5 @@
 //  NOTE: Remove on build
-import '@hookstate/devtools'
+// import '@hookstate/devtools'
 
 import React from "react";
 import ReactDOM from "react-dom";

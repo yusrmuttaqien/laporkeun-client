@@ -7,7 +7,7 @@ import Response from "component/DetailsResponse";
 import { Label, TextArea, Notify } from "style/Components";
 import { DInstance } from "util/States";
 
-import DetailsPlaceholder from "asset/defaultReport.jpg"
+import DetailsPlaceholder from "asset/defaultReport.jpg";
 
 const Metadata = styled.p`
   font-weight: ${(props) => props.theme.value.font.light};
@@ -36,6 +36,8 @@ const Content = styled.div`
   .first {
     display: inherit;
     flex-direction: row;
+    align-items: center;
+    height: 40%;
 
     .imageSection {
       height: 170px;
@@ -95,7 +97,11 @@ const Content = styled.div`
 
 export default function DetailsContent() {
   const state = GlobalState(DInstance);
-  const { data } = state.get();
+  const { data, loading } = state.get();
+
+  let tempDate = data?.lapor_date;
+  let tempDateRespon =
+    data?.petugas_name && data?.respon_date[data?.status.toLowerCase()];
 
   return !data ? (
     <Notify message="Memuat detail" />
@@ -123,13 +129,25 @@ export default function DetailsContent() {
               <Metadata>Publikasi:</Metadata>
               <Metadata>Status:</Metadata>
               <Metadata>Visibilitas:</Metadata>
+              {data?.petugas_name && (
+                <>
+                  <Metadata>Responden:</Metadata>
+                  <Metadata>Tgl respon:</Metadata>
+                </>
+              )}
             </div>
             <div className="content">
               <Metadata>{data?.pengguna_name} </Metadata>
               <Metadata>{data?.type} </Metadata>
-              <Metadata>{data?.lapor_date.split("T")[0]} </Metadata>
+              <Metadata>{tempDate}</Metadata>
               <Metadata>{data?.status} </Metadata>
               <Metadata>{data?.visibility} </Metadata>
+              {data?.petugas_name && (
+                <>
+                  <Metadata>{data?.petugas_name}</Metadata>
+                  <Metadata>{tempDateRespon}</Metadata>
+                </>
+              )}
             </div>
           </div>
         </section>
@@ -144,9 +162,7 @@ export default function DetailsContent() {
             defaultValue={data?.detail}
           ></TextArea>
         </section>
-        <section className="resSection">
-          <Response />
-        </section>
+        <section className="resSection">{!loading && <Response />}</section>
       </div>
     </Content>
   );

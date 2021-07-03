@@ -1,4 +1,7 @@
 import { createGlobalStyle, css } from "styled-components";
+import JostLight from "asset/fonts/Jost-Light.ttf";
+import JostNormal from "asset/fonts/Jost-Regular.ttf";
+import JostMedium from "asset/fonts/Jost-Medium.ttf";
 
 const Variables = {
   color: {
@@ -33,6 +36,30 @@ const Variables = {
 };
 
 const GlobalStyle = createGlobalStyle`${css`
+  @font-face {
+    font-family: "Jost";
+    src: url(${JostLight});
+    font-weight: 300;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: "Jost";
+    src: url(${JostNormal});
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+  }
+
+  @font-face {
+    font-family: "Jost";
+    src: url(${JostMedium});
+    font-weight: 500;
+    font-style: normal;
+    font-display: swap;
+  }
+
   body {
     background-color: ${Variables.color.dark};
   }
